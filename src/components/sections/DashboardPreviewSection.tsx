@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { ServicesScrollCard } from "@/components/sections/ServicesScrollCard";
 import { CheckCircle2 } from "lucide-react";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useInView } from "@/hooks/useInView";
@@ -62,7 +62,7 @@ export function DashboardPreviewSection() {
               aria-hidden="true"
             />
             <div className="relative w-full">
-              <DashboardPanel />
+              <ServicesScrollCard />
             </div>
           </div>
         </div>
