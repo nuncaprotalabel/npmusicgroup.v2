@@ -59,11 +59,21 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-350",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "bg-black/92 backdrop-blur-2xl border-b border-[#1A1A1A] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
-            : "bg-transparent"
+            ? "border-b border-white/[0.07]"
+            : "bg-transparent border-b border-transparent"
         )}
+        style={
+          scrolled
+            ? {
+                backgroundColor: "rgba(0, 0, 0, 0.72)",
+                backdropFilter: "blur(15px)",
+                WebkitBackdropFilter: "blur(15px)",
+                boxShadow: "0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.3)",
+              }
+            : undefined
+        }
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">

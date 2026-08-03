@@ -150,6 +150,41 @@
   50%       { opacity: 0.08; }
 }
 
+@keyframes hero-zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 20s ease-out both;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.animate-hero-content-1 {
+  animation: hero-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+.animate-hero-content-2 {
+  animation: hero-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+.animate-hero-content-3 {
+  animation: hero-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.34s both;
+}
+.animate-hero-content-4 {
+  animation: hero-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.48s both;
+}
+
 @keyframes scale-in {
   from {
     opacity: 0;
