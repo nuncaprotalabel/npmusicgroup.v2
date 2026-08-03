@@ -35,10 +35,10 @@ const moduleIcons = [
 
 interface DashboardSidebarProps {
   className?: string;
-  compact?: boolean;
+  iconOnly?: boolean;
 }
 
-export function DashboardSidebar({ className, compact = false }: DashboardSidebarProps) {
+export function DashboardSidebar({ className, iconOnly = false }: DashboardSidebarProps) {
   const { t } = useTranslation();
 
   const moduleKeys = Object.keys(t.dashboard.modules) as Array<
@@ -48,8 +48,8 @@ export function DashboardSidebar({ className, compact = false }: DashboardSideba
   return (
     <div
       className={cn(
-        "bg-[#060606] border-r border-[#1A1A1A] flex flex-col",
-        compact ? "w-[140px]" : "w-[180px]",
+        "bg-[#060606] border-r border-[#1A1A1A] flex flex-col shrink-0",
+        iconOnly ? "w-10" : "w-[160px]",
         className
       )}
     >
@@ -57,16 +57,16 @@ export function DashboardSidebar({ className, compact = false }: DashboardSideba
       <div
         className={cn(
           "flex items-center gap-2 border-b border-[#1A1A1A]",
-          compact ? "px-3 py-2.5" : "px-4 py-3"
+          iconOnly ? "px-2 py-2.5 justify-center" : "px-3 py-2.5"
         )}
       >
-        <div className={cn("relative shrink-0", compact ? "w-6 h-6" : "w-7 h-7")}>
+        <div className="relative shrink-0 w-5 h-5">
           <Image src="/logo.png" alt="NP Music Group" fill className="object-contain" />
         </div>
-        {!compact && (
-          <div>
-            <p className="text-[11px] font-bold text-white leading-none">NP Admin</p>
-            <p className="text-[9px] text-[#737373] mt-0.5">
+        {!iconOnly && (
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white leading-none truncate">NP Admin</p>
+            <p className="text-[9px] text-[#737373] mt-0.5 truncate">
               {t.dashboard.modules.central}
             </p>
           </div>
@@ -74,7 +74,7 @@ export function DashboardSidebar({ className, compact = false }: DashboardSideba
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 overflow-y-auto no-scrollbar py-2" aria-label="Dashboard navigation">
+      <nav className="flex-1 overflow-y-auto no-scrollbar py-1.5" aria-label="Dashboard navigation">
         {moduleKeys.map((key, i) => {
           const Icon = moduleIcons[i];
           const isActive = key === "central";
@@ -83,20 +83,25 @@ export function DashboardSidebar({ className, compact = false }: DashboardSideba
               key={key}
               disabled
               aria-label={t.dashboard.modules[key]}
+              title={iconOnly ? t.dashboard.modules[key] : undefined}
               className={cn(
-                "w-full flex items-center gap-2 transition-colors duration-150 cursor-not-allowed",
-                compact ? "px-3 py-1.5 text-[10px]" : "px-3.5 py-2 text-[11px]",
+                "w-full flex items-center transition-colors duration-150 cursor-not-allowed",
+                iconOnly ? "justify-center px-0 py-1.5" : "gap-2 px-3 py-1.5",
                 isActive
                   ? "text-[#F5C518] bg-[#F5C518]/8"
                   : "text-[#737373] hover:text-white hover:bg-white/4"
               )}
             >
               <Icon
-                size={compact ? 12 : 13}
+                size={12}
                 className={cn("shrink-0", isActive ? "text-[#F5C518]" : "text-current")}
                 aria-hidden="true"
               />
-              <span className="font-medium truncate">{t.dashboard.modules[key]}</span>
+              {!iconOnly && (
+                <span className="font-medium truncate text-[10px]">
+                  {t.dashboard.modules[key]}
+                </span>
+              )}
             </button>
           );
         })}

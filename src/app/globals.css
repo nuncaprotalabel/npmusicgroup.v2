@@ -22,7 +22,9 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -32,12 +34,24 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   body {
     background-color: #000000;
     color: #FFFFFF;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 0;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
   }
 
   ::selection {
@@ -88,5 +102,10 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Prevent any child from breaking the layout */
+  .contain-layout {
+    contain: layout;
   }
 }

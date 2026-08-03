@@ -9,10 +9,10 @@ export function DashboardPreviewSection() {
 
   return (
     <section id="plataforma" className="py-24 lg:py-32 border-t border-[#1A1A1A]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left: Copy — first in DOM = first on mobile */}
-          <div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-start lg:items-center">
+          {/* Copy — always first in DOM */}
+          <div className="w-full">
             <p className="section-label mb-4">{t.dashboardPreview.sectionLabel}</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight mb-5">
               {t.dashboardPreview.headline1}
@@ -41,14 +41,14 @@ export function DashboardPreviewSection() {
             </ul>
           </div>
 
-          {/* Right: Dashboard */}
-          <div className="relative">
+          {/* Dashboard — full width on mobile, right column on desktop */}
+          <div className="relative w-full">
             <div
               className="absolute -inset-6 rounded-2xl opacity-[0.04] blur-[80px] pointer-events-none"
               style={{ background: "#F5C518" }}
               aria-hidden="true"
             />
-            <div className="relative">
+            <div className="relative w-full">
               <DashboardPanel />
             </div>
           </div>
