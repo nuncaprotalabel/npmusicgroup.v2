@@ -92,3 +92,4 @@ La arquitectura soporta agregar sin refactor:
 - Sin datos falsos — siempre estados vacíos profesionales
 - Mobile-first (Android primero)
 - Calidad sobre velocidad
+- Antes de cualquier implementación: leer toda la documentación en /docs, especialmente PROJECT_RULES.md. Si hay conflicto entre una implementación y PROJECT_RULES.md, prevalece el documento.
