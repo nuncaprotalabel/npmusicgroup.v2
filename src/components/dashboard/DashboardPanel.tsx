@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/utils/cn";
-import { DashboardSidebar } from "./DashboardSidebar";
+import { DashboardPreviewSidebar } from "./DashboardPreviewSidebar";
 import { StatsCard } from "./StatsCard";
 import { RevenueChart } from "./RevenueChart";
 import { ActivityFeed } from "./ActivityFeed";
@@ -24,7 +24,7 @@ export function DashboardPanel({ className, compact = false }: DashboardPanelPro
       style={{ minHeight: compact ? 300 : 400 }}
     >
       {/* Sidebar: icon-only on compact, full on regular */}
-      <DashboardSidebar iconOnly={compact} />
+      <DashboardPreviewSidebar iconOnly={compact} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">

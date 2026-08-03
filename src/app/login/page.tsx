@@ -14,7 +14,7 @@ import { login } from "@/services/authService";
 export default function LoginPage() {
   const router       = useRouter();
   const searchParams = useSearchParams();
-  const from         = searchParams.get("from") ?? "/np-control";
+  const from         = searchParams.get("from") ?? "/dashboard";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

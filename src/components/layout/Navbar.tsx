@@ -155,13 +155,17 @@ export function Navbar() {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-2">
               <LanguageSelector />
-              <Button variant="ghost" size="sm" disabled>
-                {t.common.login}
-              </Button>
-              <Button variant="primary" size="sm" disabled className="gap-1.5">
-                {t.common.startNow}
-                <ArrowRight size={13} />
-              </Button>
+              <a href="/login">
+                <Button variant="ghost" size="sm">
+                  {t.common.login}
+                </Button>
+              </a>
+              <a href="/login">
+                <Button variant="primary" size="sm" className="gap-1.5">
+                  {t.common.startNow}
+                  <ArrowRight size={13} />
+                </Button>
+              </a>
             </div>
 
             {/* Mobile: language + menu */}
@@ -241,12 +245,16 @@ export function Navbar() {
 
             {/* Footer CTA */}
             <div className="p-4 border-t border-[#161616] flex flex-col gap-2">
-              <Button variant="outline" size="md" fullWidth disabled>
-                {t.common.login}
-              </Button>
-              <Button variant="primary" size="md" fullWidth disabled>
-                {t.common.startNow}
-              </Button>
+              <a href="/login" className="w-full">
+                <Button variant="outline" size="md" fullWidth>
+                  {t.common.login}
+                </Button>
+              </a>
+              <a href="/login" className="w-full">
+                <Button variant="primary" size="md" fullWidth>
+                  {t.common.startNow}
+                </Button>
+              </a>
             </div>
           </div>
         </div>

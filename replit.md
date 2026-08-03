@@ -52,6 +52,63 @@ public/
 | Superficie  | `#0A0A0A` |
 | Borde       | `#1E1E1E` |
 
+## Sprint 3 — Navegación y Dashboard (completado)
+
+### Implementado
+
+**Login**
+- Botón "Iniciar sesión" en el Navbar (landing) — habilitado, navega a `/login`
+- Formulario de login real conectado al backend (`POST /api/auth/login`)
+- Redirección automática al dashboard tras login exitoso
+- Errores de autenticación mostrados correctamente
+- Redirect por defecto: `/dashboard`
+
+**Logout**
+- Botón "Cerrar sesión" en el header del dashboard
+- Llama a `POST /api/auth/logout` y redirige a la landing (`/`)
+- Estado de carga visual durante el proceso
+
+**Dashboard — Estructura base**
+- Layout: `src/app/dashboard/layout.tsx` — sidebar + header + área principal
+- Sidebar fija en desktop, drawer lateral en mobile
+- Header con breadcrumb, perfil de usuario (iniciales), selector de idioma y logout
+- Protección doble: middleware + verificación server-side en layout
+
+**Sidebar — Navegación**
+- Rutas: Central, Artistas, Solicitudes, Invitaciones, Contratos, Lanzamientos (+ sub-ruta Recibidos/Pendientes), Analíticas, Ingresos, Mensajes, Cuentas, Permisos, Configuración
+- NP Control visible solo para `SUPER_ADMIN`
+- Ítem activo resaltado en amarillo institucional
+
+**Módulos**
+- Central: muestra stats reales del sistema (para SUPER_ADMIN/ADMIN) o estado vacío profesional
+- Todos los módulos no implementados: muestran pantalla clara "Módulo en desarrollo"
+- Nunca pantalla rota — siempre responde correctamente
+
+**Idioma**
+- Selector ES/EN funcional en landing y dashboard
+- Preferencia guardada en `localStorage` y persistida entre sesiones
+
+**Rutas protegidas**
+- `/dashboard/*`: requiere cualquier sesión activa
+- `/np-control/*`: requiere rol `SUPER_ADMIN`
+- Middleware en Edge runtime, verificación server-side en layouts
+
+### Archivos clave (Sprint 3)
+- `src/app/dashboard/layout.tsx` — layout protegido del dashboard
+- `src/app/dashboard/central/page.tsx` — vista general real
+- `src/components/dashboard/DashboardSidebar.tsx` — navegación desktop
+- `src/components/dashboard/DashboardMobileSidebar.tsx` — drawer móvil
+- `src/components/dashboard/DashboardHeader.tsx` — header con perfil y logout
+- `src/components/dashboard/DashboardHeaderWrapper.tsx` — gestión de estado mobile
+- `src/components/dashboard/InDevelopment.tsx` — estado compartido para módulos pendientes
+- `src/components/dashboard/DashboardPreviewSidebar.tsx` — sidebar decorativo para preview landing
+
+### Requisito de entorno
+Para que el login funcione, se requiere `DATABASE_URL` (conexión a Neon PostgreSQL).
+Conectar la base de datos desde el panel de Replit o agregar la variable de entorno.
+
+---
+
 ## Sprint 2 — Autenticación y Permisos (completado)
 
 ### Infraestructura implementada

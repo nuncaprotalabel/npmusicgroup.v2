@@ -1,111 +1,232 @@
 "use client";
 
+/**
+ * DashboardSidebar — barra de navegación lateral del dashboard (desktop).
+ * Solo visible en pantallas lg+. Mobile gestionado por DashboardMobileSidebar.
+ */
+import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/utils/cn";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Disc3,
-  Globe,
-  DollarSign,
-  BarChart2,
   FileText,
+  BarChart2,
+  DollarSign,
   MessageSquare,
-  UserPlus,
-  Shield,
-  Activity,
+  UserCog,
+  ShieldCheck,
   Settings,
+  Mail,
+  Send,
+  Inbox,
+  ShieldAlert,
+  ChevronRight,
 } from "lucide-react";
+import { cn } from "@/utils/cn";
 import { useTranslation } from "@/i18n/useTranslation";
+import type { UserRole } from "@/types/auth";
 
-const moduleIcons = [
-  LayoutDashboard,
-  Users,
-  Disc3,
-  Globe,
-  DollarSign,
-  BarChart2,
-  FileText,
-  MessageSquare,
-  UserPlus,
-  Shield,
-  Activity,
-  Settings,
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
+  children?: { href: string; label: string }[];
+}
+
+const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
+  {
+    group: "Plataforma",
+    items: [
+      { href: "/dashboard/central", label: "Central", icon: LayoutDashboard },
+    ],
+  },
+  {
+    group: "Gestión",
+    items: [
+      { href: "/dashboard/artistas",    label: "Artistas",    icon: Users },
+      { href: "/dashboard/solicitudes", label: "Solicitudes", icon: Inbox },
+      { href: "/dashboard/invitaciones",label: "Invitaciones",icon: Mail },
+      { href: "/dashboard/contratos",   label: "Contratos",   icon: FileText },
+      {
+        href: "/dashboard/lanzamientos",
+        label: "Lanzamientos",
+        icon: Send,
+        children: [
+          { href: "/dashboard/lanzamientos/recibidos", label: "Recibidos / Pendientes" },
+        ],
+      },
+    ],
+  },
+  {
+    group: "Finanzas",
+    items: [
+      { href: "/dashboard/analiticas", label: "Analíticas", icon: BarChart2 },
+      { href: "/dashboard/ingresos",   label: "Ingresos",   icon: DollarSign },
+      { href: "/dashboard/mensajes",   label: "Mensajes",   icon: MessageSquare },
+    ],
+  },
+  {
+    group: "Sistema",
+    items: [
+      { href: "/dashboard/cuentas",       label: "Cuentas",       icon: UserCog },
+      { href: "/dashboard/permisos",      label: "Permisos",      icon: ShieldCheck },
+      { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
+    ],
+  },
 ];
 
 interface DashboardSidebarProps {
-  className?: string;
-  iconOnly?: boolean;
+  role: UserRole;
 }
 
-export function DashboardSidebar({ className, iconOnly = false }: DashboardSidebarProps) {
-  const { t } = useTranslation();
+export function DashboardSidebar({ role }: DashboardSidebarProps) {
+  const pathname = usePathname();
+  const isSuperAdmin = role === "SUPER_ADMIN";
 
-  const moduleKeys = Object.keys(t.dashboard.modules) as Array<
-    keyof typeof t.dashboard.modules
-  >;
+  function isActive(href: string) {
+    if (href === "/dashboard/central") return pathname === href || pathname === "/dashboard";
+    return pathname === href || pathname.startsWith(href + "/");
+  }
 
   return (
-    <div
-      className={cn(
-        "bg-[#060606] border-r border-[#1A1A1A] flex flex-col shrink-0",
-        iconOnly ? "w-10" : "w-[160px]",
-        className
-      )}
+    <aside
+      className="hidden lg:flex flex-col w-60 shrink-0 h-full"
+      style={{ background: "#040404", borderRight: "1px solid #141414" }}
     >
-      {/* Logo */}
+      {/* Brand */}
       <div
-        className={cn(
-          "flex items-center gap-2 border-b border-[#1A1A1A]",
-          iconOnly ? "px-2 py-2.5 justify-center" : "px-3 py-2.5"
-        )}
+        className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b"
+        style={{ borderColor: "#141414" }}
       >
-        <div className="relative shrink-0 w-5 h-5">
-          <Image src="/logo.png" alt="NP Music Group" fill className="object-contain" />
+        <div className="relative w-7 h-7 shrink-0">
+          <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
         </div>
-        {!iconOnly && (
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-white leading-none truncate">NP Admin</p>
-            <p className="text-[9px] text-[#737373] mt-0.5 truncate">
-              {t.dashboard.modules.central}
-            </p>
-          </div>
-        )}
+        <div className="min-w-0">
+          <p className="text-[0.8125rem] font-bold text-white leading-none truncate">
+            NP Music Group
+          </p>
+          <p className="text-[0.65rem] mt-0.5 truncate" style={{ color: "#525252" }}>
+            Dashboard
+          </p>
+        </div>
       </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 overflow-y-auto no-scrollbar py-1.5" aria-label="Dashboard navigation">
-        {moduleKeys.map((key, i) => {
-          const Icon = moduleIcons[i];
-          const isActive = key === "central";
-          return (
-            <button
-              key={key}
-              disabled
-              aria-label={t.dashboard.modules[key]}
-              title={iconOnly ? t.dashboard.modules[key] : undefined}
-              className={cn(
-                "w-full flex items-center transition-colors duration-150 cursor-not-allowed",
-                iconOnly ? "justify-center px-0 py-1.5" : "gap-2 px-3 py-1.5",
-                isActive
-                  ? "text-[#F5C518] bg-[#F5C518]/8"
-                  : "text-[#737373] hover:text-white hover:bg-white/4"
-              )}
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+        {NAV_GROUPS.map(({ group, items }) => (
+          <div key={group}>
+            <p
+              className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
+              style={{ color: "#333333" }}
             >
-              <Icon
-                size={12}
-                className={cn("shrink-0", isActive ? "text-[#F5C518]" : "text-current")}
-                aria-hidden="true"
-              />
-              {!iconOnly && (
-                <span className="font-medium truncate text-[10px]">
-                  {t.dashboard.modules[key]}
-                </span>
-              )}
-            </button>
-          );
-        })}
+              {group}
+            </p>
+            <div className="space-y-0.5">
+              {items.map(({ href, label, icon: Icon, children }) => {
+                const active = isActive(href);
+                return (
+                  <div key={href}>
+                    <Link
+                      href={href}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8125rem] font-medium transition-all duration-150",
+                        active
+                          ? "text-black"
+                          : "text-[#737373] hover:text-white hover:bg-[#141414]"
+                      )}
+                      style={active ? { background: "#F5C518", color: "#000000" } : undefined}
+                    >
+                      <Icon
+                        size={15}
+                        strokeWidth={1.75}
+                        style={{ color: active ? "#000000" : "currentColor" }}
+                      />
+                      <span className="flex-1 truncate">{label}</span>
+                      {children && (
+                        <ChevronRight
+                          size={12}
+                          strokeWidth={1.75}
+                          style={{ color: active ? "#000000" : "#444444" }}
+                        />
+                      )}
+                    </Link>
+                    {/* Sub-items — visible cuando el padre está activo */}
+                    {children && pathname.startsWith(href) && (
+                      <div className="ml-4 mt-0.5 space-y-0.5">
+                        {children.map(({ href: childHref, label: childLabel }) => {
+                          const childActive = pathname === childHref || pathname.startsWith(childHref + "/");
+                          return (
+                            <Link
+                              key={childHref}
+                              href={childHref}
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[0.75rem] font-medium transition-all duration-150",
+                                childActive
+                                  ? "text-white bg-[#1A1A1A]"
+                                  : "text-[#555555] hover:text-[#A3A3A3] hover:bg-[#111111]"
+                              )}
+                            >
+                              <span
+                                className="w-1 h-1 rounded-full shrink-0"
+                                style={{ background: childActive ? "#F5C518" : "#333333" }}
+                              />
+                              {childLabel}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {/* NP Control — solo SUPER_ADMIN */}
+        {isSuperAdmin && (
+          <div>
+            <p
+              className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
+              style={{ color: "#333333" }}
+            >
+              Admin
+            </p>
+            <div className="space-y-0.5">
+              {(() => {
+                const active = pathname.startsWith("/np-control");
+                return (
+                  <Link
+                    href="/np-control"
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8125rem] font-medium transition-all duration-150",
+                      active
+                        ? "text-black"
+                        : "text-[#737373] hover:text-white hover:bg-[#141414]"
+                    )}
+                    style={active ? { background: "#F5C518", color: "#000000" } : undefined}
+                  >
+                    <ShieldAlert
+                      size={15}
+                      strokeWidth={1.75}
+                      style={{ color: active ? "#000000" : "currentColor" }}
+                    />
+                    <span className="flex-1 truncate">NP Control</span>
+                  </Link>
+                );
+              })()}
+            </div>
+          </div>
+        )}
       </nav>
-    </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 border-t shrink-0" style={{ borderColor: "#141414" }}>
+        <p className="text-[0.65rem]" style={{ color: "#2A2A2A" }}>
+          NP Music Group v2
+        </p>
+      </div>
+    </aside>
   );
 }
