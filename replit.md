@@ -52,6 +52,55 @@ public/
 | Superficie  | `#0A0A0A` |
 | Borde       | `#1E1E1E` |
 
+## Sprint 2 — Autenticación y Permisos (completado)
+
+### Infraestructura implementada
+
+**Base de datos (PostgreSQL)**
+- Tablas: `users`, `permissions`, `role_permissions`, `sessions`, `invitations`, `audit_log`
+- ENUM `user_role`: SUPER_ADMIN, ADMIN, DISTRIBUTION_MANAGER, MANAGER, ARTIST, VIEWER
+- 29 permisos distribuidos en 9 módulos con asignación correcta por rol
+- Trigger `updated_at` automático en `users`
+
+**Autenticación**
+- JWT firmado con SESSION_SECRET via `jose` (Edge-compatible)
+- Cookies HTTP-only seguras (sameSite: lax, httpOnly: true)
+- Sesión de 7 días, registro en DB de cada sesión
+- Bcrypt 12 rondas para contraseñas
+
+**Rutas**
+- `POST /api/auth/login` — autenticación real contra Neon
+- `POST /api/auth/logout` — cierre de sesión + borrado de cookie
+- `GET /api/auth/me` — verificación de sesión activa
+- `/login` — página pública de inicio de sesión
+- `/np-control` — panel privado, solo SUPER_ADMIN
+
+**Middleware**
+- Protege `/np-control`, `/dashboard`, `/admin` en Edge runtime
+- Verifica JWT antes de permitir acceso
+- Redirige a `/login?from=...` si no autenticado
+- Redirige a `/403` si rol insuficiente
+
+**SUPER_ADMIN**
+- Usuario: `npmusicadmin`
+- Contraseña inicial: `PEMDPD`
+- Creado idempotente (no se duplica si ya existe)
+
+**Auditoría**
+- Registra: LOGIN_SUCCESS, LOGIN_FAILED, LOGOUT en `audit_log`
+- Módulo independiente que no bloquea el flujo principal
+
+**Archivos clave**
+- `src/lib/db.ts` — pool de conexión PostgreSQL
+- `src/lib/auth.ts` — JWT + session cookies
+- `src/lib/password.ts` — bcrypt utilities
+- `src/lib/permissions.ts` — rol/permiso constants
+- `src/lib/audit.ts` — log de auditoría
+- `src/middleware.ts` — protección de rutas
+- `src/services/authService.ts` — cliente de la API de auth
+- `src/components/np-control/` — componentes del panel
+- `docs/DATABASE_PLAN.md` — esquema documentado
+
 ## Cambios recientes
 
 - **Logo**: convertido a PNG con canal alpha (`logo-transparent.png`) — sin fondo negro.
