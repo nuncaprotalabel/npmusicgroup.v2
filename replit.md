@@ -9,6 +9,7 @@ Plataforma SaaS todo-en-uno para artistas musicales independientes.
 - **Estilos:** Tailwind CSS v4
 - **Iconos:** Lucide React
 - **Runtime:** Node.js 20
+- **Tipografía:** Plus Jakarta Sans (Google Fonts) — seleccionada por su estética SaaS premium, legibilidad técnica y carácter empresarial. Reemplaza a Inter.
 
 ## Cómo correr
 

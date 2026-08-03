@@ -3,6 +3,7 @@
 import { cn } from "@/utils/cn";
 import { Loader2 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef } from "react";
+import { useRipple } from "@/hooks/useRipple";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -18,7 +19,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#F5C518] text-black font-semibold hover:bg-[#E6B800] active:bg-[#D4A900] disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-[#F5C518] text-black font-semibold hover:bg-[#FFCF2F] active:bg-[#D4A900] disabled:opacity-50 disabled:cursor-not-allowed ripple-dark",
   secondary:
     "bg-[#141414] text-white border border-[#262626] hover:bg-[#1E1E1E] hover:border-[#404040] active:bg-[#262626] disabled:opacity-50 disabled:cursor-not-allowed",
   ghost:
@@ -32,7 +33,7 @@ const variantStyles: Record<ButtonVariant, string> = {
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "h-8 px-3 text-xs rounded-[6px] gap-1.5",
   md: "h-10 px-4 text-sm rounded-[8px] gap-2",
-  lg: "h-12 px-6 text-base rounded-[10px] gap-2.5",
+  lg: "h-12 px-6 text-[0.9375rem] rounded-[10px] gap-2.5",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -47,16 +48,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       children,
       disabled,
+      onClick,
       ...props
     },
     ref
   ) => {
+    const { createRipple } = useRipple();
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!disabled && !loading) {
+        createRipple(e);
+        onClick?.(e);
+      }
+    };
+
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
+        onClick={handleClick}
         className={cn(
-          "inline-flex items-center justify-center font-medium transition-all duration-150 select-none whitespace-nowrap shrink-0",
+          "ripple-host inline-flex items-center justify-center font-medium transition-all duration-200 select-none whitespace-nowrap shrink-0",
           variantStyles[variant],
           sizeStyles[size],
           fullWidth && "w-full",

@@ -13,7 +13,7 @@
   --color-text-muted: #737373;
   --color-text-secondary: #A3A3A3;
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -41,7 +41,7 @@
   body {
     background-color: #000000;
     color: #FFFFFF;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     width: 100%;
     min-width: 0;
@@ -78,34 +78,211 @@
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* ── Keyframes ── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .section-label {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #737373;
-  }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  .gradient-yellow {
-    background: linear-gradient(135deg, #F5C518, #E6B800);
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+@keyframes slide-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
   }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
 
-  /* Prevent any child from breaking the layout */
-  .contain-layout {
-    contain: layout;
+@keyframes fade-in-overlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.04; }
+  50%       { opacity: 0.08; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.08s; }
+.reveal-delay-2 { transition-delay: 0.16s; }
+.reveal-delay-3 { transition-delay: 0.24s; }
+.reveal-delay-4 { transition-delay: 0.32s; }
+.reveal-delay-5 { transition-delay: 0.40s; }
+.reveal-delay-6 { transition-delay: 0.48s; }
+
+/* ── Animation utilities ── */
+.animate-fade-up {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease both;
+}
+
+.animate-fade-down {
+  animation: fade-down 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.25s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+.animate-fade-in-overlay {
+  animation: fade-in-overlay 0.25s ease both;
+}
+
+.animate-float-y {
+  animation: float-y 5s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* ── Ripple ── */
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0);
+  animation: ripple 0.55s linear;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ripple-host > *:not(.ripple-effect) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ripple on yellow primary buttons */
+.ripple-host.ripple-dark .ripple-effect {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* ── Misc utilities ── */
+.text-balance {
+  text-wrap: balance;
+}
+
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #737373;
+}
+
+.gradient-yellow {
+  background: linear-gradient(135deg, #F5C518, #E6B800);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.contain-layout {
+  contain: layout;
+}
+
+/* ── Card hover elevation ── */
+.card-hover {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.22s ease,
+              box-shadow 0.22s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  border-color: #2A2A2A;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
