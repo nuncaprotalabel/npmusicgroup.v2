@@ -33,7 +33,8 @@ export function HowItWorks() {
             className="absolute top-10 left-0 right-0 h-px hidden lg:block pointer-events-none"
             style={{
               background:
-                "linear-gradient(to right, transparent, #1E1E1E 10%, #1E1E1E 90%, transparent)",
+                "linear-gradient(to right, transparent 0%, #1E1E1E 8%, #F5C518 30%, #F5C518 50%, #1E1E1E 92%, transparent 100%)",
+              opacity: 0.25,
             }}
             aria-hidden="true"
           />
@@ -55,10 +56,10 @@ export function HowItWorks() {
                     >
                       {i + 1}
                     </div>
-                    <div className="w-20 h-20 flex items-center justify-center rounded-2xl bg-[#080808] border border-[#1A1A1A] transition-all duration-300 group-hover:border-[#F5C518]/20 group-hover:bg-[#F5C518]/4">
+                    <div className="w-20 h-20 flex items-center justify-center rounded-2xl bg-[#080808] border border-[#1A1A1A] transition-all duration-300 group-hover:border-[#F5C518]/25 group-hover:bg-[#F5C518]/5 group-hover:shadow-[0_0_24px_rgba(245,197,24,0.10)] group-hover:-translate-y-1">
                       <Icon
                         size={26}
-                        className="text-[#444] transition-colors duration-300 group-hover:text-[#F5C518]"
+                        className="text-[#444] transition-all duration-300 group-hover:text-[#F5C518] group-hover:scale-110"
                         aria-hidden="true"
                       />
                     </div>

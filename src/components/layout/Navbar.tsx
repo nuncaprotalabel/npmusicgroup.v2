@@ -85,7 +85,7 @@ export function Navbar() {
             >
               <div className="w-9 h-9 relative transition-transform duration-200 group-hover:scale-105">
                 <Image
-                  src="/logo.png"
+                  src="/logo-transparent.png"
                   alt="NP Music Group"
                   fill
                   className="object-contain"
@@ -193,7 +193,7 @@ export function Navbar() {
             <div className="flex items-center justify-between px-5 h-16 border-b border-[#161616]">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 relative">
-                  <Image src="/logo.png" alt="NP Music Group" fill className="object-contain" />
+                  <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
                 </div>
                 <span className="text-sm font-bold text-white">NP Music Group</span>
               </div>

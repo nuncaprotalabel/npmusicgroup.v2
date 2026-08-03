@@ -83,7 +83,7 @@ export function Footer() {
           <div className={`sm:col-span-2 reveal${inView ? " in-view" : ""}`}>
             <a href="#inicio" className="flex items-center gap-2.5 mb-5 group w-fit">
               <div className="w-10 h-10 relative transition-transform duration-200 group-hover:scale-105">
-                <Image src="/logo.png" alt="NP Music Group" fill className="object-contain" />
+                <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
               </div>
               <span className="font-bold text-white">NP Music Group</span>
             </a>
@@ -96,7 +96,8 @@ export function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#1A1A1A] text-[#555] hover:text-white hover:border-[#2A2A2A] hover:bg-[#111] transition-all duration-150"
+                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#1A1A1A] text-[#555] hover:text-[#F5C518] hover:border-[#F5C518]/25 hover:bg-[#F5C518]/6 transition-all duration-200"
+                  style={{ '--tw-shadow': 'none' } as React.CSSProperties}
                 >
                   {icon}
                 </a>
@@ -118,9 +119,10 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-[#555] hover:text-white transition-colors duration-150"
+                      className="group relative text-sm text-[#555] hover:text-[#F5C518] transition-colors duration-200 inline-flex flex-col"
                     >
                       {link.label}
+                      <span className="absolute -bottom-0.5 left-0 h-px w-full bg-[#F5C518]/50 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-250" />
                     </a>
                   </li>
                 ))}

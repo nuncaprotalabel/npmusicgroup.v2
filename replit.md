@@ -52,6 +52,16 @@ public/
 | Superficie  | `#0A0A0A` |
 | Borde       | `#1E1E1E` |
 
+## Cambios recientes
+
+- **Logo**: convertido a PNG con canal alpha (`logo-transparent.png`) — sin fondo negro.
+- **i18n**: todos los textos del Hero usan claves de traducción (`t.hero.cta1`, `t.hero.cta2`, `t.hero.description`).
+- **PlatformsBar**: reescrita como carrusel infinito CSS (`marquee` keyframe). Al hover, la animación se ralentiza de 32s → 90s. Borde-fade a los costados. Glow amarillo en cada plataforma al hover.
+- **Services**: cards con `translate-y` + `box-shadow` amarillo suave en hover + icono `scale-110` + borde izquierdo amarillo.
+- **HowItWorks**: línea conectora con gradiente amarillo. Íconos con `translate-y` + glow al hover.
+- **Footer**: links con subrayado amarillo animado al hover. Redes sociales con glow amarillo.
+- **CSS**: nuevos keyframes `marquee`, `fade-left`, `fade-right`, `counter-glow`, `border-glow`, `icon-float`. Clases `.carousel-track` y `.carousel-wrapper`.
+
 ## Secciones del landing
 
 1. **Navbar** — sticky, con dropdown y menú móvil

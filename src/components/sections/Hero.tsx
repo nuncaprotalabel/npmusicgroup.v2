@@ -66,7 +66,7 @@ export function Hero() {
                 className="relative w-10 h-10 shrink-0"
                 style={{ filter: "drop-shadow(0 2px 14px rgba(245,196,0,0.30))" }}
               >
-                <Image src="/logo.png" alt="NP Music Group" fill className="object-contain" />
+                <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
               </div>
               <span
                 className="text-[0.8125rem] font-bold text-white/90 tracking-wide"
@@ -96,13 +96,13 @@ export function Hero() {
 
             {/* Description */}
             <p
-              className="text-[0.9375rem] sm:text-base leading-[1.68] mb-9 max-w-[420px] animate-hero-content-3"
+              className="text-[0.9375rem] sm:text-base leading-[1.68] mb-9 max-w-[420px] animate-hero-content-3 line-clamp-2"
               style={{
                 color: "rgba(255,255,255,0.78)",
                 textShadow: "0 1px 10px rgba(0,0,0,0.5)",
               }}
             >
-              Distribuye tu música en todas las plataformas digitales y gestiona tu carrera con herramientas profesionales.
+              {t.hero.description}
             </p>
 
             {/* CTAs */}
@@ -116,9 +116,9 @@ export function Hero() {
                   background: "linear-gradient(135deg, #F5C400 0%, #E6B300 100%)",
                   boxShadow: "0 4px 28px rgba(245,196,0,0.30), 0 1px 0 rgba(255,255,255,0.15) inset",
                 }}
-                aria-label="Distribuye tu música — próximamente"
+                aria-label={`${t.hero.cta1} — ${t.common.comingSoon}`}
               >
-                Distribuye tu música
+                {t.hero.cta1}
                 <ArrowRight size={15} strokeWidth={2.5} />
               </button>
 
@@ -132,9 +132,9 @@ export function Hero() {
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                 }}
-                aria-label="Conocer más"
+                aria-label={t.hero.cta2}
               >
-                Conocer más
+                {t.hero.cta2}
                 <ChevronDown size={15} strokeWidth={2.5} />
               </button>
 

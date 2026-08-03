@@ -36,6 +36,8 @@ export const translations = {
       headline3: "Tu negocio.",
       description:
         "Distribuye tu música en todas las plataformas digitales, gestiona tu carrera y genera ingresos reales con herramientas profesionales diseñadas para artistas independientes.",
+      cta1: "Distribuye tu música",
+      cta2: "Conocer más",
     },
     platforms: {
       trustedBy: "Distribución en las principales plataformas del mundo",
@@ -246,6 +248,8 @@ export const translations = {
       headline3: "Your business.",
       description:
         "Distribute your music to all digital platforms, manage your career and generate real income with professional tools designed for independent artists.",
+      cta1: "Distribute your music",
+      cta2: "Learn more",
     },
     platforms: {
       trustedBy: "Distribution across the world's leading platforms",
