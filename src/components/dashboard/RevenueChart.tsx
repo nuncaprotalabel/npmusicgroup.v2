@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { cn } from "@/utils/cn";
+import { useTranslation } from "@/i18n/useTranslation";
 
 const periodOptions = ["7D", "30D", "3M", "12M"] as const;
-type Period = typeof periodOptions[number];
+type Period = (typeof periodOptions)[number];
 
 interface RevenueChartProps {
   className?: string;
@@ -13,8 +14,8 @@ interface RevenueChartProps {
 
 export function RevenueChart({ className, compact = false }: RevenueChartProps) {
   const [activePeriod, setActivePeriod] = useState<Period>("30D");
+  const { t } = useTranslation();
 
-  // Empty state SVG path — flat baseline with subtle dots
   const width = 480;
   const height = compact ? 80 : 120;
   const baseline = height * 0.75;
@@ -25,12 +26,22 @@ export function RevenueChart({ className, compact = false }: RevenueChartProps) 
   }));
 
   return (
-    <div className={cn("bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl", compact ? "p-3.5" : "p-5", className)}>
+    <div
+      className={cn(
+        "bg-[#0A0A0A] border border-[#1E1E1E] rounded-xl",
+        compact ? "p-3.5" : "p-5",
+        className
+      )}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 gap-3">
         <div>
-          <p className="text-xs text-[#737373] font-medium mb-1">Ingresos</p>
-          <p className={cn("font-bold text-[#404040]", compact ? "text-lg" : "text-2xl")}>—</p>
+          <p className="text-xs text-[#737373] font-medium mb-1">
+            {t.dashboard.modules.revenue}
+          </p>
+          <p className={cn("font-bold text-[#404040]", compact ? "text-lg" : "text-2xl")}>
+            —
+          </p>
         </div>
         {/* Period selector */}
         <div className="flex items-center bg-[#141414] rounded-lg p-0.5 border border-[#1E1E1E] shrink-0">
@@ -58,6 +69,7 @@ export function RevenueChart({ className, compact = false }: RevenueChartProps) 
           className="w-full"
           style={{ height: compact ? 80 : 120 }}
           preserveAspectRatio="none"
+          aria-hidden="true"
         >
           {/* Grid lines */}
           {[0.25, 0.5, 0.75].map((ratio) => (
@@ -114,14 +126,14 @@ export function RevenueChart({ className, compact = false }: RevenueChartProps) 
         {/* Empty State Overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
           <p className="text-[11px] text-[#404040] font-medium bg-[#0A0A0A]/80 px-3 py-1.5 rounded-full border border-[#1A1A1A]">
-            Los ingresos aparecerán aquí
+            {t.dashboard.revenueEmpty}
           </p>
         </div>
       </div>
 
       {/* X-axis labels */}
-      <div className="flex items-center justify-between mt-2 px-0.5">
-        {["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago"].map((m) => (
+      <div className="flex items-center justify-between mt-2 px-0.5" aria-hidden="true">
+        {t.dashboard.months.map((m) => (
           <span key={m} className="text-[10px] text-[#404040]">
             {m}
           </span>

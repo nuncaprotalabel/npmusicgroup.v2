@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/Button";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import { ArrowRight, Play } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export function Hero() {
+  const { t } = useTranslation();
+
   return (
     <section
       id="inicio"
@@ -14,6 +17,7 @@ export function Hero() {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full opacity-[0.04] blur-[120px] pointer-events-none"
         style={{ background: "#F5C518" }}
+        aria-hidden="true"
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full py-16 lg:py-24">
@@ -23,24 +27,25 @@ export function Hero() {
             {/* Label */}
             <div className="flex items-center gap-2 mb-7">
               <span
-                className="inline-block w-1.5 h-1.5 rounded-full"
+                className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ backgroundColor: "#F5C518" }}
+                aria-hidden="true"
               />
-              <p className="section-label">
-                Plataforma todo-en-uno para artistas independientes
-              </p>
+              <p className="section-label">{t.hero.label}</p>
             </div>
 
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-balance mb-6">
-              <span className="text-white block">Tu música.</span>
-              <span className="text-white block">Tu carrera.</span>
-              <span style={{ color: "#F5C518" }} className="block">Tu negocio.</span>
+              <span className="text-white block">{t.hero.headline1}</span>
+              <span className="text-white block">{t.hero.headline2}</span>
+              <span style={{ color: "#F5C518" }} className="block">
+                {t.hero.headline3}
+              </span>
             </h1>
 
             {/* Description */}
-            <p className="text-base sm:text-lg text-[#737373] leading-relaxed max-w-md mb-8">
-              Distribuye tu música en todas las plataformas digitales, gestiona tu carrera y genera ingresos reales con herramientas profesionales diseñadas para artistas independientes.
+            <p className="text-base sm:text-lg text-[#737373] leading-relaxed mb-8 max-w-md">
+              {t.hero.description}
             </p>
 
             {/* CTAs */}
@@ -52,7 +57,7 @@ export function Hero() {
                 iconRight={<ArrowRight size={18} />}
                 className="w-full sm:w-auto"
               >
-                Comenzar ahora
+                {t.common.startNow}
               </Button>
               <Button
                 variant="ghost"
@@ -60,55 +65,38 @@ export function Hero() {
                 disabled
                 icon={
                   <span className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10">
-                    <Play size={12} fill="white" />
+                    <Play size={12} fill="white" aria-hidden="true" />
                   </span>
                 }
                 className="w-full sm:w-auto"
               >
-                Ver plataforma
+                {t.common.viewPlatform}
               </Button>
-            </div>
-
-            {/* Social proof */}
-            <div className="flex items-center gap-3 mt-8 pt-8 border-t border-[#1A1A1A] w-full">
-              <div className="flex -space-x-2">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-bold text-black"
-                    style={{
-                      backgroundColor: i === 0 ? "#F5C518" : i === 1 ? "#A3A3A3" : i === 2 ? "#737373" : "#404040",
-                      zIndex: 4 - i,
-                    }}
-                  >
-                    {["A", "B", "C", "D"][i]}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-white">+2.000 artistas activos</p>
-                <p className="text-[11px] text-[#737373]">confían en NP Music Group</p>
-              </div>
             </div>
           </div>
 
-          {/* Right: Dashboard Preview */}
+          {/* Right: Dashboard Preview — desktop only */}
           <div className="relative hidden lg:block">
-            {/* Subtle glow behind dashboard */}
             <div
               className="absolute -inset-8 rounded-2xl opacity-[0.06] blur-[60px] pointer-events-none"
               style={{ background: "#F5C518" }}
+              aria-hidden="true"
             />
             <div className="relative">
               <DashboardPanel compact />
-              {/* Mobile mockup overlay — right side hint */}
+              {/* Mini card overlay */}
               <div
                 className="absolute -right-4 -bottom-6 w-32 bg-[#0A0A0A] border border-[#1E1E1E] rounded-2xl p-3 shadow-2xl hidden xl:block"
                 style={{ boxShadow: "0 24px 48px rgba(0,0,0,0.8)" }}
+                aria-hidden="true"
               >
-                <div className="text-[9px] text-[#737373] font-medium mb-1.5">Ingresos</div>
+                <div className="text-[9px] text-[#737373] font-medium mb-1.5">
+                  {t.dashboard.modules.revenue}
+                </div>
                 <div className="text-sm font-bold text-[#404040] mb-2">—</div>
-                <div className="text-[9px] text-[#737373] font-medium mb-1">Lanzamientos recientes</div>
+                <div className="text-[9px] text-[#737373] font-medium mb-1">
+                  {t.dashboard.modules.releases}
+                </div>
                 <div className="space-y-1.5">
                   {[1, 2].map((i) => (
                     <div key={i} className="flex items-center gap-1.5">
@@ -125,7 +113,7 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Mobile Dashboard (shown below on small screens) */}
+        {/* Mobile Dashboard */}
         <div className="lg:hidden mt-10">
           <DashboardPanel compact />
         </div>

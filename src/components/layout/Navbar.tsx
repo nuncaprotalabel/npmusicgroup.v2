@@ -3,39 +3,42 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { cn } from "@/utils/cn";
 import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
-
-const navItems = [
-  { label: "Inicio", href: "#inicio" },
-  {
-    label: "Plataforma",
-    href: "#plataforma",
-    children: [
-      { label: "Dashboard", href: "#dashboard", description: "Gestiona todo desde un lugar" },
-      { label: "Analíticas", href: "#analiticas", description: "Datos en tiempo real" },
-      { label: "Artistas", href: "#artistas", description: "Gestión de artistas y roles" },
-    ],
-  },
-  { label: "Distribución", href: "#distribucion" },
-  { label: "Servicios", href: "#servicios" },
-  {
-    label: "Recursos",
-    href: "#recursos",
-    children: [
-      { label: "Blog", href: "#blog", description: "Artículos y guías" },
-      { label: "Soporte", href: "#soporte", description: "Ayuda cuando la necesitas" },
-      { label: "FAQ", href: "#faq", description: "Preguntas frecuentes" },
-    ],
-  },
-  { label: "Precios", href: "#precios" },
-  { label: "Contacto", href: "#contacto" },
-];
+import { useTranslation } from "@/i18n/useTranslation";
 
 export function Navbar() {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+
+  const navItems = [
+    { label: t.nav.home, href: "#inicio" },
+    {
+      label: t.nav.platform,
+      href: "#plataforma",
+      children: [
+        { label: t.nav.dashboard, href: "#dashboard", description: t.nav.platformDesc },
+        { label: t.nav.analytics, href: "#analiticas", description: t.nav.analyticsDesc },
+        { label: t.nav.artists, href: "#artistas", description: t.nav.artistsDesc },
+      ],
+    },
+    { label: t.nav.distribution, href: "#distribucion" },
+    { label: t.nav.services, href: "#servicios" },
+    {
+      label: t.nav.resources,
+      href: "#recursos",
+      children: [
+        { label: t.nav.blog, href: "#blog", description: t.nav.blogDesc },
+        { label: t.nav.support, href: "#soporte", description: t.nav.supportDesc },
+        { label: t.nav.faq, href: "#faq", description: t.nav.faqDesc },
+      ],
+    },
+    { label: t.nav.pricing, href: "#precios" },
+    { label: t.nav.contact, href: "#contacto" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 12);
@@ -49,7 +52,9 @@ export function Navbar() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   return (
@@ -65,7 +70,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <a href="#inicio" className="flex items-center gap-2.5 shrink-0 group">
+            <a href="#inicio" className="flex items-center gap-2.5 shrink-0">
               <div className="w-9 h-9 relative">
                 <Image
                   src="/logo.png"
@@ -108,7 +113,6 @@ export function Navbar() {
                     )}
                   </a>
 
-                  {/* Dropdown */}
                   {item.children && openDropdown === item.label && (
                     <div className="absolute top-full left-0 pt-1">
                       <div className="bg-[#0D0D0D] border border-[#1E1E1E] rounded-xl p-1.5 min-w-[220px] shadow-2xl shadow-black/60">
@@ -118,12 +122,12 @@ export function Navbar() {
                             href={child.href}
                             className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-[#1A1A1A] transition-colors duration-150 group"
                           >
-                            <span className="text-sm font-medium text-white group-hover:text-white">
+                            <span className="text-sm font-medium text-white">
                               {child.label}
                             </span>
-                            {"description" in child && (
+                            {child.description && (
                               <span className="text-xs text-[#737373] mt-0.5">
-                                {(child as typeof child & { description: string }).description}
+                                {child.description}
                               </span>
                             )}
                           </a>
@@ -137,23 +141,27 @@ export function Navbar() {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-2">
+              <LanguageSelector />
               <Button variant="ghost" size="sm" disabled>
-                Iniciar sesión
+                {t.common.login}
               </Button>
               <Button variant="primary" size="sm" disabled className="gap-1.5">
-                Comenzar ahora
+                {t.common.startNow}
                 <ArrowRight size={13} />
               </Button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-[#A3A3A3] hover:text-white hover:bg-white/8 transition-colors"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Abrir menú"
-            >
-              <Menu size={20} />
-            </button>
+            {/* Mobile: language + menu */}
+            <div className="lg:hidden flex items-center gap-2">
+              <LanguageSelector />
+              <button
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-[#A3A3A3] hover:text-white hover:bg-white/8 transition-colors"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Abrir menú"
+              >
+                <Menu size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -177,6 +185,7 @@ export function Navbar() {
               <button
                 className="flex items-center justify-center w-8 h-8 rounded-lg text-[#737373] hover:text-white hover:bg-white/8 transition-colors"
                 onClick={() => setMobileOpen(false)}
+                aria-label="Cerrar menú"
               >
                 <X size={18} />
               </button>
@@ -214,10 +223,10 @@ export function Navbar() {
             {/* Drawer Footer */}
             <div className="p-4 border-t border-[#1A1A1A] flex flex-col gap-2">
               <Button variant="outline" size="md" fullWidth disabled>
-                Iniciar sesión
+                {t.common.login}
               </Button>
               <Button variant="primary" size="md" fullWidth disabled>
-                Comenzar ahora
+                {t.common.startNow}
               </Button>
             </div>
           </div>
