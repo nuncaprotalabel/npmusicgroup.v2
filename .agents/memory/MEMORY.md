@@ -1,0 +1,1 @@
+- [Database setup](db-setup.md) — Schema + SUPER_ADMIN seed applied to Replit PostgreSQL; DATABASE_URL auto-provisioned.
