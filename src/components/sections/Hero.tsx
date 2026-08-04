@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useTranslation } from "@/i18n/useTranslation";
 
@@ -108,35 +109,33 @@ export function Hero() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 animate-hero-content-4">
 
-              {/* Primary — yellow */}
-              <button
-                disabled
-                className="group flex items-center justify-center gap-2 px-7 py-[14px] rounded-full text-[0.875rem] font-semibold text-black w-full sm:w-auto transition-all duration-200 cursor-not-allowed"
+              {/* Primary — yellow → /aplicar */}
+              <Link
+                href="/aplicar"
+                className="group flex items-center justify-center gap-2 px-7 py-[14px] rounded-full text-[0.875rem] font-semibold text-black w-full sm:w-auto transition-all duration-200 hover:brightness-105 active:scale-[0.98]"
                 style={{
                   background: "linear-gradient(135deg, #F5C400 0%, #E6B300 100%)",
                   boxShadow: "0 4px 28px rgba(245,196,0,0.30), 0 1px 0 rgba(255,255,255,0.15) inset",
                 }}
-                aria-label={`${t.hero.cta1} — ${t.common.comingSoon}`}
               >
                 {t.hero.cta1}
                 <ArrowRight size={15} strokeWidth={2.5} />
-              </button>
+              </Link>
 
-              {/* Secondary — glass outline */}
-              <button
-                disabled
-                className="flex items-center justify-center gap-2 px-7 py-[14px] rounded-full text-[0.875rem] font-semibold text-white w-full sm:w-auto transition-all duration-200 cursor-not-allowed"
+              {/* Secondary — glass outline → scroll to #servicios */}
+              <a
+                href="#servicios"
+                className="flex items-center justify-center gap-2 px-7 py-[14px] rounded-full text-[0.875rem] font-semibold text-white w-full sm:w-auto transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
                 style={{
                   background: "rgba(255,255,255,0.07)",
                   border: "1px solid rgba(255,255,255,0.30)",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                 }}
-                aria-label={t.hero.cta2}
               >
                 {t.hero.cta2}
                 <ChevronDown size={15} strokeWidth={2.5} />
-              </button>
+              </a>
 
             </div>
           </div>

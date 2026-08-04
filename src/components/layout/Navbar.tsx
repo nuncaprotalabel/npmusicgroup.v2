@@ -160,7 +160,7 @@ export function Navbar() {
                   {t.common.login}
                 </Button>
               </a>
-              <a href="/login">
+              <a href="/aplicar">
                 <Button variant="primary" size="sm" className="gap-1.5">
                   {t.common.startNow}
                   <ArrowRight size={13} />
@@ -250,7 +250,7 @@ export function Navbar() {
                   {t.common.login}
                 </Button>
               </a>
-              <a href="/login" className="w-full">
+              <a href="/aplicar" className="w-full">
                 <Button variant="primary" size="md" fullWidth>
                   {t.common.startNow}
                 </Button>

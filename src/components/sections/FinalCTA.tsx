@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight, Zap } from "lucide-react";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useInView } from "@/hooks/useInView";
@@ -59,14 +60,14 @@ export function FinalCTA() {
 
               {/* CTA */}
               <div className="shrink-0 w-full sm:w-auto">
-                <button
-                  disabled
+                <Link
+                  href="/aplicar"
                   onMouseDown={createRipple}
-                  className="ripple-host ripple-dark inline-flex items-center justify-center gap-2.5 h-12 px-7 w-full sm:w-auto bg-black text-white text-[0.9375rem] font-semibold rounded-xl transition-all duration-200 cursor-not-allowed opacity-80 tracking-tight"
+                  className="ripple-host ripple-dark inline-flex items-center justify-center gap-2.5 h-12 px-7 w-full sm:w-auto bg-black text-white text-[0.9375rem] font-semibold rounded-xl transition-all duration-200 hover:bg-[#111] active:scale-[0.98] tracking-tight"
                 >
                   {t.finalCTA.button}
                   <ArrowRight size={15} aria-hidden="true" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
