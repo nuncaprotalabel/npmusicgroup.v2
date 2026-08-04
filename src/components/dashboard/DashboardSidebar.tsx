@@ -3,6 +3,7 @@
 /**
  * DashboardSidebar — barra de navegación lateral del dashboard (desktop).
  * Solo visible en pantallas lg+. Mobile gestionado por DashboardMobileSidebar.
+ * Filtra ítems según el rol del usuario.
  */
 import Link from "next/link";
 import Image from "next/image";
@@ -24,15 +25,19 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { useTranslation } from "@/i18n/useTranslation";
 import type { UserRole } from "@/types/auth";
 
+// ─── Tipos ─────────────────────────────────────────────────────────────────────
+
 interface NavItem {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
-  children?: { href: string; label: string }[];
+  href:        string;
+  label:       string;
+  icon:        React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
+  roles?:      UserRole[];   // undefined = visible para todos los roles
+  children?:   { href: string; label: string }[];
 }
+
+// ─── Navegación ────────────────────────────────────────────────────────────────
 
 const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   {
@@ -45,13 +50,18 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     group: "Gestión",
     items: [
       { href: "/dashboard/artistas",    label: "Artistas",    icon: Users },
-      { href: "/dashboard/solicitudes", label: "Solicitudes", icon: Inbox },
-      { href: "/dashboard/invitaciones",label: "Invitaciones",icon: Mail },
-      { href: "/dashboard/contratos",   label: "Contratos",   icon: FileText },
       {
-        href: "/dashboard/lanzamientos",
-        label: "Lanzamientos",
-        icon: Send,
+        href:  "/dashboard/solicitudes",
+        label: "Solicitudes",
+        icon:  Inbox,
+        roles: ["SUPER_ADMIN", "ADMIN", "DISTRIBUTION_MANAGER"],
+      },
+      { href: "/dashboard/invitaciones", label: "Invitaciones", icon: Mail },
+      { href: "/dashboard/contratos",    label: "Contratos",    icon: FileText },
+      {
+        href:     "/dashboard/lanzamientos",
+        label:    "Lanzamientos",
+        icon:     Send,
         children: [
           { href: "/dashboard/lanzamientos/recibidos", label: "Recibidos / Pendientes" },
         ],
@@ -76,17 +86,26 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   },
 ];
 
+// ─── Props ─────────────────────────────────────────────────────────────────────
+
 interface DashboardSidebarProps {
   role: UserRole;
 }
 
+// ─── Componente ────────────────────────────────────────────────────────────────
+
 export function DashboardSidebar({ role }: DashboardSidebarProps) {
-  const pathname = usePathname();
+  const pathname    = usePathname();
   const isSuperAdmin = role === "SUPER_ADMIN";
 
   function isActive(href: string) {
     if (href === "/dashboard/central") return pathname === href || pathname === "/dashboard";
     return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  function isVisible(item: NavItem): boolean {
+    if (!item.roles) return true;
+    return item.roles.includes(role);
   }
 
   return (
@@ -114,75 +133,81 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {NAV_GROUPS.map(({ group, items }) => (
-          <div key={group}>
-            <p
-              className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
-              style={{ color: "#333333" }}
-            >
-              {group}
-            </p>
-            <div className="space-y-0.5">
-              {items.map(({ href, label, icon: Icon, children }) => {
-                const active = isActive(href);
-                return (
-                  <div key={href}>
-                    <Link
-                      href={href}
-                      className={cn(
-                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8125rem] font-medium transition-all duration-150",
-                        active
-                          ? "text-black"
-                          : "text-[#737373] hover:text-white hover:bg-[#141414]"
-                      )}
-                      style={active ? { background: "#F5C518", color: "#000000" } : undefined}
-                    >
-                      <Icon
-                        size={15}
-                        strokeWidth={1.75}
-                        style={{ color: active ? "#000000" : "currentColor" }}
-                      />
-                      <span className="flex-1 truncate">{label}</span>
-                      {children && (
-                        <ChevronRight
-                          size={12}
+        {NAV_GROUPS.map(({ group, items }) => {
+          const visibleItems = items.filter(isVisible);
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={group}>
+              <p
+                className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
+                style={{ color: "#333333" }}
+              >
+                {group}
+              </p>
+              <div className="space-y-0.5">
+                {visibleItems.map(({ href, label, icon: Icon, children }) => {
+                  const active = isActive(href);
+                  return (
+                    <div key={href}>
+                      <Link
+                        href={href}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8125rem] font-medium transition-all duration-150",
+                          active
+                            ? "text-black"
+                            : "text-[#737373] hover:text-white hover:bg-[#141414]"
+                        )}
+                        style={active ? { background: "#F5C518", color: "#000000" } : undefined}
+                      >
+                        <Icon
+                          size={15}
                           strokeWidth={1.75}
-                          style={{ color: active ? "#000000" : "#444444" }}
+                          style={{ color: active ? "#000000" : "currentColor" }}
                         />
+                        <span className="flex-1 truncate">{label}</span>
+                        {children && (
+                          <ChevronRight
+                            size={12}
+                            strokeWidth={1.75}
+                            style={{ color: active ? "#000000" : "#444444" }}
+                          />
+                        )}
+                      </Link>
+
+                      {/* Sub-ítems */}
+                      {children && pathname.startsWith(href) && (
+                        <div className="ml-4 mt-0.5 space-y-0.5">
+                          {children.map(({ href: childHref, label: childLabel }) => {
+                            const childActive = pathname === childHref || pathname.startsWith(childHref + "/");
+                            return (
+                              <Link
+                                key={childHref}
+                                href={childHref}
+                                className={cn(
+                                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[0.75rem] font-medium transition-all duration-150",
+                                  childActive
+                                    ? "text-white bg-[#1A1A1A]"
+                                    : "text-[#555555] hover:text-[#A3A3A3] hover:bg-[#111111]"
+                                )}
+                              >
+                                <span
+                                  className="w-1 h-1 rounded-full shrink-0"
+                                  style={{ background: childActive ? "#F5C518" : "#333333" }}
+                                />
+                                {childLabel}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       )}
-                    </Link>
-                    {/* Sub-items — visible cuando el padre está activo */}
-                    {children && pathname.startsWith(href) && (
-                      <div className="ml-4 mt-0.5 space-y-0.5">
-                        {children.map(({ href: childHref, label: childLabel }) => {
-                          const childActive = pathname === childHref || pathname.startsWith(childHref + "/");
-                          return (
-                            <Link
-                              key={childHref}
-                              href={childHref}
-                              className={cn(
-                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[0.75rem] font-medium transition-all duration-150",
-                                childActive
-                                  ? "text-white bg-[#1A1A1A]"
-                                  : "text-[#555555] hover:text-[#A3A3A3] hover:bg-[#111111]"
-                              )}
-                            >
-                              <span
-                                className="w-1 h-1 rounded-full shrink-0"
-                                style={{ background: childActive ? "#F5C518" : "#333333" }}
-                              />
-                              {childLabel}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* NP Control — solo SUPER_ADMIN */}
         {isSuperAdmin && (

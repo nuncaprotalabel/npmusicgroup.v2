@@ -22,7 +22,7 @@ export interface Application {
   createdAt:    string;
 }
 
-// ─── API ──────────────────────────────────────────────────────────────────────
+// ─── Formulario público ───────────────────────────────────────────────────────
 
 export interface ApplicationFormData {
   artisticName: string;
@@ -37,5 +37,36 @@ export interface ApplicationFormData {
 
 export interface ApplicationSubmitResponse {
   application?: { id: string };
+  error?:       string;
+}
+
+// ─── Admin — lista ────────────────────────────────────────────────────────────
+
+export interface ApplicationListParams {
+  search?: string;
+  status?: ApplicationStatus;
+  page?:   number;
+  limit?:  number;
+}
+
+export interface ApplicationListResponse {
+  applications: Application[];
+  total:        number;
+  page:         number;
+  totalPages:   number;
+}
+
+export interface ApplicationListError {
+  error: string;
+}
+
+// ─── Admin — acción ───────────────────────────────────────────────────────────
+
+export interface ApplicationStatusUpdate {
+  status: 'APROBADA' | 'RECHAZADA';
+}
+
+export interface ApplicationUpdateResponse {
+  application?: { id: string; status: ApplicationStatus };
   error?:       string;
 }
