@@ -115,6 +115,32 @@ Log inmutable de eventos importantes del sistema.
 | `severity`    | VARCHAR(20)  | DEFAULT 'INFO'                              | INFO / WARN / ERROR / CRITICAL  |
 | `created_at`  | TIMESTAMPTZ  | DEFAULT NOW()                               | Timestamp del evento            |
 
+### 3.7 `applications`
+
+Solicitudes de artistas que desean incorporarse a NP Music Group.
+
+| Columna        | Tipo           | Restricciones                 | Descripción                          |
+|----------------|----------------|-------------------------------|--------------------------------------|
+| `id`           | UUID           | PK, DEFAULT gen_random_uuid() | Identificador único                  |
+| `artistic_name`| VARCHAR(150)   | NOT NULL                      | Nombre artístico del solicitante     |
+| `email`        | VARCHAR(255)   | NOT NULL                      | Correo electrónico del artista       |
+| `country`      | VARCHAR(100)   | NOT NULL                      | País del artista                     |
+| `genre`        | VARCHAR(100)   | NOT NULL                      | Género musical principal             |
+| `main_link`    | TEXT           | NOT NULL                      | Enlace principal (Spotify, YouTube…) |
+| `instagram`    | TEXT           | NULLABLE                      | Perfil de Instagram (opcional)       |
+| `tiktok`       | TEXT           | NULLABLE                      | Perfil de TikTok (opcional)          |
+| `message`      | TEXT           | NULLABLE                      | Mensaje de presentación (máx. 1000)  |
+| `status`       | VARCHAR(20)    | NOT NULL DEFAULT 'PENDIENTE'  | Estado: PENDIENTE / APROBADA / RECHAZADA |
+| `ip_address`   | VARCHAR(45)    | NULLABLE                      | IP del solicitante                   |
+| `created_at`   | TIMESTAMPTZ    | NOT NULL DEFAULT NOW()        | Fecha de creación                    |
+
+**Índices:**
+- `idx_applications_email` — búsqueda por correo para detección de duplicados
+- `idx_applications_status` — filtrado por estado
+- `idx_applications_created_at` — ordenación descendente
+
+**Regla de negocio:** No se permite crear una solicitud si ya existe una con el mismo `email` y `status = 'PENDIENTE'`.
+
 ---
 
 ## 4. ENUM types

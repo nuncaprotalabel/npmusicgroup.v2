@@ -1,1 +1,2 @@
 - [Database setup](db-setup.md) — Schema + SUPER_ADMIN seed applied to Replit PostgreSQL; DATABASE_URL auto-provisioned.
+- [Applications table](applications-table.md) — Table `applications` created in Neon for artist applications; API at POST /api/applications.
