@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 
 export function useRipple() {
-  const createRipple = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+  const createRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const button = e.currentTarget;
     const existing = button.querySelector(".ripple-effect");
     if (existing) existing.remove();
