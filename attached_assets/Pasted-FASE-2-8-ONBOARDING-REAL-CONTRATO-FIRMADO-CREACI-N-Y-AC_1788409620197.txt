@@ -1,0 +1,496 @@
+FASE 2.8 — ONBOARDING REAL: CONTRATO FIRMADO → CREACIÓN Y ACTIVACIÓN DE CUENTA
+
+CONTEXTO
+
+NP Music Group ya tiene implementados y funcionando:
+
+- Solicitudes
+- Aprobación/rechazo de solicitudes
+- Invitaciones
+- Contratos
+- Firma/aceptación interna
+- Persistencia en PostgreSQL/Neon
+- Autenticación existente
+- Sesiones existentes
+- RBAC existente
+- Usuarios existentes
+- Auditoría existente
+
+El flujo actual termina correctamente en:
+
+Solicitud aprobada
+→ Invitación
+→ Contrato
+→ Firma
+→ CONTRATO FIRMADO
+→ ONBOARDING PENDIENTE
+
+Esta fase debe implementar ÚNICAMENTE el siguiente paso:
+
+CONTRATO FIRMADO
+→ CREAR CUENTA DEL ARTISTA
+→ ESTABLECER CONTRASEÑA
+→ ACTIVAR CUENTA
+→ PERMITIR LOGIN
+
+NO implementar todavía:
+
+- artistas como módulo completo
+- perfiles de artista
+- splits
+- colaboradores
+- lanzamientos
+- distribución
+- Too Lost
+- ingresos
+- analíticas
+- mensajes
+- emails
+- proveedores externos
+- DocuSign
+- Dropbox Sign
+- Adobe Sign
+- pagos
+- cambios de diseño global
+- nuevas funcionalidades administrativas no relacionadas
+
+REGLA PRINCIPAL
+
+No crear ninguna cuenta automáticamente antes de que el contrato esté firmado.
+
+==================================================
+1. PRECONDICIONES
+==================================================
+
+El onboarding solamente puede comenzar si:
+
+- la solicitud relacionada existe;
+- la solicitud está APROBADA;
+- existe una invitación válida relacionada;
+- el contrato relacionado existe;
+- el contrato está FIRMADO;
+- existe una firma persistida;
+- la invitación está UTILIZADA.
+
+Si cualquiera de estas condiciones falla:
+
+- rechazar la operación;
+- no crear usuario;
+- no activar usuario;
+- no modificar datos existentes;
+- devolver error claro.
+
+Nunca confiar en contract_id, invitation_id, email o role enviados desde el frontend.
+
+Resolver las relaciones desde PostgreSQL utilizando el token/onboarding correspondiente.
+
+==================================================
+2. CREACIÓN DE CUENTA
+==================================================
+
+Cuando el contrato esté firmado y el onboarding pueda comenzar:
+
+Crear un usuario real en la tabla users existente.
+
+Datos:
+
+- email: proveniente de la solicitud aprobada;
+- username: generar un username inicial seguro a partir del nombre artístico o email;
+- role: ARTIST;
+- estado: inicialmente DESACTIVADA o equivalente existente;
+- password: NO establecer todavía;
+- created_at: generado por DB;
+- updated_at: generado por DB.
+
+IMPORTANTE:
+
+No crear una segunda cuenta si ya existe una cuenta asociada al mismo email.
+
+La operación debe ser idempotente.
+
+Si el usuario ya existe y corresponde correctamente a este onboarding:
+
+- reutilizarlo;
+- no duplicarlo;
+- continuar el onboarding.
+
+Si existe un usuario con ese email pero la relación es incompatible o pertenece a otro flujo:
+
+- bloquear la operación;
+- no modificar esa cuenta automáticamente.
+
+==================================================
+3. VINCULACIÓN DEL ONBOARDING
+==================================================
+
+La cuenta creada/reutilizada debe quedar vinculada al onboarding correspondiente.
+
+Utilizar las relaciones existentes cuando sea posible.
+
+Si actualmente no existe una relación adecuada entre:
+
+- solicitud
+- invitación
+- contrato
+- usuario
+
+crear únicamente la mínima estructura necesaria para mantener esta trazabilidad.
+
+No duplicar tablas existentes.
+
+Debe poder determinarse posteriormente:
+
+Solicitud X
+→ Invitación X
+→ Contrato X
+→ Firma X
+→ Usuario X
+
+==================================================
+4. ESTABLECIMIENTO DE CONTRASEÑA
+==================================================
+
+NO crear ni mostrar una contraseña automáticamente.
+
+Crear un flujo seguro de establecimiento de contraseña para el usuario recién creado.
+
+Debe utilizar un token temporal de un solo uso.
+
+Características:
+
+- token criptográficamente seguro;
+- almacenar únicamente hash del token;
+- expiración razonable;
+- un solo uso;
+- invalidación después de utilizarlo;
+- no almacenar token plano en PostgreSQL;
+- no registrar token en audit_log;
+- no mostrar token en logs;
+- no incluir secretos en respuestas del backend.
+
+Crear una ruta pública similar conceptualmente a:
+
+/activar/[token]
+
+o utilizar una estructura equivalente coherente con la arquitectura actual.
+
+La página debe permitir:
+
+- establecer contraseña;
+- confirmar contraseña.
+
+Validaciones:
+
+- contraseña obligatoria;
+- longitud mínima segura;
+- confirmación coincidente;
+- errores claros;
+- no aceptar token inválido;
+- no aceptar token expirado;
+- no aceptar token utilizado.
+
+==================================================
+5. ACTIVACIÓN
+==================================================
+
+Después de establecer correctamente la contraseña:
+
+- generar hash usando bcrypt con la estrategia de autenticación existente;
+- guardar el hash;
+- cambiar usuario a ACTIVA;
+- invalidar el token de establecimiento de contraseña;
+- registrar fecha de activación;
+- crear auditoría.
+
+La cuenta solamente debe pasar a ACTIVA después de establecer correctamente la contraseña.
+
+No activar cuentas mediante GET.
+
+No activar cuentas solamente por visitar la página.
+
+==================================================
+6. LOGIN
+==================================================
+
+Una vez activada:
+
+El usuario ARTIST debe poder utilizar el login existente.
+
+Al iniciar sesión:
+
+- crear sesión usando el sistema existente;
+- respetar cookies y seguridad existentes;
+- respetar RBAC;
+- role = ARTIST;
+- cargar únicamente permisos correspondientes al rol ARTIST.
+
+No crear un sistema paralelo de autenticación.
+
+Reutilizar exactamente el sistema de autenticación existente.
+
+==================================================
+7. REDIRECCIÓN
+==================================================
+
+Después de establecer correctamente la contraseña:
+
+mostrar confirmación clara:
+
+"CUENTA ACTIVADA"
+
+y permitir continuar al login.
+
+No iniciar sesión automáticamente en esta fase.
+
+Después del login exitoso:
+
+redirigir al dashboard correspondiente al usuario ARTIST.
+
+No conceder acceso a:
+
+/np-control
+/admin/*
+
+salvo que el RBAC existente indique explícitamente lo contrario.
+
+==================================================
+8. PERMISOS ARTIST
+==================================================
+
+Revisar el rol ARTIST existente.
+
+NO crear permisos nuevos innecesariamente.
+
+El artista debe tener únicamente los permisos que ya estén definidos para su rol.
+
+No modificar permisos de:
+
+- SUPER_ADMIN
+- ADMIN
+- DISTRIBUTION_MANAGER
+- MANAGER
+- VIEWER
+
+Si ARTIST todavía no tiene permisos suficientes para entrar a su dashboard, identificar exactamente cuáles son necesarios y realizar únicamente la mínima modificación RBAC necesaria.
+
+==================================================
+9. AUDITORÍA
+==================================================
+
+Registrar eventos relevantes:
+
+- ARTIST_ACCOUNT_CREATED
+- ARTIST_PASSWORD_SET
+- ARTIST_ACCOUNT_ACTIVATED
+
+Si la cuenta ya existía y simplemente se continúa el onboarding:
+
+- no registrar una falsa creación.
+
+Nunca registrar:
+
+- contraseña;
+- password hash;
+- token;
+- token hash;
+- secretos.
+
+==================================================
+10. SEGURIDAD
+==================================================
+
+Aplicar las mismas reglas de seguridad existentes:
+
+- bcrypt;
+- tokens criptográficamente seguros;
+- hash de tokens;
+- expiración;
+- single-use;
+- protección contra reutilización;
+- validación server-side;
+- no confiar en datos críticos del frontend;
+- transacciones PostgreSQL cuando correspondan;
+- no filtrar información sensible en errores.
+
+Evitar enumeración innecesaria de usuarios.
+
+==================================================
+11. IDEMPOTENCIA
+==================================================
+
+Este punto es obligatorio.
+
+Si el proceso de onboarding se ejecuta dos veces:
+
+NO debe:
+
+- crear dos usuarios;
+- crear dos tokens activos innecesarios;
+- cambiar roles incorrectamente;
+- sobrescribir cuentas existentes;
+- duplicar relaciones.
+
+Debe poder reanudarse de manera segura.
+
+==================================================
+12. ESTADOS
+==================================================
+
+El flujo debe quedar conceptualmente:
+
+CONTRATO FIRMADO
+↓
+ONBOARDING PENDIENTE
+↓
+CUENTA CREADA
+↓
+PENDIENTE DE ESTABLECER CONTRASEÑA
+↓
+CUENTA ACTIVA
+↓
+LOGIN
+↓
+DASHBOARD ARTIST
+
+No marcar onboarding como completado antes de que:
+
+- exista usuario;
+- tenga contraseña;
+- esté ACTIVO.
+
+==================================================
+13. UI
+==================================================
+
+Mantener el diseño actual.
+
+No hacer rediseño global.
+
+La pantalla de activación debe ser:
+
+- minimalista;
+- premium;
+- limpia;
+- responsive;
+- excelente en Android;
+- coherente con NP Music Group;
+- negro/blanco/amarillo;
+- sin widgets innecesarios;
+- sin estadísticas falsas;
+- sin elementos decorativos innecesarios.
+
+El logo oficial existente debe mantenerse sin modificar.
+
+==================================================
+14. BASE DE DATOS
+==================================================
+
+Antes de crear tablas nuevas:
+
+REVISAR las tablas existentes.
+
+No duplicar:
+
+- users;
+- sessions;
+- invitations;
+- contracts;
+- solicitudes;
+- audit_log.
+
+Si ya existe infraestructura para tokens de establecimiento de contraseña, reutilizarla.
+
+Si no existe una estructura adecuada, crear únicamente la mínima tabla necesaria.
+
+Documentar cualquier cambio en:
+
+docs/DATABASE_PLAN.md
+
+==================================================
+15. NO EMAIL
+==================================================
+
+IMPORTANTE:
+
+Todavía NO implementar envío de email.
+
+El sistema debe poder generar el flujo de activación de manera segura internamente, pero no conectar ningún proveedor de correo.
+
+No:
+
+- Resend
+- SendGrid
+- Mailgun
+- SMTP
+- Gmail
+- etc.
+
+La integración de emails será otra fase.
+
+==================================================
+16. PRUEBAS OBLIGATORIAS
+==================================================
+
+Probar al menos:
+
+1. Contrato FIRMADO permite iniciar onboarding.
+2. Contrato no firmado bloquea onboarding.
+3. Invitación no válida bloquea onboarding.
+4. Solicitud no aprobada bloquea onboarding.
+5. Se crea usuario ARTIST correctamente.
+6. No se duplica usuario si se repite la operación.
+7. Token de contraseña válido funciona.
+8. Token inválido falla.
+9. Token expirado falla.
+10. Token utilizado nuevamente falla.
+11. Contraseña no se almacena en texto plano.
+12. Usuario pasa a ACTIVA solamente después de establecer contraseña.
+13. ARTIST puede iniciar sesión.
+14. ARTIST no puede acceder a /np-control.
+15. ARTIST no puede acceder a /admin/*.
+16. SUPER_ADMIN mantiene acceso.
+17. Auditoría se registra correctamente.
+18. No aparecen tokens ni secretos en logs.
+19. TypeScript pasa.
+20. Build pasa.
+21. git diff --check pasa.
+
+==================================================
+17. DATOS DE PRUEBA
+==================================================
+
+Utilizar datos temporales únicamente para pruebas.
+
+Al finalizar:
+
+- eliminar todos los datos temporales;
+- no dejar usuarios ARTIST de prueba;
+- no dejar tokens de prueba;
+- no dejar sesiones de prueba;
+- no dejar contratos de prueba;
+- no dejar firmas de prueba.
+
+La base debe quedar limpia.
+
+==================================================
+18. REGLA DE ALCANCE
+==================================================
+
+NO continuar automáticamente con otra fase.
+
+NO implementar artistas, releases, splits, ingresos, analíticas, emails ni Too Lost.
+
+Al finalizar reportar únicamente:
+
+1. archivos creados/modificados;
+2. tablas creadas/reutilizadas;
+3. endpoints;
+4. estados;
+5. flujo final;
+6. seguridad;
+7. pruebas realizadas;
+8. resultado de TypeScript/build/diff;
+9. datos temporales eliminados;
+10. cualquier problema pendiente.
+
+DETENERSE COMPLETAMENTE AL TERMINAR ESTA FASE.
