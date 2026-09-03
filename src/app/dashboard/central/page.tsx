@@ -152,12 +152,12 @@ export default async function CentralPage() {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const MODULES = [
-  { label: "Artistas",              description: "Gestión de artistas y perfiles",     href: "/dashboard/artistas" },
-  { label: "Lanzamientos",          description: "Publicaciones y releases",           href: "/dashboard/lanzamientos" },
-  { label: "Contratos",             description: "Contratos y acuerdos digitales",     href: "/dashboard/contratos" },
-  { label: "Ingresos",              description: "Ingresos y distribución de royalties",href: "/dashboard/ingresos" },
-  { label: "Analíticas",            description: "Estadísticas y métricas",            href: "/dashboard/analiticas" },
-  { label: "Mensajes",              description: "Comunicación interna",               href: "/dashboard/mensajes" },
+  { label: "Artistas",              description: "Gestión de artistas y perfiles",     href: "/admin/artistas" },
+  { label: "Lanzamientos",          description: "Publicaciones y releases",           href: "/admin/lanzamientos" },
+  { label: "Contratos",             description: "Contratos y acuerdos digitales",     href: "/admin/contratos" },
+  { label: "Ingresos",              description: "Ingresos y distribución de royalties",href: "/admin/ingresos" },
+  { label: "Analíticas",            description: "Estadísticas y métricas",            href: "/admin/analiticas" },
+  { label: "Mensajes",              description: "Comunicación interna",               href: "/admin/mensajes" },
 ];
 
 function StatCard({
