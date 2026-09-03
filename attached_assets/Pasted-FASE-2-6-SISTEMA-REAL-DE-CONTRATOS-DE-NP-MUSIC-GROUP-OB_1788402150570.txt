@@ -1,0 +1,847 @@
+FASE 2.6 — SISTEMA REAL DE CONTRATOS DE NP MUSIC GROUP
+
+OBJETIVO:
+
+Construir el módulo completo de gestión de contratos de NP Music Group, conectado con el sistema existente de solicitudes, invitaciones, usuarios, RBAC y auditoría.
+
+Esta fase debe dejar funcionando:
+
+SOLICITUD APROBADA
+        ↓
+INVITACIÓN VÁLIDA
+        ↓
+CREACIÓN DEL CONTRATO
+        ↓
+BORRADOR
+        ↓
+VALIDACIÓN CONTRACTUAL
+        ↓
+PENDIENTE DE FIRMA
+
+El sistema debe quedar preparado para que una fase posterior implemente la firma electrónica, pero ESTA FASE NO DEBE IMPLEMENTAR LA FIRMA.
+
+==================================================
+REGLAS ABSOLUTAS — AHORRO DE CRÉDITOS
+==================================================
+
+- NO reconstruir el proyecto.
+- NO hacer refactors generales.
+- NO cambiar la arquitectura existente sin necesidad.
+- NO modificar el sitio público.
+- NO modificar /aplicar.
+- NO modificar autenticación existente.
+- NO modificar sesiones existentes.
+- NO modificar RBAC salvo que sea estrictamente necesario.
+- NO modificar /admin/cuentas salvo compatibilidad mínima.
+- NO modificar /admin/solicitudes salvo compatibilidad mínima.
+- NO modificar /admin/invitaciones salvo compatibilidad mínima.
+- NO implementar artistas.
+- NO implementar colaboradores.
+- NO implementar splits completos.
+- NO implementar ingresos.
+- NO implementar analíticas.
+- NO implementar lanzamientos.
+- NO implementar distribución.
+- NO implementar Too Lost.
+- NO implementar firma electrónica.
+- NO implementar proveedores externos.
+- NO implementar emails automáticos.
+- NO crear contraseñas.
+- NO activar cuentas.
+- NO agregar dependencias innecesarias.
+
+Antes de crear cualquier cosa:
+
+1. Inspeccionar únicamente las estructuras relacionadas con:
+   - solicitudes
+   - invitaciones
+   - users
+   - RBAC
+   - audit_log
+   - navegación administrativa
+   - DATABASE_PLAN
+
+2. Reutilizar estructuras existentes.
+
+3. Si ya existe una tabla o modelo de contratos:
+   reutilizarlo.
+
+4. Si ya existen permisos contracts.view / contracts.manage:
+   reutilizarlos.
+
+5. Si existe una convención de nombres concreta:
+   respetarla.
+
+NO crear estructuras duplicadas.
+
+==================================================
+1. PROPÓSITO DEL CONTRATO
+==================================================
+
+El contrato representa el acuerdo entre:
+
+ARTISTA
+y
+NP MUSIC GROUP
+
+La filosofía contractual definida para NP Music Group es:
+
+- El artista conserva la propiedad de sus derechos.
+- NP Music Group no adquiere automáticamente la propiedad de la música del artista.
+- El artista conserva el 85%.
+- NP Music Group recibe el 15% correspondiente a los servicios contemplados en el acuerdo.
+- El artista tiene derecho a terminar/rescindir la relación contractual conforme al mecanismo establecido en el contrato definitivo.
+
+IMPORTANTE:
+
+La plataforma debe soportar estas condiciones como reglas contractuales estructurales.
+
+NO inventar cláusulas legales adicionales.
+
+NO inventar una duración obligatoria.
+
+NO inventar exclusividad.
+
+NO inventar penalizaciones.
+
+NO inventar cesión de masters.
+
+NO inventar cesión editorial.
+
+NO inventar propiedad de catálogo.
+
+NO inventar obligaciones económicas adicionales.
+
+La redacción jurídica definitiva debe poder ser revisada y aprobada por NP Music Group antes de utilizar contratos con artistas reales.
+
+==================================================
+2. BASE DE DATOS
+==================================================
+
+Primero inspeccionar el schema actual.
+
+Si existe una estructura equivalente a contracts:
+REUTILIZARLA.
+
+Si no existe:
+crear la estructura mínima necesaria siguiendo la arquitectura actual.
+
+El contrato debe poder relacionarse con:
+
+- solicitud
+- invitación
+- usuario administrativo que lo creó
+- posteriormente, una cuenta/artista cuando esa entidad exista
+
+NO crear todavía una entidad Artist solamente para satisfacer esta fase.
+
+Campos mínimos:
+
+- id UUID
+- solicitud_id
+- invitation_id
+- tipo
+- título
+- versión
+- contenido
+- estado
+- artist_percentage
+- company_percentage
+- created_by
+- created_at
+- updated_at
+
+Si la arquitectura requiere nombres en inglés, utilizar nombres en inglés.
+
+==================================================
+3. PORCENTAJES CONTRACTUALES — REGLA CENTRAL
+==================================================
+
+Los porcentajes contractuales deben almacenarse como datos reales.
+
+Valores oficiales:
+
+artist_percentage = 85
+company_percentage = 15
+
+REGLA:
+
+85 + 15 = 100
+
+El sistema debe validar siempre:
+
+artist_percentage + company_percentage = 100
+
+El contrato NO puede pasar a PENDIENTE_FIRMA si los porcentajes no cumplen:
+
+Artista = 85%
+NP Music Group = 15%
+
+IMPORTANTE:
+
+Estos porcentajes representan la distribución económica establecida en el contrato.
+
+NO significan:
+
+- transferencia de propiedad intelectual
+- cesión de masters
+- cesión editorial
+- propiedad del catálogo
+
+NO implementar todavía el sistema completo de splits.
+
+==================================================
+4. PROPIEDAD DE LOS DERECHOS
+==================================================
+
+El contrato debe contener una sección específica relacionada con:
+
+"TITULARIDAD DE DERECHOS"
+
+La estructura debe permitir almacenar la cláusula contractual aprobada por NP Music Group.
+
+Debe quedar claramente establecido en el contrato definitivo que:
+
+- el artista conserva el 100% de la titularidad de sus derechos;
+- NP Music Group no adquiere automáticamente la propiedad de las obras, grabaciones, masters, composiciones, nombre artístico, imagen o catálogo del artista por la prestación de servicios;
+- cualquier derecho que eventualmente deba concederse debe estar expresamente definido en el contrato aprobado.
+
+IMPORTANTE:
+
+NO inventar la redacción jurídica definitiva.
+
+La plataforma debe poder guardar y versionar el texto aprobado.
+
+==================================================
+5. DERECHO DE TERMINACIÓN
+==================================================
+
+El contrato debe contener una sección específica:
+
+"TERMINACIÓN / RESCISIÓN"
+
+La estructura debe permitir almacenar la cláusula contractual aprobada.
+
+La intención contractual de NP Music Group es:
+
+El artista conserva la libertad de terminar la relación contractual cuando lo considere, conforme al procedimiento establecido en el contrato.
+
+NO crear:
+
+- permanencia mínima inventada
+- renovación obligatoria
+- penalizaciones inventadas
+- cláusulas de exclusividad no solicitadas
+
+NO interpretar "libertad de terminación" como permiso para ignorar obligaciones ya generadas.
+
+La redacción jurídica final debe ser aprobada por NP Music Group.
+
+==================================================
+6. ESTRUCTURA DEL CONTRATO
+==================================================
+
+El sistema debe soportar como mínimo estas secciones:
+
+1. Identificación de las partes
+2. Objeto del acuerdo
+3. Servicios de NP Music Group
+4. Titularidad de derechos
+5. Distribución económica
+6. Terminación / rescisión
+7. Obligaciones de las partes
+8. Vigencia / condiciones aplicables
+9. Firmas
+
+IMPORTANTE:
+
+Las secciones deben poder almacenarse de manera estructurada o como contenido persistente editable.
+
+NO crear un contrato legal definitivo inventando cláusulas.
+
+Si todavía no existe texto contractual oficial:
+
+permitir crear un BORRADOR.
+
+No presentar un texto inventado como contrato legal aprobado.
+
+==================================================
+7. TIPOS DE CONTRATO
+==================================================
+
+Implementar únicamente:
+
+CONTRATO_ARTISTA
+
+No crear tipos ficticios.
+
+La arquitectura debe permitir agregar otros tipos en el futuro.
+
+==================================================
+8. ESTADOS
+==================================================
+
+Implementar estos estados:
+
+BORRADOR
+PENDIENTE_FIRMA
+FIRMADO
+RECHAZADO
+CANCELADO
+
+PERO en esta fase solamente deben estar activamente implementadas estas transiciones:
+
+BORRADOR → PENDIENTE_FIRMA
+
+Los demás estados deben quedar preparados únicamente si el schema los necesita.
+
+NO implementar todavía:
+
+PENDIENTE_FIRMA → FIRMADO
+
+porque eso pertenece a la fase de firma.
+
+==================================================
+9. RELACIÓN CON SOLICITUDES E INVITACIONES
+==================================================
+
+Un contrato solamente puede comenzar desde una relación válida.
+
+Validar server-side:
+
+- solicitud existe
+- solicitud está APROBADA
+- invitación existe
+- invitación pertenece a la solicitud
+- invitación está válida
+- invitación no está EXPIRADA
+- invitación no está REVOCADA
+- invitación no está UTILIZADA
+
+No permitir:
+
+PENDIENTE → contrato
+RECHAZADA → contrato
+invitación inválida → contrato
+invitación expirada → contrato
+invitación revocada → contrato
+
+No crear automáticamente contratos al aprobar solicitudes.
+
+No crear automáticamente contratos al generar invitaciones.
+
+El administrador debe iniciar explícitamente la creación.
+
+==================================================
+10. DUPLICADOS
+==================================================
+
+Evitar múltiples contratos activos para la misma invitación.
+
+Si ya existe un contrato BORRADOR o PENDIENTE_FIRMA asociado:
+
+mostrarlo y evitar crear otro innecesariamente.
+
+Si en el futuro existe una revisión contractual:
+deberá utilizar versionado, no duplicación descontrolada.
+
+==================================================
+11. /admin/contratos
+==================================================
+
+Crear:
+
+/admin/contratos
+
+Usar el layout administrativo existente.
+
+Listado real desde PostgreSQL.
+
+Mostrar:
+
+- título
+- tipo
+- artista / nombre artístico cuando pueda obtenerse desde solicitud
+- email
+- estado
+- versión
+- artista %
+- NP Music Group %
+- fecha de creación
+- última actualización
+
+No crear estadísticas falsas.
+
+==================================================
+12. DETALLE DEL CONTRATO
+==================================================
+
+Permitir abrir un contrato y visualizar:
+
+- información de la solicitud
+- información de la invitación
+- tipo
+- título
+- versión
+- estado
+- 85% artista
+- 15% NP Music Group
+- contenido contractual
+- secciones
+- fecha de creación
+- última actualización
+- creador
+
+La visualización debe ser profesional y legible.
+
+==================================================
+13. CREACIÓN
+==================================================
+
+Desde una invitación válida:
+
+"Crear contrato"
+
+El servidor debe:
+
+1. validar sesión;
+2. validar contracts.manage;
+3. validar solicitud;
+4. validar invitación;
+5. validar estado;
+6. comprobar duplicados;
+7. crear contrato;
+8. establecer 85/15;
+9. establecer estado BORRADOR;
+10. registrar created_by;
+11. registrar auditoría.
+
+NO activar cuenta.
+
+NO consumir la invitación.
+
+NO cambiar invitación a UTILIZADA.
+
+NO enviar email.
+
+==================================================
+14. EDICIÓN DEL BORRADOR
+==================================================
+
+Mientras esté en BORRADOR permitir editar:
+
+- título
+- contenido
+- versión
+- secciones contractuales
+
+Los porcentajes NO deben poder modificarse libremente desde un formulario genérico.
+
+Deben mantenerse:
+
+artist_percentage = 85
+company_percentage = 15
+
+Si en el futuro NP Music Group necesita cambiar esta política:
+deberá existir un cambio explícito de configuración/versionado y no una modificación accidental del contrato.
+
+Toda modificación debe persistir en PostgreSQL.
+
+Registrar auditoría.
+
+==================================================
+15. VALIDACIÓN CONTRACTUAL
+==================================================
+
+Antes de permitir:
+
+BORRADOR → PENDIENTE_FIRMA
+
+el servidor debe validar:
+
+✓ solicitud APROBADA
+✓ invitación válida
+✓ título existente
+✓ tipo existente
+✓ versión existente
+✓ contenido existente
+✓ sección de titularidad de derechos existente
+✓ sección de terminación/rescisión existente
+✓ distribución económica existente
+✓ artista = 85%
+✓ NP Music Group = 15%
+✓ suma = 100%
+
+Si falta cualquier requisito:
+
+NO permitir pasar a PENDIENTE_FIRMA.
+
+Mostrar claramente qué requisito falta.
+
+==================================================
+16. PENDIENTE DE FIRMA
+==================================================
+
+Implementar:
+
+BORRADOR → PENDIENTE_FIRMA
+
+Al hacerlo:
+
+- persistir estado
+- actualizar updated_at
+- registrar auditoría
+
+NO:
+
+- enviar email
+- firmar
+- activar cuenta
+- establecer contraseña
+- crear artista
+- marcar invitación como utilizada
+
+El contrato simplemente queda listo para la futura fase de firma.
+
+==================================================
+17. VERSIONADO
+==================================================
+
+La versión del contrato debe persistir.
+
+Ejemplo:
+
+1.0
+
+Si un contrato ya está PENDIENTE_FIRMA:
+
+NO permitir modificar su contenido directamente.
+
+Si se necesita una modificación posterior:
+
+deberá crearse una nueva versión/revisión en una fase futura.
+
+No sobrescribir silenciosamente documentos que ya fueron enviados a firma.
+
+==================================================
+18. AUDITORÍA
+==================================================
+
+Utilizar exclusivamente el audit_log existente.
+
+Registrar:
+
+- contrato creado
+- contrato editado
+- contrato enviado a firma
+- cambios relevantes
+- cancelación si se implementa
+
+Registrar:
+
+- usuario
+- contrato
+- acción
+- timestamp
+
+NO registrar:
+
+- contraseñas
+- tokens
+- secretos
+- contenido sensible innecesario
+
+==================================================
+19. RBAC
+==================================================
+
+Usar:
+
+contracts.view
+
+para consultar.
+
+Usar:
+
+contracts.manage
+
+para:
+
+- crear
+- editar
+- enviar a firma
+- cancelar si corresponde
+
+Server-side obligatorio.
+
+No confiar en botones ocultos.
+
+No crear permisos paralelos.
+
+SUPER_ADMIN mantiene acceso mediante RBAC existente.
+
+==================================================
+20. SEGURIDAD
+==================================================
+
+Validar siempre en servidor:
+
+- sesión
+- permisos
+- IDs
+- estados
+- relaciones
+- porcentajes
+- transiciones
+
+Nunca confiar en:
+
+- estado enviado por frontend
+- porcentajes enviados por frontend
+- permiso enviado por frontend
+- relación solicitud/invitación enviada por frontend
+
+Consultar PostgreSQL.
+
+==================================================
+21. DISEÑO
+==================================================
+
+Reutilizar el sistema visual administrativo existente.
+
+Mantener:
+
+- negro
+- blanco
+- amarillo
+- rojo solamente para estados críticos
+- minimalismo
+- profesionalismo
+- espacios limpios
+- responsive
+- excelente Android
+
+NO:
+
+- dashboards decorativos
+- gráficos falsos
+- widgets innecesarios
+- gradientes exagerados
+- estética gamer
+- tarjetas vacías
+- texto legal inventado
+
+El módulo debe parecer software profesional de gestión musical.
+
+==================================================
+22. NAVEGACIÓN
+==================================================
+
+Agregar:
+
+/admin/contratos
+
+a la navegación administrativa existente.
+
+Reutilizar:
+
+DashboardSidebar
+DashboardMobileSidebar
+DashboardHeader
+
+Si existe:
+
+/dashboard/contratos
+
+redirigir a:
+
+/admin/contratos
+
+No crear una segunda navegación.
+
+==================================================
+23. EMAILS
+==================================================
+
+NO implementar emails automáticos en esta fase.
+
+El contrato debe quedar preparado para que una fase futura pueda enviar:
+
+"Tu contrato está listo para revisión/firma."
+
+Pero esa funcionalidad queda fuera de esta fase.
+
+==================================================
+24. FIRMA ELECTRÓNICA
+==================================================
+
+NO implementar:
+
+- DocuSign
+- Dropbox Sign
+- Adobe Sign
+- HelloSign
+- ningún proveedor externo
+
+No crear integraciones falsas.
+
+Solamente dejar el contrato en:
+
+PENDIENTE_FIRMA
+
+==================================================
+25. CUENTAS Y CONTRASEÑAS
+==================================================
+
+NO crear cuenta automáticamente.
+
+NO activar ninguna cuenta.
+
+NO generar contraseña temporal.
+
+NO permitir establecimiento de contraseña.
+
+NO modificar el sistema de autenticación.
+
+El futuro flujo será:
+
+Contrato firmado
+↓
+creación/activación de cuenta
+↓
+establecimiento seguro de contraseña
+↓
+acceso
+
+Eso pertenece a una fase posterior.
+
+==================================================
+26. BASE DE DATOS — REGLAS
+==================================================
+
+NO crear:
+
+contracts2
+artist_contracts_new
+contracts_temp
+
+No duplicar tablas existentes.
+
+Si se necesita migración:
+
+- mínima
+- reversible cuando sea razonable
+- documentada en DATABASE_PLAN.md
+- sin borrar datos existentes
+
+==================================================
+27. VERIFICACIÓN OBLIGATORIA
+==================================================
+
+Probar:
+
+AUTH:
+
+- sin sesión → login
+- sin contracts.view → 403
+- sin contracts.manage → puede consultar si tiene view, pero no modificar
+- SUPER_ADMIN → acceso
+
+RELACIONES:
+
+- solicitud PENDIENTE → bloqueada
+- solicitud RECHAZADA → bloqueada
+- solicitud APROBADA + invitación válida → permitida
+- invitación EXPIRADA → bloqueada
+- invitación REVOCADA → bloqueada
+- invitación UTILIZADA → bloqueada
+
+CONTRATO:
+
+- creación real en PostgreSQL
+- estado BORRADOR
+- artista 85%
+- NP Music Group 15%
+- suma 100%
+- edición persistente
+- contenido persistente
+- versión persistente
+- transición BORRADOR → PENDIENTE_FIRMA
+- contrato PENDIENTE_FIRMA no editable
+- auditoría funcionando
+
+SEGURIDAD:
+
+- no token en logs
+- no contraseña
+- no datos ficticios
+- no cuentas creadas
+- no emails enviados
+- no activaciones automáticas
+
+Ejecutar:
+
+npx tsc --noEmit
+npm run build
+git diff --check
+
+Si existen tests relevantes para auth/RBAC, ejecutarlos.
+
+==================================================
+28. CRITERIO DE FINALIZACIÓN
+==================================================
+
+La fase está completa únicamente cuando exista:
+
+SOLICITUD APROBADA
+        ↓
+INVITACIÓN VÁLIDA
+        ↓
+CONTRATO
+        ↓
+BORRADOR
+        ↓
+VALIDACIÓN
+        ↓
+PENDIENTE_FIRMA
+
+con:
+
+✓ PostgreSQL
+✓ RBAC
+✓ auditoría
+✓ versionado
+✓ relación solicitud/invitación
+✓ 100% derechos del artista
+✓ 85% artista
+✓ 15% NP Music Group
+✓ mecanismo contractual de terminación/rescisión
+✓ protección contra modificaciones posteriores a PENDIENTE_FIRMA
+
+NO continuar automáticamente a firma electrónica.
+
+NO continuar automáticamente a activación de cuentas.
+
+DETENTE AL TERMINAR ESTA FASE.
+
+==================================================
+29. INFORME FINAL
+==================================================
+
+Al terminar, informa únicamente:
+
+1. Archivos creados/modificados.
+2. Tablas reutilizadas/creadas.
+3. Migraciones realizadas.
+4. Endpoints creados/modificados.
+5. Rutas creadas/modificadas.
+6. Estados implementados.
+7. Validaciones contractuales implementadas.
+8. Verificaciones ejecutadas.
+9. Confirmación de que:
+   - no se implementó firma electrónica;
+   - no se enviaron emails;
+   - no se crearon cuentas;
+   - no se establecieron contraseñas;
+   - no se activaron artistas;
+   - no se implementaron splits.

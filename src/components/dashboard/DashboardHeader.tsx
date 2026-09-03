@@ -35,6 +35,7 @@ const MODULE_LABELS: Record<string, string> = {
   "/dashboard/invitaciones":             "Invitaciones",
   "/admin/invitaciones":                  "Invitaciones",
   "/dashboard/contratos":                "Contratos",
+  "/admin/contratos":                     "Contratos",
   "/dashboard/lanzamientos":             "Lanzamientos",
   "/dashboard/lanzamientos/recibidos":   "Recibidos / Pendientes",
   "/dashboard/analiticas":               "Analíticas",

@@ -7,6 +7,7 @@ import {
   Clock3,
   Copy,
   ExternalLink,
+  FileText,
   Link2,
   Loader2,
   RefreshCw,
@@ -19,6 +20,8 @@ import {
   regenerateInvitation,
   revokeInvitation,
 } from "@/services/invitacionesService";
+import { createContractFromInvitation } from "@/services/contratosService";
+import { useRouter } from "next/navigation";
 import type { Invitation, InvitationStatus } from "@/types/invitations";
 
 const STATUS_CONFIG: Record<InvitationStatus, {
@@ -34,6 +37,7 @@ const STATUS_CONFIG: Record<InvitationStatus, {
 };
 
 export function InvitacionesAdminView({ canManage }: { canManage: boolean }) {
+  const router = useRouter();
   const [invitaciones, setInvitaciones] = useState<Invitation[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -73,6 +77,18 @@ export function InvitacionesAdminView({ canManage }: { canManage: boolean }) {
       setLink({ url: result.invitationUrl, expiresAt: result.expiresAt });
     }
     await load();
+  }
+
+  async function handleCreateContract(invitation: Invitation) {
+    if (!window.confirm(`¿Crear un borrador de contrato para ${invitation.nombreArtistico}?`)) return;
+    setBusyId(invitation.id);
+    const result = await createContractFromInvitation(invitation.id);
+    setBusyId(null);
+    if (result.contract?.id || result.contractId) {
+      router.push("/admin/contratos");
+      return;
+    }
+    setError(result.error || "No se pudo crear el contrato.");
   }
 
   async function copyLink() {
@@ -171,6 +187,7 @@ export function InvitacionesAdminView({ canManage }: { canManage: boolean }) {
                   busy={busyId === invitation.id}
                   onRevoke={() => void handleRevoke(invitation)}
                   onRegenerate={() => void handleRegenerate(invitation)}
+                  onCreateContract={() => void handleCreateContract(invitation)}
                 />
               ))}
             </div>
@@ -187,12 +204,14 @@ function InvitationRow({
   busy,
   onRevoke,
   onRegenerate,
+  onCreateContract,
 }: {
   invitation: Invitation;
   canManage: boolean;
   busy: boolean;
   onRevoke: () => void;
   onRegenerate: () => void;
+  onCreateContract: () => void;
 }) {
   const expired = invitation.status === "EXPIRADA";
   return (
@@ -207,9 +226,14 @@ function InvitationRow({
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2 md:hidden">
         {canManage && invitation.status === "PENDIENTE" && (
+          <>
+            <Button type="button" variant="secondary" size="sm" disabled={busy} icon={<FileText size={13} />} onClick={onCreateContract}>
+              Crear contrato
+            </Button>
           <Button type="button" variant="outline" size="sm" disabled={busy} icon={<ShieldOff size={13} />} onClick={onRevoke}>
             Revocar
           </Button>
+          </>
         )}
         {canManage && expired && (
           <Button type="button" variant="secondary" size="sm" disabled={busy} icon={<RefreshCw size={13} />} onClick={onRegenerate}>
@@ -229,6 +253,11 @@ function InvitationRow({
         <div className="flex min-w-0 items-center justify-between gap-2">
           <span className="truncate text-xs text-[#525252]">{invitation.createdBy || "Usuario eliminado"}</span>
           <div className="flex shrink-0 items-center gap-1">
+            {canManage && invitation.status === "PENDIENTE" && (
+              <button type="button" disabled={busy} onClick={onCreateContract} className="rounded p-1.5 text-[#525252] hover:bg-white/5 hover:text-[#F5C518]" title="Crear contrato">
+                <FileText size={14} />
+              </button>
+            )}
             {canManage && invitation.status === "PENDIENTE" && (
               <button type="button" disabled={busy} onClick={onRevoke} className="rounded p-1.5 text-[#525252] hover:bg-white/5 hover:text-[#EF4444]" title="Revocar">
                 <ShieldOff size={14} />

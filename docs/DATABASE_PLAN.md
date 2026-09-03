@@ -148,6 +148,32 @@ Log inmutable de eventos importantes del sistema.
 | `severity`    | VARCHAR(20)  | DEFAULT 'INFO'                              | INFO / WARN / ERROR / CRITICAL  |
 | `created_at`  | TIMESTAMPTZ  | DEFAULT NOW()                               | Timestamp del evento            |
 
+### 3.8 `contracts`
+
+Contratos de artista en borrador o pendientes de firma, relacionados con una
+solicitud aprobada y una invitación vigente.
+
+| Columna              | Tipo          | Restricciones                                      | Descripción                         |
+|----------------------|---------------|----------------------------------------------------|-------------------------------------|
+| `id`                 | UUID          | PK, DEFAULT gen_random_uuid()                      | Identificador único                 |
+| `solicitud_id`       | UUID          | FK → solicitudes(id), NOT NULL                     | Solicitud relacionada               |
+| `invitation_id`      | UUID          | FK → invitations(id), NOT NULL                     | Invitación relacionada              |
+| `type`               | VARCHAR(50)   | NOT NULL, CHECK `CONTRATO_ARTISTA`                 | Tipo de contrato                    |
+| `title`              | VARCHAR(255)  | NOT NULL                                           | Título editable del contrato       |
+| `version`            | VARCHAR(20)   | NOT NULL                                           | Versión persistente                 |
+| `content`            | TEXT          | NOT NULL                                           | Contenido editable                  |
+| `sections`           | JSONB         | NOT NULL                                           | Secciones estructuradas             |
+| `status`             | VARCHAR(20)   | NOT NULL, CHECK de estados contractuales           | Estado del contrato                 |
+| `artist_percentage`  | NUMERIC(5,2)  | NOT NULL, CHECK 85.00                              | Porcentaje del artista              |
+| `company_percentage` | NUMERIC(5,2)  | NOT NULL, CHECK 15.00                              | Porcentaje de NP Music Group        |
+| `created_by`         | UUID          | FK → users(id) ON DELETE SET NULL, NULLABLE        | Usuario creador                     |
+| `created_at`         | TIMESTAMPTZ   | DEFAULT NOW()                                      | Fecha de creación                   |
+| `updated_at`         | TIMESTAMPTZ   | DEFAULT NOW()                                      | Última actualización                |
+
+La base de datos impide porcentajes distintos de 85% para el artista y 15%
+para NP Music Group. Solo puede existir un contrato activo
+(`BORRADOR` o `PENDIENTE_FIRMA`) por invitación.
+
 ---
 
 ## 4. ENUM types
@@ -168,7 +194,11 @@ CREATE TYPE user_role AS ENUM (
 ```
 users ──< sessions        (user_id → users.id CASCADE DELETE)
 users ──< invitations     (invited_by → users.id SET NULL)
+solicitudes ──< invitations (solicitud_id → solicitudes.id CASCADE DELETE)
+solicitudes ──< contracts   (solicitud_id → solicitudes.id RESTRICT DELETE)
+invitations ──< contracts   (invitation_id → invitations.id RESTRICT DELETE)
 users ──< audit_log       (user_id → users.id SET NULL)
+users ──< contracts        (created_by → users.id SET NULL)
 users ──< users           (created_by → users.id SET NULL)
 permissions ──< role_permissions (permission_id → permissions.id CASCADE DELETE)
 ```
@@ -187,6 +217,11 @@ permissions ──< role_permissions (permission_id → permissions.id CASCADE D
 | `idx_audit_action`        | audit_log        | action                  | BTREE   |
 | `idx_audit_created_at`    | audit_log        | created_at DESC         | BTREE   |
 | `idx_invitations_token`   | invitations      | token                   | BTREE   |
+| `idx_invitations_token_hash` | invitations    | token_hash              | UNIQUE parcial |
+| `idx_contracts_active_invitation` | contracts | invitation_id       | UNIQUE parcial |
+| `idx_contracts_status`    | contracts        | status                  | BTREE   |
+| `idx_contracts_solicitud_id` | contracts      | solicitud_id             | BTREE   |
+| `idx_contracts_created_at` | contracts       | created_at DESC          | BTREE   |
 
 ---
 
