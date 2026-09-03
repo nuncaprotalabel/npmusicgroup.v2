@@ -36,6 +36,10 @@ export const metadata: Metadata = {
     title: "NP Music Group",
     description: "Un espacio profesional para proyectos musicales independientes.",
   },
+  icons: {
+    icon: "/logo-transparent.png",
+    apple: "/logo-transparent.png",
+  },
   robots: {
     index: true,
     follow: true,

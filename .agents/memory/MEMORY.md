@@ -2,3 +2,4 @@
 - [Dependency restoration](dependency-restoration.md) — After workspace restores, package.json dependencies may need reinstalling before API routes compile.
 - [Isolated production builds](build-workflow.md) — Stop the dev workflow before running `next build` because both processes write to `.next`.
 - [Secure account creation](account-creation.md) — New accounts use inactive bcrypt-backed records plus one-time setup tokens; never expose temporary passwords.
+- [Next.js preview origins](next-preview-origins.md) — Replit proxy previews need explicit local and REPLIT_DEV_DOMAIN origins for assets and HMR.
