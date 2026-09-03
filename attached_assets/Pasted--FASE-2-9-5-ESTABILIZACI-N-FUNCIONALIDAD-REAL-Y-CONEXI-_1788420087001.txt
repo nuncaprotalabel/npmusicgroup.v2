@@ -1,0 +1,599 @@
+# FASE 2.9.5 — ESTABILIZACIÓN, FUNCIONALIDAD REAL Y CONEXIÓN DEL SISTEMA
+
+## OBJETIVO
+
+ANTES DE CONTINUAR CON LA FASE 2.10, detener el desarrollo de nuevas funcionalidades y corregir los problemas actuales de funcionamiento.
+
+Hay 4 problemas prioritarios:
+
+1. La web se siente mal optimizada/lenta.
+2. Existen botones y apartados públicos que no hacen nada.
+3. El panel administrativo tiene navegación y botones rotos/inconsistentes.
+4. La traducción del panel privado no traduce todo el contenido.
+
+Esta fase NO debe crear nuevas funcionalidades de negocio.
+
+Debe hacer que lo que YA EXISTE funcione correctamente, conectado a Neon/PostgreSQL y sin datos falsos.
+
+---
+
+# REGLA PRINCIPAL
+
+NO hagas un refactor general.
+
+NO reconstruyas autenticación.
+
+NO reconstruyas RBAC.
+
+NO reconstruyas contratos.
+
+NO reconstruyas onboarding.
+
+NO reconstruyas artistas.
+
+NO reconstruyas la base de datos existente si no es necesario.
+
+NO agregues dependencias innecesarias.
+
+NO crees datos falsos para aparentar que algo funciona.
+
+Primero inspecciona el código existente y localiza exactamente por qué las funciones actuales están fallando.
+
+Después corrige únicamente lo necesario.
+
+---
+
+# 1. OPTIMIZACIÓN GENERAL
+
+La web actualmente se siente poco optimizada.
+
+Investiga los problemas reales que puedan estar provocándolo:
+
+* renders innecesarios
+* consultas duplicadas
+* consultas ejecutadas al cargar páginas que no las necesitan
+* componentes pesados
+* JavaScript innecesario en cliente
+* navegación que vuelve a cargar información innecesariamente
+* imágenes demasiado pesadas
+* efectos/animaciones excesivos
+* llamadas API duplicadas
+* errores que provocan reintentos
+* loading states mal implementados
+* componentes que bloquean la interfaz
+* código muerto o duplicado que esté afectando las páginas principales
+
+PRIORIDAD:
+
+La optimización debe mejorar especialmente:
+
+* homepage
+* login
+* dashboard
+* panel administrativo
+* navegación móvil
+
+NO sacrificar funcionalidad para conseguir velocidad.
+
+NO eliminar características existentes simplemente para reducir código.
+
+No hacer benchmarks artificiales.
+
+Corrige problemas reales encontrados en el código.
+
+---
+
+# 2. AUDITAR TODOS LOS BOTONES Y ENLACES PÚBLICOS
+
+La homepage debe dejar de tener botones decorativos o enlaces que no hacen nada.
+
+Inspecciona TODOS los botones, enlaces y elementos interactivos visibles en la página pública.
+
+Especial atención a:
+
+* Contacto
+* Blog
+* Aplicar
+* Login
+* navegación principal
+* navegación del footer
+* botones CTA
+* redes sociales
+* cualquier menú desplegable
+* cualquier enlace interno
+
+REGLA:
+
+Si un botón existe visualmente, debe tener una función real.
+
+Si apunta a una página existente:
+→ debe navegar correctamente.
+
+Si necesita una página que todavía no existe:
+→ implementar una página mínima REAL y funcional usando el diseño existente.
+
+Si un apartado todavía no puede ofrecer contenido real:
+→ NO inventar contenido.
+
+En ese caso crear una página funcional que explique claramente su estado o redirigir a una sección real existente.
+
+NO dejar botones muertos.
+
+NO usar `href="#"`.
+
+NO usar botones que simplemente hagan `console.log`.
+
+NO crear placeholders que parezcan funcionalidades terminadas.
+
+---
+
+# 3. CONTACTO
+
+El botón/sección de CONTACTO debe funcionar realmente.
+
+Inspecciona cómo está implementado actualmente.
+
+Si ya existe una ruta:
+→ repararla.
+
+Si no existe:
+→ crear una página `/contacto` coherente con NP Music Group.
+
+Debe permitir al visitante encontrar una vía real de contacto utilizando únicamente infraestructura que ya exista en el proyecto.
+
+NO integrar un proveedor de email nuevo en esta fase.
+
+NO crear un sistema complejo de tickets.
+
+---
+
+# 4. BLOG
+
+El botón BLOG tampoco puede quedar muerto.
+
+Primero verifica si existe actualmente:
+
+* ruta
+* componentes
+* datos
+* API
+* tabla
+* contenido
+
+Si existe:
+→ reparar la navegación y mostrar el contenido real existente.
+
+Si NO existe infraestructura de blog:
+→ crear una página funcional `/blog` con estado vacío correctamente diseñado, dejando claro que todavía no existen publicaciones.
+
+NO inventar artículos.
+
+NO crear contenido falso.
+
+NO crear CMS en esta fase.
+
+---
+
+# 5. PANEL ADMINISTRATIVO — PRIORIDAD MÁXIMA
+
+El panel administrativo actualmente presenta un problema crítico:
+
+Los botones de navegación y las opciones del menú no funcionan correctamente o dejan de funcionar.
+
+Debes diagnosticar y reparar esto.
+
+Inspecciona la navegación completa del panel, incluyendo:
+
+* navegación principal
+* menú lateral
+* menú móvil / botón de tres rayas
+* rutas
+* botones internos
+* enlaces
+* estados activos
+* navegación entre páginas
+* botones de volver
+* acciones principales de cada sección
+
+Secciones existentes mencionadas:
+
+* Artistas
+* Lanzamientos
+* Solicitudes
+* Invitaciones
+* Contratos
+* Cuentas
+* Configuración
+* cualquier otra sección que realmente exista
+
+---
+
+# 6. NO ASUMIR QUE EL PROBLEMA ES VISUAL
+
+No te limites a corregir CSS.
+
+Determina si los fallos vienen de:
+
+* rutas incorrectas
+* imports incorrectos
+* componentes desmontándose
+* `onClick` inexistentes
+* eventos bloqueados
+* overlays
+* navegación incorrecta
+* middleware
+* autenticación
+* permisos RBAC
+* requests API fallidos
+* errores JavaScript
+* estados incorrectos
+* componentes que dependen de datos inexistentes
+* errores de hydration
+* problemas con navegación cliente
+* endpoints que devuelven errores
+
+Corrige la causa real.
+
+---
+
+# 7. REGLA PARA LAS SECCIONES ADMIN
+
+Cada sección visible del panel debe cumplir:
+
+**BOTÓN → RUTA → PÁGINA → API/DATOS → NEON**
+
+cuando corresponda.
+
+No debe existir una pantalla que simplemente parezca funcional pero no esté conectada.
+
+Para cada módulo existente verifica:
+
+### ARTISTAS
+
+Debe cargar información real de la base de datos si el módulo ya está implementado.
+
+### SOLICITUDES
+
+Debe utilizar los datos reales de `solicitudes`.
+
+### INVITACIONES
+
+Debe utilizar las invitaciones reales.
+
+### CONTRATOS
+
+Debe utilizar `contracts` y sus relaciones existentes.
+
+### CUENTAS
+
+Debe utilizar `users` y el sistema RBAC existente.
+
+### CONFIGURACIÓN
+
+Si existen configuraciones reales, deben funcionar.
+Si todavía no existe una configuración real, no inventar opciones falsas.
+
+### LANZAMIENTOS
+
+Si todavía no existe el módulo funcional, NO construir el sistema de releases de la Fase 2.10.
+Únicamente evitar que un enlace existente produzca una pantalla rota.
+
+---
+
+# 8. NEON / DATOS REALES
+
+Toda información dinámica existente debe provenir de:
+
+**Neon PostgreSQL**
+
+utilizando los servicios/repositorios/queries existentes.
+
+NO crear:
+
+* arrays hardcodeados
+* datos mock
+* estadísticas falsas
+* artistas falsos
+* contratos falsos
+* solicitudes falsas
+* invitaciones falsas
+
+Si una página no tiene datos todavía:
+
+→ mostrar un estado vacío profesional.
+
+Ejemplo conceptual:
+
+"Sin registros todavía."
+
+Nunca llenar la pantalla con datos inventados para ocultar un problema.
+
+---
+
+# 9. NO ROMPER LAS FASES ANTERIORES
+
+Debes preservar:
+
+* autenticación
+* sesiones
+* RBAC
+* permisos
+* solicitudes
+* invitaciones
+* contratos
+* firma/aceptación
+* onboarding
+* cuentas
+* artistas
+* perfil del artista
+* audit log
+
+Si para reparar una navegación necesitas modificar una de estas áreas, haz el cambio mínimo necesario.
+
+No reemplaces sistemas existentes por implementaciones nuevas.
+
+---
+
+# 10. TRADUCCIÓN COMPLETA DEL PANEL PRIVADO
+
+El botón de idioma del panel privado debe funcionar correctamente.
+
+Actualmente NO debe limitarse a traducir algunos textos.
+
+Cuando el usuario cambie entre Español/Inglés:
+
+DEBE traducirse todo el contenido visible de la interfaz.
+
+Incluyendo:
+
+* sidebar
+* menú móvil
+* header
+* títulos
+* subtítulos
+* botones
+* formularios
+* placeholders
+* labels
+* mensajes de éxito
+* mensajes de error
+* estados vacíos
+* tablas
+* modales
+* confirmaciones
+* tooltips
+* navegación
+* textos de autenticación dentro del área privada
+* textos de contratos cuando sean textos de interfaz
+* textos de solicitudes
+* textos de invitaciones
+* textos de cuentas
+* configuración
+* perfil
+* cualquier componente privado existente
+
+NO dejar textos mezclados accidentalmente en ambos idiomas.
+
+---
+
+# 11. SISTEMA DE IDIOMAS
+
+Inspecciona primero si ya existe un sistema de internacionalización.
+
+Si existe:
+
+→ reutilizarlo y completarlo.
+
+NO instalar otro sistema de traducción paralelo.
+
+Si no existe un sistema adecuado:
+
+→ implementar la solución mínima necesaria para soportar Español/Inglés de forma consistente.
+
+No traducir mediante traducción automática en runtime.
+
+Los textos de interfaz deben tener traducciones definidas.
+
+El idioma seleccionado debe mantenerse al navegar entre las diferentes páginas privadas.
+
+No romper SSR/cliente ni autenticación.
+
+---
+
+# 12. MENÚ DE TRES RAYAS / MOBILE
+
+El menú móvil del panel administrativo debe funcionar correctamente.
+
+Comprobar:
+
+* abrir
+* cerrar
+* navegación
+* overlay
+* cierre al seleccionar una sección
+* scroll
+* no bloquear la pantalla
+* no quedar encima de botones
+* no perder estado de autenticación
+* funcionar correctamente en Android
+
+El botón de tres rayas debe ser un control real, no únicamente visual.
+
+---
+
+# 13. MANEJO DE ERRORES
+
+Cuando una página o API falle:
+
+NO dejar la interfaz congelada.
+
+Mostrar:
+
+* loading apropiado
+* estado vacío cuando corresponda
+* mensaje de error útil cuando exista un error real
+* posibilidad razonable de reintentar
+
+No ocultar errores silenciosamente.
+
+No usar `catch {}` que simplemente ignore errores importantes.
+
+---
+
+# 14. AUDITORÍA DE RUTAS
+
+Haz una revisión concreta de las rutas actuales del proyecto.
+
+Detecta:
+
+* rutas inexistentes
+* enlaces hacia rutas incorrectas
+* rutas duplicadas
+* rutas que generan 404
+* rutas protegidas incorrectamente
+* rutas administrativas sin protección
+* rutas que requieren permisos incorrectos
+* links que apuntan a páginas antiguas
+
+NO crear rutas innecesarias.
+
+Corrige las referencias existentes.
+
+---
+
+# 15. PRUEBA REAL OBLIGATORIA
+
+Después de reparar:
+
+## WEB PÚBLICA
+
+Probar navegación desde homepage:
+
+Homepage
+→ Contacto
+→ Blog
+→ Aplicar
+→ Login
+→ enlaces del footer
+→ navegación principal
+
+No debe existir ningún botón muerto.
+
+## ADMIN
+
+Con una cuenta administrativa real:
+
+Login
+→ Dashboard
+→ menú lateral
+→ Artistas
+→ Solicitudes
+→ Invitaciones
+→ Contratos
+→ Cuentas
+→ Configuración
+→ volver
+→ menú móvil
+→ abrir/cerrar menú
+→ cambiar idioma
+→ navegar entre páginas manteniendo idioma
+
+Comprobar que las páginas carguen datos reales cuando corresponda.
+
+## ARTIST
+
+Con una cuenta ARTIST real:
+
+Login
+→ Dashboard
+→ Perfil
+→ navegación existente
+→ cambio de idioma
+
+Comprobar que no se rompa el acceso ni el ownership.
+
+---
+
+# 16. VERIFICACIÓN TÉCNICA
+
+Ejecutar al finalizar:
+
+`npx tsc --noEmit`
+
+`git diff --check`
+
+`npm run build`
+
+Si existen tests E2E funcionales, ejecutar los relacionados con:
+
+* navegación
+* autenticación
+* admin
+* artista
+* idioma
+
+No crear una batería enorme de tests si eso consume tiempo/créditos innecesariamente.
+
+---
+
+# 17. RESTRICCIÓN DE CRÉDITOS
+
+Los créditos son limitados.
+
+Por eso:
+
+NO hagas una exploración interminable.
+
+NO reescribas archivos que no estén relacionados.
+
+NO hagas refactors generales.
+
+NO cambies arquitectura sin necesidad.
+
+NO agregues dependencias salvo que sea imprescindible.
+
+Trabaja directamente sobre los problemas descritos.
+
+Prioridad:
+
+1. Panel administrativo roto.
+2. Navegación/botones muertos.
+3. Conexión real con Neon.
+4. Traducción completa.
+5. Optimización.
+
+---
+
+# CRITERIO DE TERMINACIÓN
+
+La fase SOLO está terminada cuando:
+
+* los botones existentes funcionan;
+* las rutas existentes funcionan;
+* el menú móvil funciona;
+* el panel admin permite navegar entre sus módulos;
+* las acciones existentes funcionan o muestran correctamente que todavía no están disponibles;
+* los datos dinámicos provienen de Neon;
+* no existen datos mock usados para aparentar funcionalidad;
+* el cambio Español/Inglés cubre toda la interfaz privada existente;
+* la web se siente más rápida y estable;
+* no se rompieron autenticación, RBAC, contratos, invitaciones, onboarding ni artistas;
+* TypeScript pasa;
+* build pasa;
+* `git diff --check` pasa.
+
+IMPORTANTE:
+
+NO continúes con Fase 2.10.
+
+Al terminar, entrega un reporte corto indicando:
+
+1. qué problemas encontraste;
+2. qué archivos modificaste;
+3. qué reparaste;
+4. qué rutas comprobaste;
+5. qué módulos siguen sin existir realmente;
+6. resultado de TypeScript/build;
+7. cualquier problema que no hayas podido resolver.
+
+DETENTE.
