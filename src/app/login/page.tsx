@@ -5,18 +5,22 @@
  * Pública. Redirige al destino original si autenticación exitosa.
  * Diseño conforme a DESIGN_BRIEF.md: negro, amarillo, tipografía limpia.
  */
-import { useState, useEffect, type FormEvent } from "react";
+import { Suspense, useState, useEffect, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { login } from "@/services/authService";
 
-export default function LoginPage() {
+function LoginForm() {
   const router       = useRouter();
   const searchParams = useSearchParams();
-  const from         = searchParams.get("from") ?? "/dashboard";
+  const requestedFrom = searchParams.get("from");
+  const from =
+    requestedFrom && requestedFrom.startsWith("/") && !requestedFrom.startsWith("//")
+      ? requestedFrom
+      : "/dashboard";
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
@@ -27,12 +31,12 @@ export default function LoginPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!username.trim() || !password) return;
+    if (!email.trim() || !password) return;
 
     setLoading(true);
     setError(null);
 
-    const result = await login(username.trim(), password);
+    const result = await login(email.trim(), password);
 
     if (result.error) {
       setError(result.error);
@@ -85,26 +89,26 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
-          {/* Username */}
+          {/* Email */}
           <div>
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-[0.8125rem] font-medium mb-1.5"
               style={{ color: "#A3A3A3" }}
             >
-              Usuario
+              Correo electrónico
             </label>
             <input
-              id="username"
-              type="text"
-              autoComplete="username"
+              id="email"
+              type="email"
+              autoComplete="email"
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               disabled={loading}
-              placeholder="Tu nombre de usuario"
+              placeholder="tu@correo.com"
               className="w-full rounded-lg px-3.5 py-2.5 text-[0.875rem] text-white outline-none transition-all duration-150 disabled:opacity-50"
               style={{
                 background:   "#141414",
@@ -182,7 +186,7 @@ export default function LoginPage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading || !username.trim() || !password}
+            disabled={loading || !email.trim() || !password}
             className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 text-[0.875rem] font-semibold text-black transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background:  "linear-gradient(135deg, #F5C518 0%, #E6B300 100%)",
@@ -206,5 +210,24 @@ export default function LoginPage() {
         © {new Date().getFullYear()} NP Music Group. Acceso restringido.
       </p>
     </div>
+  );
+}
+
+function LoginLoading() {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: "#000000", color: "#737373" }}
+    >
+      Cargando…
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }

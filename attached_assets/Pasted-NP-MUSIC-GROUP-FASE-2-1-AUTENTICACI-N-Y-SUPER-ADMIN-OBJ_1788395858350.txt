@@ -1,0 +1,216 @@
+NP MUSIC GROUP — FASE 2.1: AUTENTICACIÓN Y SUPER_ADMIN
+
+OBJETIVO ÚNICO DE ESTE SPRINT:
+
+Implementar el sistema REAL de autenticación de NP Music Group y el acceso exclusivo del SUPER_ADMIN.
+
+AHORRO DE CRÉDITOS — MUY IMPORTANTE:
+
+NO reconstruyas el proyecto.
+NO rediseñes la interfaz.
+NO cambies la landing pública.
+NO modifiques /aplicar salvo que sea estrictamente necesario para proteger rutas.
+NO implementes Too Lost.
+NO implementes distribución.
+NO implementes contratos.
+NO implementes lanzamientos.
+NO implementes ingresos.
+NO implementes analíticas.
+NO implementes splits.
+NO implementes mensajería.
+NO implementes notificaciones.
+NO implementes funcionalidades de otros módulos.
+
+Trabaja únicamente sobre autenticación, sesiones y acceso SUPER_ADMIN.
+
+ANTES DE MODIFICAR:
+
+Lee únicamente la documentación existente relacionada con arquitectura, reglas del proyecto, base de datos y autenticación si existe.
+
+Inspecciona solamente los archivos necesarios.
+
+No hagas una revisión general del proyecto.
+
+REQUISITOS:
+
+1. AUTENTICACIÓN REAL
+
+Implementar login real conectado a Neon/PostgreSQL.
+
+Debe existir:
+
+- email
+- contraseña
+- hash seguro de contraseña
+- sesión segura
+- logout
+- protección de rutas administrativas
+
+NO almacenar contraseñas en texto plano.
+
+NO usar localStorage para almacenar credenciales o sesiones sensibles.
+
+2. USUARIO SUPER_ADMIN
+
+Debe existir el concepto de:
+
+SUPER_ADMIN
+
+Este rol tendrá control absoluto del sistema.
+
+Por ahora SOLO necesitamos implementar su autenticación y autorización.
+
+No construir todavía las funciones administrativas internas.
+
+3. PROTECCIÓN DEL PANEL
+
+Las rutas:
+
+/admin
+/admin/artistas
+/admin/solicitudes
+/admin/invitaciones
+/admin/contratos
+/admin/lanzamientos
+/admin/recibidos
+/admin/analiticas
+/admin/ingresos
+/admin/mensajes
+/admin/cuentas
+/admin/permisos
+/admin/configuracion
+
+deben requerir una sesión válida.
+
+Si alguien no está autenticado:
+
+→ redirigir al login.
+
+Si alguien está autenticado pero no tiene permisos administrativos:
+
+→ denegar el acceso.
+
+NO crear una página pública alternativa para saltarse la protección.
+
+4. LOGIN
+
+Crear una página de login profesional utilizando el diseño existente de NP Music Group.
+
+Debe mantener:
+
+- negro
+- blanco
+- amarillo de identidad
+- estilo premium
+- diseño limpio
+- excelente experiencia móvil
+
+NO rediseñar el resto del sitio.
+
+Campos:
+
+- Correo electrónico
+- Contraseña
+
+Acciones:
+
+- Iniciar sesión
+
+Mostrar errores claros sin revelar información sensible.
+
+5. SESIONES
+
+La sesión debe:
+
+- ser segura
+- tener expiración
+- poder invalidarse mediante logout
+- estar protegida contra acceso no autorizado
+
+Usar la infraestructura de autenticación ya existente si el proyecto ya tiene una implementación válida.
+
+NO introducir otra librería innecesaria si ya existe una solución adecuada en el proyecto.
+
+6. BASE DE DATOS
+
+Utilizar Neon/PostgreSQL existente.
+
+Si ya existe una tabla de usuarios/cuentas adecuada, reutilizarla.
+
+Si falta una estructura mínima necesaria para autenticación, crear únicamente las tablas/migraciones estrictamente necesarias.
+
+NO crear tablas para módulos futuros en este sprint.
+
+7. CUENTA SUPER_ADMIN
+
+NO crear usuarios ficticios de artistas.
+
+NO crear usuarios demo.
+
+NO insertar datos de prueba innecesarios.
+
+Si el sistema necesita crear inicialmente el SUPER_ADMIN, implementar un mecanismo seguro de bootstrap/setup para hacerlo sin exponer credenciales en el código.
+
+Nunca escribir una contraseña real directamente en el repositorio.
+
+8. SEGURIDAD
+
+No exponer:
+
+- contraseñas
+- hashes
+- secretos
+- tokens
+- variables de entorno
+
+Utilizar variables de entorno para cualquier secreto necesario.
+
+No imprimir credenciales en logs.
+
+9. NO SIMULACIONES
+
+Todo debe ser REAL.
+
+No:
+
+- usuarios falsos
+- sesiones simuladas
+- autenticación visual
+- botones falsos
+- datos ficticios
+- localStorage como sistema de autenticación
+
+10. VERIFICACIÓN
+
+Al terminar comprobar:
+
+- build correcto
+- login funcionando
+- logout funcionando
+- /admin protegido
+- usuario no autenticado no puede acceder al panel
+- usuario autorizado puede entrar
+- contraseña almacenada de forma segura
+- no existen errores de TypeScript/build
+- /aplicar continúa funcionando
+- sitio público continúa funcionando
+
+IMPORTANTE:
+
+DETENTE AL TERMINAR ESTA FASE.
+
+NO IMPLEMENTES ROLES ADICIONALES TODAVÍA.
+
+NO IMPLEMENTES PERMISOS DETALLADOS TODAVÍA.
+
+NO IMPLEMENTES CUENTAS DE ARTISTAS TODAVÍA.
+
+NO IMPLEMENTES RECUPERACIÓN DE CONTRASEÑA TODAVÍA.
+
+NO IMPLEMENTES NINGÚN OTRO MÓDULO.
+
+El siguiente sprint será exclusivamente para el sistema de ROLES Y PERMISOS.
+
+Prioridad absoluta:
+
+FUNCIONALIDAD REAL + SEGURIDAD + MÍNIMO CONSUMO DE CRÉDITOS.

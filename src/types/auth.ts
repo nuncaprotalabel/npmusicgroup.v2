@@ -45,7 +45,7 @@ export interface SessionRecord {
 // ─── API auth responses ───────────────────────────────────────────────────────
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 

@@ -193,6 +193,13 @@ CREATE TRIGGER users_updated_at
 29 permisos distribuidos en 9 módulos:
 `system`, `users`, `artists`, `releases`, `distribution`, `revenue`, `contracts`, `analytics`, `invitations`, `audit`
 
+### Estado de implementación de Fase 2.1
+
+Para autenticación se aplican inicialmente únicamente las tablas `users`, `sessions` y `audit_log`.
+El alta del primer `SUPER_ADMIN` se realiza con `npm run auth:bootstrap`, usando
+`SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD` y opcionalmente `SUPER_ADMIN_USERNAME` como secretos
+del entorno. El proceso es idempotente y no sobrescribe cuentas existentes.
+
 ---
 
 ## 9. Reglas de integridad

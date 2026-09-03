@@ -4,7 +4,7 @@
  * Sin datos ficticios: solo estados vacíos profesionales si no hay información.
  */
 import { query } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getActiveSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import {
   Users,
@@ -47,7 +47,7 @@ async function getSystemStats() {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default async function NpControlPage() {
-  const session = await getSession();
+  const session = await getActiveSession();
   if (!session || session.role !== "SUPER_ADMIN") redirect("/login");
 
   const stats = await getSystemStats();

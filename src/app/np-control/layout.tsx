@@ -4,7 +4,7 @@
  * El middleware ya garantiza que solo SUPER_ADMIN llega aquí.
  */
 import type { Metadata } from "next";
-import { getSession } from "@/lib/auth";
+import { getActiveSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { NpControlSidebar } from "@/components/np-control/NpControlSidebar";
 import { NpControlHeader } from "@/components/np-control/NpControlHeader";
@@ -20,7 +20,7 @@ export default async function NpControlLayout({
   children: React.ReactNode;
 }) {
   // Doble verificación server-side (el middleware ya protege, esto es defensa en profundidad)
-  const session = await getSession();
+  const session = await getActiveSession();
   if (!session || session.role !== "SUPER_ADMIN") {
     redirect("/login?from=/np-control");
   }

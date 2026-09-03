@@ -4,17 +4,9 @@
  * Usado por el cliente para verificar sesión activa.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, COOKIE_NAME } from '@/lib/auth';
+import { COOKIE_NAME } from '@/lib/auth';
 import { queryOne } from '@/lib/db';
-
-interface UserRow {
-  id: string;
-  username: string;
-  email: string | null;
-  role: string;
-  is_active: boolean;
-  last_login_at: string | null;
-}
+import { getActiveSession } from '@/lib/session';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -23,14 +15,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
     }
 
-    const session = await verifyToken(token);
+    const session = await getActiveSession();
     if (!session) {
       return NextResponse.json({ error: 'Sesión inválida o expirada.' }, { status: 401 });
     }
 
     // Verificar que el usuario sigue activo en DB
-    const user = await queryOne<UserRow>(
-      `SELECT id, username, email, role, is_active, last_login_at
+    const user = await queryOne<{
+      id: string;
+      username: string;
+      email: string | null;
+      role: string;
+      last_login_at: string | null;
+    }>(
+      `SELECT id, username, email, role, last_login_at
        FROM users
        WHERE id = $1 AND is_active = true`,
       [session.userId]

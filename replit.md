@@ -139,9 +139,9 @@ Conectar la base de datos desde el panel de Replit o agregar la variable de ento
 - Redirige a `/403` si rol insuficiente
 
 **SUPER_ADMIN**
-- Usuario: `npmusicadmin`
-- Contraseña inicial: `PEMDPD`
-- Creado idempotente (no se duplica si ya existe)
+- Cuenta inicial creada mediante bootstrap seguro con secretos del entorno.
+- El repositorio no contiene contraseñas ni credenciales iniciales.
+- Bootstrap idempotente: no duplica una cuenta existente.
 
 **Auditoría**
 - Registra: LOGIN_SUCCESS, LOGIN_FAILED, LOGOUT en `audit_log`

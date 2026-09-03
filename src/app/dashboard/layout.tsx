@@ -4,7 +4,7 @@
  * Todos los roles autenticados tienen acceso.
  */
 import type { Metadata } from "next";
-import { getSession } from "@/lib/auth";
+import { getActiveSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeaderWrapper } from "@/components/dashboard/DashboardHeaderWrapper";
@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   // Verificación server-side (defensa en profundidad — el middleware ya protege esta ruta)
-  const session = await getSession();
+  const session = await getActiveSession();
   if (!session) {
     redirect("/login?from=/dashboard");
   }

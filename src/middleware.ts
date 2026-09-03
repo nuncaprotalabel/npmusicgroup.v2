@@ -19,7 +19,7 @@ interface RouteRule {
 const PROTECTED_ROUTES: Record<string, RouteRule> = {
   '/np-control': { roles: ['SUPER_ADMIN'] },
   '/dashboard':  { roles: ['SUPER_ADMIN', 'ADMIN', 'DISTRIBUTION_MANAGER', 'MANAGER', 'ARTIST', 'VIEWER'] },
-  '/admin':      { roles: ['SUPER_ADMIN', 'ADMIN'] },
+  '/admin':      { roles: ['SUPER_ADMIN'] },
 };
 
 // ─── Middleware ───────────────────────────────────────────────────────────────

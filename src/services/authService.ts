@@ -13,12 +13,12 @@ export interface LoginResult {
 }
 
 /** Inicia sesión y retorna el usuario si es exitoso. */
-export async function login(username: string, password: string): Promise<LoginResult> {
+export async function login(email: string, password: string): Promise<LoginResult> {
   try {
     const res = await fetch(`${BASE}/login`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ username, password }),
+      body:    JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (!res.ok) return { error: data.error ?? 'Error desconocido.' };

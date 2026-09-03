@@ -21,19 +21,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json().catch(() => null);
 
-    if (!body || typeof body.username !== 'string' || typeof body.password !== 'string') {
+    if (!body || typeof body.email !== 'string' || typeof body.password !== 'string') {
       return NextResponse.json(
-        { error: 'Usuario y contraseña son requeridos.' },
+        { error: 'Correo electrónico y contraseña son requeridos.' },
         { status: 400 }
       );
     }
 
-    const username = body.username.trim().toLowerCase();
+    const email = body.email.trim().toLowerCase();
     const password = body.password;
 
-    if (!username || !password) {
+    if (!email || !password || email.length > 255 || !email.includes('@')) {
       return NextResponse.json(
-        { error: 'Usuario y contraseña son requeridos.' },
+        { error: 'Correo electrónico y contraseña son requeridos.' },
         { status: 400 }
       );
     }
@@ -45,8 +45,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const user = await queryOne<UserRow>(
       `SELECT id, username, email, password_hash, role, is_active
        FROM users
-       WHERE username = $1`,
-      [username]
+       WHERE LOWER(email) = $1`,
+      [email]
     );
 
     // Usuario no encontrado o inactivo (mismo mensaje para no revelar existencia)
