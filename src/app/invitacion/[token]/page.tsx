@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertCircle, CheckCircle2, Clock3, ExternalLink, ShieldOff, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock3, ExternalLink, FileSignature, ShieldOff, XCircle } from "lucide-react";
 import { validatePublicInvitation, type PublicInvitationStatus } from "@/lib/invitations";
+import { PublicContractReview } from "@/components/invitations/PublicContractReview";
 
 export const metadata: Metadata = {
   title: "Invitación — NP Music Group",
@@ -19,6 +20,30 @@ const STATUS_CONTENT: Record<PublicInvitationStatus, {
     description: "Tu solicitud fue aprobada y este enlace está listo para continuar con el proceso de incorporación.",
     icon: CheckCircle2,
     color: "#F5C518",
+  },
+  CONTRATO_NO_DISPONIBLE: {
+    title: "Contrato aún no disponible",
+    description: "La invitación es válida, pero el contrato todavía no está listo para revisión.",
+    icon: Clock3,
+    color: "#A3A3A3",
+  },
+  CONTRATO_PENDIENTE: {
+    title: "Contrato pendiente de firma",
+    description: "Revisa el documento completo antes de confirmar tu aceptación.",
+    icon: FileSignature,
+    color: "#F5C518",
+  },
+  CONTRATO_FIRMADO: {
+    title: "Contrato ya firmado",
+    description: "La aceptación de este contrato ya fue registrada. El onboarding queda pendiente.",
+    icon: CheckCircle2,
+    color: "#34D399",
+  },
+  CONTRATO_CANCELADO: {
+    title: "Contrato no disponible",
+    description: "Este contrato fue cancelado y no puede aceptarse mediante esta invitación.",
+    icon: XCircle,
+    color: "#EF4444",
   },
   EXPIRADA: {
     title: "Invitación expirada",
@@ -53,6 +78,15 @@ export default async function InvitationPage({
 }) {
   const { token } = await params;
   const invitation = await validatePublicInvitation(token);
+  if (invitation.status === "CONTRATO_PENDIENTE" && invitation.contract) {
+    return (
+      <PublicContractReview
+        token={token}
+        contract={invitation.contract}
+        artistName={invitation.nombreArtistico}
+      />
+    );
+  }
   const content = STATUS_CONTENT[invitation.status];
   const Icon = content.icon;
 
@@ -82,6 +116,12 @@ export default async function InvitationPage({
           <p className="mt-4 flex items-center justify-center gap-2 text-xs text-[#525252]">
             <ExternalLink size={13} />
             El siguiente paso se habilitará en una fase posterior.
+          </p>
+        )}
+        {invitation.status === "CONTRATO_FIRMADO" && invitation.signedVersion && (
+          <p className="mt-4 rounded-lg border border-[#34D399]/20 bg-[#34D399]/[0.06] px-3 py-2 text-xs text-[#A3A3A3]">
+            Versión firmada: <span className="font-medium text-[#34D399]">{invitation.signedVersion}</span>
+            {invitation.signedAt && <> · {formatDate(invitation.signedAt)}</>}
           </p>
         )}
         <Link href="/" className="mt-8 inline-flex items-center text-sm font-medium text-[#F5C518] hover:underline">

@@ -20,6 +20,8 @@ export interface ContractRow {
   created_at: string;
   updated_at: string;
   invitation_expires_at: string;
+  signed_at?: string | null;
+  signed_version?: string | null;
 }
 
 export const CONTRACT_SELECT = `
@@ -28,11 +30,13 @@ export const CONTRACT_SELECT = `
          c.artist_percentage, c.company_percentage,
          s.estado AS solicitud_status, i.status AS invitation_status,
          u.username AS created_by_username,
-         c.created_at, c.updated_at, i.expires_at AS invitation_expires_at
+         c.created_at, c.updated_at, i.expires_at AS invitation_expires_at,
+         cs.accepted_at AS signed_at, cs.contract_version AS signed_version
   FROM contracts c
   INNER JOIN solicitudes s ON s.id = c.solicitud_id
   INNER JOIN invitations i ON i.id = c.invitation_id
   LEFT JOIN users u ON u.id = c.created_by
+  LEFT JOIN contract_signatures cs ON cs.contract_id = c.id
 `;
 
 export function mapContractRow(row: ContractRow): Contract {
@@ -62,6 +66,8 @@ export function mapContractRow(row: ContractRow): Contract {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     invitationExpiresAt: row.invitation_expires_at,
+    signedAt: row.signed_at ?? null,
+    signedVersion: row.signed_version ?? null,
   };
 }
 

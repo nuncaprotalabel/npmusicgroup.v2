@@ -1,0 +1,517 @@
+FASE 2.7 — FIRMA / ACEPTACIÓN DEL CONTRATO Y PREPARACIÓN DEL ONBOARDING
+
+OBJETIVO ÚNICO:
+
+Implementar el flujo real mediante el cual el destinatario de una invitación puede revisar y aceptar el contrato PENDIENTE_FIRMA, dejando el contrato registrado como FIRMADO y preparando el siguiente paso de creación/activación de cuenta.
+
+IMPORTANTE:
+
+Esta fase NO debe implementar todavía la creación final de cuenta ni el establecimiento de contraseña.
+
+El objetivo es:
+
+CONTRATO PENDIENTE_FIRMA
+↓
+REVISIÓN
+↓
+ACEPTACIÓN/FIRMA
+↓
+CONTRATO FIRMADO
+↓
+LISTO PARA ONBOARDING
+
+==================================================
+REGLAS DE AHORRO DE CRÉDITOS
+==================================================
+
+- NO reconstruir el proyecto.
+- NO hacer refactors generales.
+- NO modificar el sitio público.
+- NO modificar /aplicar.
+- NO modificar autenticación existente salvo compatibilidad estrictamente necesaria.
+- NO modificar RBAC salvo necesidad estricta.
+- NO modificar solicitudes salvo compatibilidad.
+- NO modificar cuentas salvo compatibilidad.
+- NO implementar distribución.
+- NO implementar Too Lost.
+- NO implementar splits completos.
+- NO implementar ingresos.
+- NO implementar analíticas.
+- NO implementar lanzamientos.
+- NO implementar emails automáticos si no existe infraestructura ya preparada.
+- NO integrar DocuSign.
+- NO integrar Dropbox Sign.
+- NO integrar Adobe Sign.
+- NO integrar ningún proveedor externo de firma.
+- NO crear contraseñas temporales.
+- NO activar cuentas automáticamente.
+- NO agregar dependencias innecesarias.
+
+Inspeccionar solamente:
+- contracts
+- invitations
+- solicitudes
+- users
+- sessions/auth
+- RBAC
+- audit_log
+- rutas de invitación
+- navegación necesaria
+
+Reutilizar todo lo existente.
+
+==================================================
+1. FLUJO
+==================================================
+
+El flujo permitido será:
+
+INVITACIÓN VÁLIDA
+        ↓
+CONTRATO PENDIENTE_FIRMA
+        ↓
+VISUALIZACIÓN DEL CONTRATO
+        ↓
+ACEPTACIÓN/FIRMA
+        ↓
+CONTRATO FIRMADO
+        ↓
+ONBOARDING PENDIENTE
+
+No permitir saltarse pasos.
+
+==================================================
+2. ACCESO AL CONTRATO
+==================================================
+
+La persona que recibe la invitación debe poder acceder al contrato mediante el mecanismo seguro de invitación existente.
+
+No crear otro sistema de tokens.
+
+Utilizar el token de invitación existente.
+
+Validar server-side:
+
+- token válido
+- invitación existente
+- invitación PENDIENTE
+- no expirada
+- no revocada
+- no utilizada
+- contrato relacionado existente
+- contrato en PENDIENTE_FIRMA
+
+Si alguna condición falla:
+
+NO mostrar el contrato.
+
+Mostrar el estado correspondiente.
+
+==================================================
+3. CONTRATO EXACTO
+==================================================
+
+La persona debe visualizar exactamente la versión del contrato que está pendiente de firma.
+
+Debe mostrarse:
+
+- título
+- tipo
+- versión
+- contenido
+- secciones
+- distribución económica
+- 85% artista
+- 15% NP Music Group
+- titularidad de derechos
+- terminación/rescisión
+
+NO permitir editar el contrato desde el flujo público.
+
+NO permitir modificar porcentajes.
+
+NO permitir modificar cláusulas.
+
+==================================================
+4. ACEPTACIÓN / FIRMA
+==================================================
+
+Implementar una acción explícita:
+
+"Firmar y aceptar contrato"
+
+Antes de permitirla:
+
+- el usuario debe poder revisar el contrato completo;
+- confirmar que ha leído el documento;
+- confirmar aceptación expresa;
+- confirmar su intención de firmar/aceptar.
+
+No permitir una aceptación accidental mediante un simple acceso a la página.
+
+Debe existir una acción explícita.
+
+==================================================
+5. REGISTRO DE FIRMA
+==================================================
+
+Crear una estructura persistente para registrar la aceptación/firma.
+
+Antes de crear una nueva tabla:
+
+INSPECCIONAR si ya existe una estructura equivalente.
+
+Si no existe, crear una estructura mínima relacionada con contracts.
+
+Debe registrar como mínimo:
+
+- id
+- contract_id
+- invitation_id
+- versión exacta del contrato
+- fecha/hora
+- método de aceptación
+- estado
+- created_at
+
+Si técnicamente y de acuerdo con la arquitectura existente es apropiado registrar metadata de solicitud:
+
+- IP
+- user-agent
+
+No almacenar información innecesaria.
+
+IMPORTANTE:
+
+No guardar credenciales.
+
+No guardar contraseñas.
+
+No guardar secretos.
+
+==================================================
+6. INTEGRIDAD DE LA FIRMA
+==================================================
+
+La firma/aceptación debe estar vinculada a:
+
+- contrato específico
+- versión específica
+- invitación específica
+
+No debe ser posible firmar una versión distinta de la que se mostró.
+
+Si el contrato cambia después de haber sido enviado a firma:
+
+NO permitir modificarlo.
+
+Debe requerirse una nueva versión en el futuro.
+
+==================================================
+7. CAMBIO DE ESTADO
+==================================================
+
+Implementar únicamente:
+
+PENDIENTE_FIRMA → FIRMADO
+
+El cambio debe hacerse server-side.
+
+No aceptar el estado enviado desde frontend.
+
+El servidor debe verificar el estado real en PostgreSQL.
+
+Al completar:
+
+- contrato = FIRMADO
+- registrar timestamp
+- registrar firma
+- registrar auditoría
+- actualizar updated_at
+
+==================================================
+8. INVITACIÓN
+==================================================
+
+Después de firmar correctamente:
+
+La invitación debe pasar a:
+
+UTILIZADA
+
+Solamente después de que la firma haya sido registrada correctamente.
+
+IMPORTANTE:
+
+La operación debe ser transaccional siempre que la arquitectura actual lo permita.
+
+No debe quedar:
+
+contrato FIRMADO + invitación PENDIENTE
+
+ni:
+
+contrato PENDIENTE_FIRMA + invitación UTILIZADA
+
+por una operación parcialmente fallida.
+
+==================================================
+9. ONBOARDING
+==================================================
+
+Después de la firma:
+
+NO crear automáticamente una cuenta activa.
+
+NO establecer contraseña.
+
+NO iniciar sesión automáticamente.
+
+NO generar contraseña temporal.
+
+El sistema debe dejar un estado claro:
+
+"CONTRATO FIRMADO — ONBOARDING PENDIENTE"
+
+Esto será utilizado por la siguiente fase.
+
+==================================================
+10. AUDITORÍA
+==================================================
+
+Usar audit_log existente.
+
+Registrar:
+
+- contrato firmado
+- invitación utilizada
+- aceptación registrada
+
+Registrar:
+
+- contrato
+- invitación
+- timestamp
+- actor si existe
+- acción
+
+NO registrar:
+
+- token
+- contraseña
+- secretos
+
+==================================================
+11. ADMINISTRACIÓN
+==================================================
+
+En:
+
+/admin/contratos
+
+los administradores deben poder identificar:
+
+- BORRADOR
+- PENDIENTE_FIRMA
+- FIRMADO
+
+Para un contrato FIRMADO:
+
+- mostrar fecha de firma
+- versión firmada
+- estado
+
+NO permitir editar el contrato firmado.
+
+NO permitir modificar sus porcentajes.
+
+NO permitir modificar la versión firmada.
+
+==================================================
+12. SEGURIDAD
+==================================================
+
+Validar todo server-side.
+
+Nunca confiar en:
+
+- contract_id enviado por frontend
+- invitation_id enviado por frontend
+- estado enviado por frontend
+- email enviado por frontend
+
+Resolver las relaciones desde PostgreSQL.
+
+La invitación debe continuar funcionando como mecanismo de autorización hasta que se consuma.
+
+Una vez UTILIZADA:
+
+NO permitir reutilizarla.
+
+==================================================
+13. RBAC
+==================================================
+
+Para administración:
+
+contracts.view
+contracts.manage
+
+Reutilizar RBAC existente.
+
+La firma del artista/invitado NO debe depender de permisos administrativos.
+
+La persona invitada accede exclusivamente mediante la invitación válida.
+
+No crear un usuario administrativo para el invitado.
+
+==================================================
+14. INTERFAZ PÚBLICA
+==================================================
+
+La experiencia debe ser profesional y coherente con NP Music Group.
+
+Mantener:
+
+- negro
+- blanco
+- amarillo
+- rojo únicamente para errores/estados críticos
+- responsive
+- excelente Android
+- diseño limpio
+- lectura cómoda del contrato
+
+La pantalla debe dejar absolutamente claro:
+
+- quién presenta el contrato
+- qué documento está revisando
+- versión
+- condiciones económicas
+- estado
+- acción de aceptación
+
+No utilizar diseño gamer.
+
+No utilizar widgets innecesarios.
+
+==================================================
+15. ERRORES
+==================================================
+
+Mostrar estados claros para:
+
+- invitación inválida
+- invitación expirada
+- invitación revocada
+- invitación utilizada
+- contrato inexistente
+- contrato ya firmado
+- contrato cancelado
+- operación no autorizada
+
+No revelar información interna innecesaria.
+
+==================================================
+16. FIRMA ELECTRÓNICA EXTERNA
+==================================================
+
+NO implementar ningún proveedor externo.
+
+NO crear una falsa firma electrónica.
+
+El sistema debe implementar únicamente una aceptación/firma interna explícita y auditable.
+
+La posibilidad de integrar posteriormente un proveedor externo debe quedar desacoplada de la lógica del contrato.
+
+==================================================
+17. VERIFICACIONES OBLIGATORIAS
+==================================================
+
+Verificar:
+
+- invitación válida puede acceder al contrato
+- invitación inválida no puede
+- invitación expirada no puede
+- invitación revocada no puede
+- invitación utilizada no puede
+- contrato BORRADOR no puede firmarse
+- contrato PENDIENTE_FIRMA puede aceptarse
+- contrato ya FIRMADO no puede firmarse nuevamente
+- contrato firmado no puede editarse
+- versión firmada queda congelada
+- 85/15 permanece intacto
+- titularidad de derechos permanece intacta
+- cláusula de terminación permanece intacta
+- firma queda registrada en PostgreSQL
+- contrato cambia a FIRMADO
+- invitación cambia a UTILIZADA
+- auditoría funciona
+- no se crea cuenta
+- no se crea contraseña
+- no se activa usuario
+- no se envían emails
+- no se utilizan proveedores externos
+
+Ejecutar:
+
+npx tsc --noEmit
+npm run build
+git diff --check
+
+Si existen tests relevantes, ejecutarlos.
+
+==================================================
+18. CRITERIO DE FINALIZACIÓN
+==================================================
+
+La fase termina cuando exista:
+
+INVITACIÓN
+↓
+CONTRATO PENDIENTE_FIRMA
+↓
+REVISIÓN
+↓
+ACEPTACIÓN/FIRMA
+↓
+CONTRATO FIRMADO
+↓
+INVITACIÓN UTILIZADA
+↓
+ONBOARDING PENDIENTE
+
+Todo persistido en PostgreSQL.
+
+DETENTE AQUÍ.
+
+NO continúes automáticamente a creación de cuentas.
+
+NO continúes automáticamente a contraseña.
+
+NO continúes automáticamente a artistas.
+
+==================================================
+19. INFORME FINAL
+==================================================
+
+Al finalizar informa:
+
+1. Archivos creados/modificados.
+2. Tablas creadas/reutilizadas.
+3. Migraciones.
+4. Endpoints.
+5. Rutas.
+6. Estados implementados.
+7. Flujo de firma implementado.
+8. Datos registrados de la firma.
+9. Verificaciones realizadas.
+10. Confirmación explícita de que NO se implementaron:
+   - cuentas
+   - contraseñas
+   - activación
+   - emails
+   - proveedores externos de firma
+   - artistas
+   - distribución
+   - splits

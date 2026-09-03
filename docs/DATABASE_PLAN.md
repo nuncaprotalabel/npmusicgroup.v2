@@ -174,6 +174,25 @@ La base de datos impide porcentajes distintos de 85% para el artista y 15%
 para NP Music Group. Solo puede existir un contrato activo
 (`BORRADOR` o `PENDIENTE_FIRMA`) por invitación.
 
+### 3.9 `contract_signatures`
+
+Registro mínimo de aceptación interna del contrato. No almacena credenciales ni
+tokens. La combinación de contrato e invitación es única para impedir una
+segunda aceptación.
+
+| Columna            | Tipo          | Restricciones                                  | Descripción                    |
+|--------------------|---------------|------------------------------------------------|--------------------------------|
+| `id`               | UUID          | PK, DEFAULT gen_random_uuid()                  | Identificador de la aceptación |
+| `contract_id`      | UUID          | FK → contracts(id), UNIQUE, NOT NULL           | Contrato aceptado              |
+| `invitation_id`    | UUID          | FK → invitations(id), UNIQUE, NOT NULL         | Invitación utilizada           |
+| `contract_version` | VARCHAR(20)   | NOT NULL                                       | Versión exacta firmada         |
+| `accepted_at`      | TIMESTAMPTZ   | NOT NULL, DEFAULT NOW()                        | Momento de aceptación          |
+| `method`           | VARCHAR(50)   | `INTERNAL_ACCEPTANCE`                          | Método interno auditable       |
+| `status`           | VARCHAR(20)   | `FIRMADO`                                      | Estado de la aceptación        |
+| `ip_address`       | INET          | NULLABLE                                       | IP válida, si está disponible  |
+| `user_agent`       | TEXT          | NULLABLE                                       | Navegador, si está disponible  |
+| `created_at`       | TIMESTAMPTZ   | DEFAULT NOW()                                  | Fecha de registro              |
+
 ---
 
 ## 4. ENUM types
@@ -199,6 +218,8 @@ solicitudes ──< contracts   (solicitud_id → solicitudes.id RESTRICT DELETE
 invitations ──< contracts   (invitation_id → invitations.id RESTRICT DELETE)
 users ──< audit_log       (user_id → users.id SET NULL)
 users ──< contracts        (created_by → users.id SET NULL)
+contracts ──< contract_signatures (contract_id → contracts.id RESTRICT DELETE)
+invitations ──< contract_signatures (invitation_id → invitations.id RESTRICT DELETE)
 users ──< users           (created_by → users.id SET NULL)
 permissions ──< role_permissions (permission_id → permissions.id CASCADE DELETE)
 ```
@@ -222,6 +243,7 @@ permissions ──< role_permissions (permission_id → permissions.id CASCADE D
 | `idx_contracts_status`    | contracts        | status                  | BTREE   |
 | `idx_contracts_solicitud_id` | contracts      | solicitud_id             | BTREE   |
 | `idx_contracts_created_at` | contracts       | created_at DESC          | BTREE   |
+| `idx_contract_signatures_accepted_at` | contract_signatures | accepted_at DESC | BTREE |
 
 ---
 

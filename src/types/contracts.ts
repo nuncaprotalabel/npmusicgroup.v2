@@ -32,6 +32,8 @@ export interface Contract {
   createdAt: string;
   updatedAt: string;
   invitationExpiresAt: string;
+  signedAt: string | null;
+  signedVersion: string | null;
 }
 
 export interface ContractResult {

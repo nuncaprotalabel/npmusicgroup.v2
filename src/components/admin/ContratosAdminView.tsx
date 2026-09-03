@@ -5,7 +5,6 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  Clock3,
   FileText,
   Loader2,
   Save,
@@ -128,7 +127,7 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
         ) : (
           <>
             <div className="hidden grid-cols-[1.4fr_1.15fr_1fr_90px_110px_130px] gap-4 border-b border-[#141414] px-5 py-3 text-[0.6875rem] font-semibold uppercase tracking-wider text-[#404040] md:grid">
-              <span>Contrato / Artista</span><span>Email</span><span>Estado</span><span>Versión</span><span>Distribución</span><span>Actualizado</span>
+              <span>Contrato / Artista</span><span>Email</span><span>Estado</span><span>Versión</span><span>Distribución</span><span>Firma / actualización</span>
             </div>
             <div className="divide-y divide-[#141414]">
               {contracts.map((contract) => (
@@ -147,7 +146,7 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
                     <StatusBadge status={contract.status} />
                     <span className="text-sm text-[#A3A3A3]">v{contract.version}</span>
                     <span className="text-xs text-[#A3A3A3]">{contract.artistPercentage}% / {contract.companyPercentage}%</span>
-                    <span className="text-xs text-[#525252]">{formatDate(contract.updatedAt)}</span>
+                    <span className="text-xs text-[#525252]">{contract.signedAt ? formatDate(contract.signedAt) : formatDate(contract.updatedAt)}</span>
                   </div>
                   <ChevronRight size={15} className="absolute right-3 hidden text-[#333333] group-hover:text-[#737373] md:block" />
                 </button>
@@ -243,6 +242,9 @@ function ContractDetail({
           <div className="border-t border-[#141414] pt-5 text-xs text-[#525252]">
             <p>Creado por {contract.createdBy || "Usuario eliminado"} el {formatDateTime(contract.createdAt)}.</p>
             <p className="mt-1">Última actualización: {formatDateTime(contract.updatedAt)}.</p>
+            {contract.status === "FIRMADO" && contract.signedAt && (
+              <p className="mt-1 text-[#34D399]">Firmado el {formatDateTime(contract.signedAt)} · versión {contract.signedVersion || contract.version}.</p>
+            )}
           </div>
           {editable && (
             <div className="flex flex-col gap-2 border-t border-[#141414] pt-5 sm:flex-row sm:justify-end">
@@ -250,7 +252,8 @@ function ContractDetail({
               <Button type="button" variant="primary" loading={saving} icon={!saving ? <Send size={15} /> : undefined} onClick={onSubmit}>Enviar a firma</Button>
             </div>
           )}
-          {!editable && contract.status === "PENDIENTE_FIRMA" && <p className="flex items-center gap-2 border-t border-[#141414] pt-5 text-xs text-[#A3A3A3]"><CheckCircle2 size={14} className="text-[#34D399]" />Contrato bloqueado y listo para la futura fase de firma.</p>}
+          {!editable && contract.status === "PENDIENTE_FIRMA" && <p className="flex items-center gap-2 border-t border-[#141414] pt-5 text-xs text-[#A3A3A3]"><CheckCircle2 size={14} className="text-[#F5C518]" />Contrato bloqueado y disponible para aceptación mediante la invitación.</p>}
+          {!editable && contract.status === "FIRMADO" && <p className="flex items-center gap-2 border-t border-[#141414] pt-5 text-xs text-[#A3A3A3]"><CheckCircle2 size={14} className="text-[#34D399]" />CONTRATO FIRMADO — ONBOARDING PENDIENTE.</p>}
         </div>
       </article>
     </div>
