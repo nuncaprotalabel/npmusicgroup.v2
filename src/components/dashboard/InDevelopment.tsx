@@ -6,6 +6,7 @@
 "use client";
 
 import { Wrench } from "lucide-react";
+import Link from "next/link";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { DashboardModuleKey } from "./navigation";
 
@@ -50,6 +51,14 @@ export function InDevelopment({ moduleName, moduleKey, description }: InDevelopm
       <p className="text-sm max-w-sm leading-relaxed" style={{ color: "#737373" }}>
         {description ?? t.dashboard.inDevelopment.description}
       </p>
+
+      <Link
+        href="/admin"
+        className="mt-6 inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors hover:bg-[#F5C518] hover:text-black"
+        style={{ border: "1px solid #2A2A2A", color: "#A3A3A3" }}
+      >
+        {t.dashboard.modulePage.backToCentral}
+      </Link>
     </div>
   );
 }

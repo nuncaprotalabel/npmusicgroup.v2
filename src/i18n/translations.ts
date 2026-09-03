@@ -220,6 +220,11 @@ export const translations = {
         description: "Este módulo se encuentra en desarrollo y estará disponible próximamente.",
         badge: "Próximamente",
       },
+      modulePage: {
+        status: "Apartado pendiente",
+        description: "Este apartado todavía no tiene datos conectados, pero ya está listo para integrarse.",
+        backToCentral: "Volver a Central",
+      },
       header: {
         logout: "Cerrar sesión",
         loggingOut: "Saliendo…",
@@ -448,6 +453,11 @@ export const translations = {
         title: "Module under development",
         description: "This module is currently under development and will be available soon.",
         badge: "Coming soon",
+      },
+      modulePage: {
+        status: "Pending section",
+        description: "This section is not connected to live data yet, but it is ready for integration.",
+        backToCentral: "Back to Central",
       },
       header: {
         logout: "Sign out",
