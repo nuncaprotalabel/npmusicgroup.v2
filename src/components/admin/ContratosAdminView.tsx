@@ -5,14 +5,17 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
+  Copy,
   FileText,
   Loader2,
   Save,
   Send,
+  UserPlus,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { getContracts, submitContract, updateContract } from "@/services/contratosService";
+import { startArtistOnboarding } from "@/services/onboardingService";
 import {
   SECTION_LABELS,
   validateContractForSubmission,
@@ -38,6 +41,8 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [startingOnboarding, setStartingOnboarding] = useState(false);
+  const [activationLink, setActivationLink] = useState<{ url: string; expiresAt: string } | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -92,6 +97,19 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
     setContracts((current) => current?.map((item) => item.id === result.contract!.id ? result.contract! : item) ?? current);
   }
 
+  async function beginOnboarding() {
+    if (!selected || selected.status !== "FIRMADO" || startingOnboarding) return;
+    setStartingOnboarding(true);
+    setError(null);
+    const result = await startArtistOnboarding(selected.id);
+    setStartingOnboarding(false);
+    if (result.error || !result.activationUrl || !result.expiresAt) {
+      setError(result.error || "No se pudo generar el enlace de activación.");
+      return;
+    }
+    setActivationLink({ url: result.activationUrl, expiresAt: result.expiresAt });
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <header>
@@ -131,7 +149,7 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
             </div>
             <div className="divide-y divide-[#141414]">
               {contracts.map((contract) => (
-                <button key={contract.id} type="button" onClick={() => { setSelected({ ...contract, sections: { ...contract.sections } }); setMissing([]); setError(null); }} className="group block w-full px-5 py-4 text-left transition-colors hover:bg-[#0D0D0D]">
+                <button key={contract.id} type="button" onClick={() => { setSelected({ ...contract, sections: { ...contract.sections } }); setMissing([]); setError(null); setActivationLink(null); }} className="group block w-full px-5 py-4 text-left transition-colors hover:bg-[#0D0D0D]">
                   <div className="flex items-start justify-between gap-3 md:hidden">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-white">{contract.title}</p>
@@ -166,6 +184,9 @@ export function ContratosAdminView({ canManage }: { canManage: boolean }) {
           onChange={setSelected}
           onSave={() => void saveDraft()}
           onSubmit={() => void sendToSignature()}
+          startingOnboarding={startingOnboarding}
+          activationLink={activationLink}
+          onStartOnboarding={() => void beginOnboarding()}
         />
       )}
     </div>
@@ -181,6 +202,9 @@ function ContractDetail({
   onChange,
   onSave,
   onSubmit,
+  startingOnboarding,
+  activationLink,
+  onStartOnboarding,
 }: {
   contract: Contract;
   canManage: boolean;
@@ -190,8 +214,12 @@ function ContractDetail({
   onChange: (contract: Contract) => void;
   onSave: () => void;
   onSubmit: () => void;
+  startingOnboarding: boolean;
+  activationLink: { url: string; expiresAt: string } | null;
+  onStartOnboarding: () => void;
 }) {
   const editable = canManage && contract.status === "BORRADOR";
+  const [copied, setCopied] = useState(false);
   const inputClass = "w-full rounded-lg border border-[#2A2A2A] bg-[#141414] px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-[#F5C518] disabled:cursor-not-allowed disabled:opacity-60";
   function updateField(field: "title" | "version" | "content", value: string) {
     onChange({ ...contract, [field]: value });
@@ -253,7 +281,60 @@ function ContractDetail({
             </div>
           )}
           {!editable && contract.status === "PENDIENTE_FIRMA" && <p className="flex items-center gap-2 border-t border-[#141414] pt-5 text-xs text-[#A3A3A3]"><CheckCircle2 size={14} className="text-[#F5C518]" />Contrato bloqueado y disponible para aceptación mediante la invitación.</p>}
-          {!editable && contract.status === "FIRMADO" && <p className="flex items-center gap-2 border-t border-[#141414] pt-5 text-xs text-[#A3A3A3]"><CheckCircle2 size={14} className="text-[#34D399]" />CONTRATO FIRMADO — ONBOARDING PENDIENTE.</p>}
+          {!editable && contract.status === "FIRMADO" && (
+            <div className="space-y-3 border-t border-[#141414] pt-5">
+              <p className="flex items-center gap-2 text-xs text-[#A3A3A3]">
+                <CheckCircle2 size={14} className="text-[#34D399]" />
+                CONTRATO FIRMADO — ONBOARDING PENDIENTE.
+              </p>
+              {canManage && (
+                <div className="rounded-xl border border-[#F5C518]/20 bg-[#F5C518]/[0.04] p-4">
+                  <p className="text-sm font-medium text-white">Crear acceso del artista</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#737373]">
+                    Genera un enlace temporal para que el artista establezca su contraseña. El enlace no se guarda ni se muestra nuevamente.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    className="mt-3"
+                    loading={startingOnboarding}
+                    icon={!startingOnboarding ? <UserPlus size={14} /> : undefined}
+                    onClick={onStartOnboarding}
+                  >
+                    Generar enlace de activación
+                  </Button>
+                  {activationLink && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs font-medium text-[#34D399]">Enlace generado. Compártelo directamente con el artista:</p>
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <input
+                          aria-label="Enlace de activación"
+                          readOnly
+                          value={activationLink.url}
+                          className="min-w-0 flex-1 rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] px-3 py-2 text-xs text-[#A3A3A3] outline-none"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          icon={<Copy size={14} />}
+                          onClick={() => {
+                            void navigator.clipboard.writeText(new URL(activationLink.url, window.location.origin).toString());
+                            setCopied(true);
+                            window.setTimeout(() => setCopied(false), 1800);
+                          }}
+                        >
+                          {copied ? "Copiado" : "Copiar"}
+                        </Button>
+                      </div>
+                      <p className="text-[0.6875rem] text-[#525252]">Válido hasta el {formatDateTime(activationLink.expiresAt)}.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </article>
     </div>
