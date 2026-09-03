@@ -121,14 +121,8 @@ export default async function CentralPage() {
             <a
               key={href}
               href={href}
-              className="flex flex-col gap-1 p-4 rounded-lg transition-all duration-150"
-              style={{ background: "#141414", border: "1px solid transparent" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = "#2A2A2A";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.borderColor = "transparent";
-              }}
+              className="flex flex-col gap-1 p-4 rounded-lg border border-transparent transition-all duration-150 hover:border-[#2A2A2A]"
+              style={{ background: "#141414" }}
             >
               <span className="text-sm font-medium text-white">{label}</span>
               <span className="text-xs" style={{ color: "#525252" }}>{description}</span>
