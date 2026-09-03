@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "NP Music Group — Plataforma para artistas independientes",
   description:
-    "Distribuye tu música en todas las plataformas digitales, gestiona tu carrera y genera ingresos reales con herramientas profesionales diseñadas para artistas independientes.",
+    "Organiza tu proyecto musical con una plataforma profesional diseñada para artistas independientes.",
   keywords: [
     "distribución musical",
     "artistas independientes",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NP Music Group — Tu música. Tu carrera. Tu negocio.",
     description:
-      "Plataforma todo-en-uno para artistas independientes. Distribución global, ingresos transparentes y gestión profesional.",
+      "Un espacio profesional para organizar proyectos musicales independientes.",
     type: "website",
     locale: "es_ES",
     siteName: "NP Music Group",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "NP Music Group",
-    description: "Plataforma todo-en-uno para artistas independientes.",
+    description: "Un espacio profesional para proyectos musicales independientes.",
   },
   robots: {
     index: true,

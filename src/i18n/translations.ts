@@ -3,7 +3,7 @@ export type Language = "es" | "en";
 export const translations = {
   es: {
     common: {
-      startNow: "Comenzar ahora",
+      startNow: "Solicitar acceso",
       login: "Iniciar sesión",
       viewPlatform: "Ver plataforma",
       comingSoon: "Próximamente",
@@ -23,7 +23,7 @@ export const translations = {
       support: "Soporte",
       faq: "Preguntas frecuentes",
       platformDesc: "Gestiona todo desde un lugar",
-      analyticsDesc: "Datos en tiempo real",
+      analyticsDesc: "Información y análisis",
       artistsDesc: "Gestión de artistas y roles",
       blogDesc: "Artículos y guías",
       supportDesc: "Ayuda cuando la necesitas",
@@ -35,100 +35,100 @@ export const translations = {
       headline2: "Tu carrera.",
       headline3: "Tu negocio.",
       description:
-        "Distribuye tu música en todas las plataformas digitales, gestiona tu carrera y genera ingresos reales con herramientas profesionales diseñadas para artistas independientes.",
-      cta1: "Distribuye tu música",
+        "Organiza tu proyecto musical con una plataforma profesional diseñada para artistas independientes.",
+      cta1: "Solicitar acceso",
       cta2: "Conocer más",
     },
     platforms: {
-      trustedBy: "Distribución en las principales plataformas del mundo",
-      distributionLabel: "Distribución sin límites — Llega a más lugares.",
-      andMore: "y más.",
+      trustedBy: "Pensada para acompañar tu proyecto en plataformas digitales",
+      distributionLabel: "Tu proyecto musical, listo para crecer.",
+      andMore: "y más destinos digitales.",
     },
     services: {
-      sectionLabel: "Todo lo que necesitas",
-      headline: "Herramientas profesionales para artistas independientes.",
+      sectionLabel: "Un espacio para crecer",
+      headline: "Herramientas profesionales para organizar tu proyecto musical.",
       items: [
         {
-          title: "Distribución Global",
+          title: "Proyecto centralizado",
           description:
-            "Lleva tu música a plataformas digitales en todo el mundo de forma automática y sin complicaciones.",
+            "Organiza la información importante de tu proyecto desde un solo espacio.",
         },
         {
-          title: "Ingresos Transparentes",
+          title: "Información organizada",
           description:
-            "Datos en tiempo real sobre streams y rendimiento. Sin sorpresas, sin letra pequeña.",
+            "Mantén tus datos y próximos objetivos claros y accesibles.",
         },
         {
-          title: "Gestión de Artistas",
+          title: "Gestión profesional",
           description:
-            "Administra artistas, roles y permisos de forma segura y transparente desde un solo panel.",
+            "Trabaja con una estructura pensada para proyectos musicales independientes.",
         },
         {
-          title: "Contratos Digitales",
+          title: "Colaboración organizada",
           description:
-            "Crea, firma y gestiona todos los contratos y acuerdos con tu equipo desde un solo lugar.",
+            "Prepara la información de tu equipo y tu proyecto para cada etapa.",
         },
         {
-          title: "Invitaciones",
+          title: "Proceso de acceso",
           description:
-            "Invita a colaboradores y miembros del equipo con permisos específicos.",
+            "Solicita acceso y permite que nuestro equipo conozca tu proyecto.",
         },
         {
-          title: "Lanzamientos",
+          title: "Planificación musical",
           description:
-            "Publica y gestiona tus lanzamientos con control total y visibilidad en tiempo real.",
+            "Da estructura a tus próximos lanzamientos y decisiones importantes.",
         },
       ],
     },
     howItWorks: {
       sectionLabel: "Cómo funciona",
-      headline: "En solo 4 simples pasos.",
+      headline: "Un proceso claro en 4 pasos.",
       steps: [
         {
-          title: "Regístrate",
-          description: "Crea tu cuenta de forma rápida y segura.",
+          title: "Solicita acceso",
+          description: "Cuéntanos sobre tu proyecto artístico mediante nuestra solicitud.",
         },
         {
-          title: "Sube tu música",
-          description: "Sube tus lanzamientos y completa la información del release.",
+          title: "Evaluamos tu proyecto",
+          description: "Nuestro equipo revisa la información y el perfil artístico.",
         },
         {
-          title: "Distribuimos",
-          description: "Tu música llega a todas las plataformas digitales del mundo.",
+          title: "Recibe tu invitación",
+          description: "Si tu proyecto es aprobado, recibirás una invitación para continuar el proceso.",
         },
         {
-          title: "Gana ingresos",
-          description: "Recibe tus pagos de forma segura, transparente y puntual.",
+          title: "Firma y comienza",
+          description: "Completa tu incorporación, crea tu cuenta y accede a la plataforma.",
         },
       ],
     },
     capabilities: {
       sectionLabel: "Plataforma completa",
-      headline: "Todo lo que tu negocio musical necesita.",
+      headline: "Una base profesional para tu proyecto musical.",
       items: [
         {
-          title: "Distribución global",
+          title: "Proyecto organizado",
           description:
-            "Tu música en las principales plataformas digitales del mundo.",
+            "Una estructura clara para centralizar la información de tu proyecto.",
         },
         {
           title: "Gestión centralizada",
           description:
-            "Artistas, lanzamientos, contratos y equipo desde un solo lugar.",
+            "Herramientas pensadas para mantener tu operación musical ordenada.",
         },
         {
-          title: "Ingresos en tiempo real",
+          title: "Proceso transparente",
           description:
-            "Visualiza y gestiona tus ingresos con total transparencia.",
+            "Conoce cada etapa del proceso de evaluación e incorporación.",
         },
         {
           title: "Software profesional",
           description:
-            "Construido para sellos y artistas que operan como empresas.",
+            "Diseñado para artistas independientes que quieren crecer con estructura.",
         },
       ],
-      brand: "Hecho para artistas reales.",
-      brandSub: "Por artistas reales.",
+      brand: "Hecho para proyectos reales.",
+      brandSub: "Con una estructura profesional.",
     },
     dashboardPreview: {
       sectionLabel: "Panel profesional",
@@ -136,23 +136,23 @@ export const translations = {
       headline2: "tus datos,",
       headline3: "tu control.",
       description:
-        "Un panel intuitivo y moderno que te permite gestionar todo tu negocio musical desde un solo lugar.",
+        "Un espacio de trabajo intuitivo y moderno para organizar tu proyecto musical.",
       highlights: [
-        "Vista general en tiempo real",
-        "Módulos independientes por área",
-        "Acciones rápidas y sencillas",
+        "Vista general de tu proyecto",
+        "Módulos organizados por área",
+        "Acciones claras y sencillas",
         "Diseñado para móviles",
       ],
     },
     finalCTA: {
-      headline: "¿Listo para llevar tu música al siguiente nivel?",
+      headline: "¿Listo para dar el siguiente paso?",
       description:
-        "Construye tu legado musical con herramientas profesionales diseñadas para artistas independientes.",
-      button: "Comenzar ahora",
+        "Solicita acceso y cuéntanos sobre tu proyecto musical.",
+      button: "Solicitar acceso",
     },
     footer: {
       description:
-        "Plataforma integral para artistas independientes. Distribución, gestión y crecimiento en un solo lugar.",
+        "Espacio profesional para organizar y hacer crecer tu proyecto musical.",
       newsletter: {
         title: "Newsletter",
         description: "Suscríbete para recibir noticias, actualizaciones y consejos.",
@@ -235,7 +235,7 @@ export const translations = {
 
   en: {
     common: {
-      startNow: "Get started",
+      startNow: "Request access",
       login: "Sign in",
       viewPlatform: "View platform",
       comingSoon: "Coming soon",
@@ -255,7 +255,7 @@ export const translations = {
       support: "Support",
       faq: "FAQ",
       platformDesc: "Manage everything in one place",
-      analyticsDesc: "Real-time data",
+      analyticsDesc: "Information and analysis",
       artistsDesc: "Artist and role management",
       blogDesc: "Articles and guides",
       supportDesc: "Help when you need it",
@@ -267,96 +267,96 @@ export const translations = {
       headline2: "Your career.",
       headline3: "Your business.",
       description:
-        "Distribute your music to all digital platforms, manage your career and generate real income with professional tools designed for independent artists.",
-      cta1: "Distribute your music",
+        "Organize your music project with a professional platform designed for independent artists.",
+      cta1: "Request access",
       cta2: "Learn more",
     },
     platforms: {
-      trustedBy: "Distribution across the world's leading platforms",
-      distributionLabel: "Limitless distribution — Reach more places.",
-      andMore: "and more.",
+      trustedBy: "Designed to support your project across digital platforms",
+      distributionLabel: "Your music project, ready to grow.",
+      andMore: "and more digital destinations.",
     },
     services: {
-      sectionLabel: "Everything you need",
-      headline: "Professional tools for independent artists.",
+      sectionLabel: "A space to grow",
+      headline: "Professional tools to organize your music project.",
       items: [
         {
-          title: "Global Distribution",
+          title: "Centralized project",
           description:
-            "Get your music to digital platforms worldwide, automatically and without hassle.",
+            "Organize your project's important information in one place.",
         },
         {
-          title: "Transparent Revenue",
+          title: "Organized information",
           description:
-            "Real-time data on streams and performance. No surprises, no fine print.",
+            "Keep your data and upcoming goals clear and accessible.",
         },
         {
-          title: "Artist Management",
+          title: "Professional management",
           description:
-            "Manage artists, roles and permissions securely and transparently from one panel.",
+            "Work with a structure designed for independent music projects.",
         },
         {
-          title: "Digital Contracts",
+          title: "Organized collaboration",
           description:
-            "Create, sign and manage all contracts and agreements with your team in one place.",
+            "Prepare your team and project information for each stage.",
         },
         {
-          title: "Invitations",
+          title: "Access process",
           description:
-            "Invite collaborators and team members with specific permissions.",
+            "Request access and let our team learn about your project.",
         },
         {
-          title: "Releases",
+          title: "Music planning",
           description:
-            "Publish and manage your releases with full control and real-time visibility.",
+            "Bring structure to your upcoming releases and important decisions.",
         },
       ],
     },
     howItWorks: {
       sectionLabel: "How it works",
-      headline: "In just 4 simple steps.",
+      headline: "A clear 4-step process.",
       steps: [
         {
-          title: "Sign up",
-          description: "Create your account quickly and securely.",
+          title: "Request access",
+          description: "Tell us about your artistic project through our application.",
         },
         {
-          title: "Upload your music",
-          description: "Upload your releases and complete the release information.",
+          title: "We evaluate your project",
+          description: "Our team reviews your information and artistic profile.",
         },
         {
-          title: "We distribute",
-          description: "Your music reaches all digital platforms worldwide.",
+          title: "Receive your invitation",
+          description: "If your project is approved, you will receive an invitation to continue.",
         },
         {
-          title: "Earn revenue",
-          description: "Receive your payments securely, transparently and on time.",
+          title: "Sign and begin",
+          description: "Complete onboarding, create your account and access the platform.",
         },
       ],
     },
     capabilities: {
       sectionLabel: "Complete platform",
-      headline: "Everything your music business needs.",
+      headline: "A professional foundation for your music project.",
       items: [
         {
-          title: "Global distribution",
-          description: "Your music on the world's leading digital platforms.",
+          title: "Organized project",
+          description: "A clear structure for centralizing your project information.",
         },
         {
           title: "Centralized management",
-          description: "Artists, releases, contracts and team in one place.",
+          description: "Tools designed to keep your music operation organized.",
         },
         {
-          title: "Real-time revenue",
-          description: "View and manage your revenue with full transparency.",
+          title: "Transparent process",
+          description: "Know each stage of the evaluation and onboarding process.",
         },
         {
           title: "Professional software",
-          description: "Built for labels and artists who operate like businesses.",
+          description: "Designed for independent artists who want to grow with structure.",
         },
       ],
-      brand: "Built for real artists.",
-      brandSub: "By real artists.",
+      brand: "Built for real projects.",
+      brandSub: "With a professional structure.",
     },
     dashboardPreview: {
       sectionLabel: "Professional panel",
@@ -364,23 +364,23 @@ export const translations = {
       headline2: "your data,",
       headline3: "your control.",
       description:
-        "An intuitive and modern panel that lets you manage your entire music business from one place.",
+        "An intuitive and modern workspace for organizing your music project.",
       highlights: [
-        "Real-time overview",
-        "Independent modules by area",
-        "Quick and easy actions",
+        "Overview of your project",
+        "Modules organized by area",
+        "Clear and simple actions",
         "Designed for mobile",
       ],
     },
     finalCTA: {
-      headline: "Ready to take your music to the next level?",
+      headline: "Ready to take the next step?",
       description:
-        "Build your musical legacy with professional tools designed for independent artists.",
-      button: "Get started",
+        "Request access and tell us about your music project.",
+      button: "Request access",
     },
     footer: {
       description:
-        "Comprehensive platform for independent artists. Distribution, management and growth in one place.",
+        "A professional space to organize and grow your music project.",
       newsletter: {
         title: "Newsletter",
         description: "Subscribe to receive news, updates and tips.",

@@ -1,10 +1,10 @@
 "use client";
 
-import { UserPlus, Upload, Globe, DollarSign } from "lucide-react";
+import { UserPlus, Search, Mail, FileCheck } from "lucide-react";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useInView } from "@/hooks/useInView";
 
-const icons = [UserPlus, Upload, Globe, DollarSign];
+const icons = [UserPlus, Search, Mail, FileCheck];
 
 export function HowItWorks() {
   const { t } = useTranslation();

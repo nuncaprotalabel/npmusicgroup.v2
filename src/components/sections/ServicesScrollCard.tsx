@@ -47,7 +47,7 @@ const SERVICES: Service[] = [
   {
     icon: Globe,
     title: "Distribución Digital",
-    description: "Lleva tu música a más de 150 plataformas globales",
+    description: "Área de trabajo para preparar tu presencia digital",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -55,7 +55,7 @@ const SERVICES: Service[] = [
   {
     icon: CalendarDays,
     title: "Lanzamientos Programados",
-    description: "Programa y automatiza tus lanzamientos con precisión",
+    description: "Organización de próximos lanzamientos y entregas",
     status: "active",
     iconColor: "#60A5FA",
     iconBg: "rgba(96,165,250,0.10)",
@@ -63,7 +63,7 @@ const SERVICES: Service[] = [
   {
     icon: Wallet,
     title: "Pagos de Regalías",
-    description: "Recibe tus ingresos directamente y sin retenciones",
+    description: "Área prevista para consultar información de ingresos",
     status: "active",
     iconColor: "#34D399",
     iconBg: "rgba(52,211,153,0.10)",
@@ -71,23 +71,23 @@ const SERVICES: Service[] = [
   {
     icon: PieChart,
     title: "División de Regalías",
-    description: "Divide automáticamente los ingresos entre colaboradores",
+    description: "Herramienta prevista para organizar colaboraciones",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
   },
   {
     icon: ShieldCheck,
-    title: "Content ID",
-    description: "Protege tu contenido con registro y reclamación automática",
+    title: "Protección de contenido",
+    description: "Protección de contenido como capacidad en desarrollo",
     status: "active",
     iconColor: "#A78BFA",
     iconBg: "rgba(167,139,250,0.10)",
   },
   {
     icon: PlayCircle,
-    title: "YouTube Monetization",
-    description: "Activa la monetización y recibe ingresos de YouTube",
+    title: "Monetización digital",
+    description: "Monetización en YouTube como capacidad en desarrollo",
     status: "active",
     iconColor: "#F87171",
     iconBg: "rgba(248,113,113,0.10)",
@@ -95,7 +95,7 @@ const SERVICES: Service[] = [
   {
     icon: Zap,
     title: "TikTok",
-    description: "Distribuye y monetiza en TikTok Sound y TikTok Music",
+    description: "Presencia en TikTok como capacidad en desarrollo",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -103,7 +103,7 @@ const SERVICES: Service[] = [
   {
     icon: Camera,
     title: "Instagram",
-    description: "Tu música disponible para Reels, Stories y publicaciones",
+    description: "Presencia en Instagram como capacidad en desarrollo",
     status: "active",
     iconColor: "#F9A8D4",
     iconBg: "rgba(249,168,212,0.10)",
@@ -111,7 +111,7 @@ const SERVICES: Service[] = [
   {
     icon: Music2,
     title: "Facebook Music",
-    description: "Licencia tu catálogo para videos en Facebook",
+    description: "Presencia en Facebook como capacidad en desarrollo",
     status: "active",
     iconColor: "#93C5FD",
     iconBg: "rgba(147,197,253,0.10)",
@@ -119,7 +119,7 @@ const SERVICES: Service[] = [
   {
     icon: Headphones,
     title: "Apple Music",
-    description: "Distribución oficial y aprobada en Apple Music",
+    description: "Presencia en Apple Music como capacidad en desarrollo",
     status: "active",
     iconColor: "#F87171",
     iconBg: "rgba(248,113,113,0.10)",
@@ -127,7 +127,7 @@ const SERVICES: Service[] = [
   {
     icon: Music,
     title: "Spotify",
-    description: "Pitching editorial y distribución prioritaria en Spotify",
+    description: "Planificación de tu presencia en Spotify",
     status: "active",
     iconColor: "#34D399",
     iconBg: "rgba(52,211,153,0.10)",
@@ -135,7 +135,7 @@ const SERVICES: Service[] = [
   {
     icon: Package,
     title: "Amazon Music",
-    description: "Acceso a millones de oyentes de Prime y Unlimited",
+    description: "Presencia en Amazon Music como capacidad en desarrollo",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -143,7 +143,7 @@ const SERVICES: Service[] = [
   {
     icon: Radio,
     title: "Deezer",
-    description: "Distribución completa con perfil de artista verificado",
+    description: "Presencia en Deezer como capacidad en desarrollo",
     status: "active",
     iconColor: "#A78BFA",
     iconBg: "rgba(167,139,250,0.10)",
@@ -151,7 +151,7 @@ const SERVICES: Service[] = [
   {
     icon: Waves,
     title: "Tidal",
-    description: "Audio en alta fidelidad para oyentes premium globales",
+    description: "Presencia en Tidal como capacidad en desarrollo",
     status: "active",
     iconColor: "#60A5FA",
     iconBg: "rgba(96,165,250,0.10)",
@@ -166,16 +166,16 @@ const SERVICES: Service[] = [
   },
   {
     icon: LifeBuoy,
-    title: "Soporte 24/7",
-    description: "Equipo dedicado disponible en todo momento",
+    title: "Acompañamiento",
+    description: "Acompañamiento del equipo según disponibilidad",
     status: "active",
     iconColor: "#34D399",
     iconBg: "rgba(52,211,153,0.10)",
   },
   {
     icon: BarChart3,
-    title: "Estadísticas en Tiempo Real",
-    description: "Análisis avanzado de streams, oyentes y tendencias",
+    title: "Análisis de rendimiento",
+    description: "Área prevista para consultar métricas y tendencias",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -183,7 +183,7 @@ const SERVICES: Service[] = [
   {
     icon: Users,
     title: "Gestión de Artistas",
-    description: "Administra perfiles, roles y permisos por artista",
+    description: "Organización de perfiles y equipos en un solo espacio",
     status: "active",
     iconColor: "#93C5FD",
     iconBg: "rgba(147,197,253,0.10)",
@@ -191,7 +191,7 @@ const SERVICES: Service[] = [
   {
     icon: FileText,
     title: "Contratos Digitales",
-    description: "Firma y gestiona acuerdos con valor legal desde el panel",
+    description: "Contratos digitales como capacidad en desarrollo",
     status: "soon",
     iconColor: "#A78BFA",
     iconBg: "rgba(167,139,250,0.08)",
@@ -199,7 +199,7 @@ const SERVICES: Service[] = [
   {
     icon: UserPlus,
     title: "Invitaciones de Equipo",
-    description: "Invita colaboradores con permisos granulares y seguros",
+    description: "Colaboración con equipos como capacidad en desarrollo",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -207,7 +207,7 @@ const SERVICES: Service[] = [
   {
     icon: LayoutDashboard,
     title: "Panel Administrativo",
-    description: "Control total de tu sello desde una sola interfaz",
+    description: "Espacio de control para la operación del proyecto",
     status: "active",
     iconColor: "#F87171",
     iconBg: "rgba(248,113,113,0.10)",
@@ -215,7 +215,7 @@ const SERVICES: Service[] = [
   {
     icon: BookOpen,
     title: "Gestión de Catálogo",
-    description: "Organiza, filtra y exporta todo tu catálogo musical",
+    description: "Organización del catálogo como capacidad en desarrollo",
     status: "active",
     iconColor: "#34D399",
     iconBg: "rgba(52,211,153,0.10)",
@@ -223,7 +223,7 @@ const SERVICES: Service[] = [
   {
     icon: Lock,
     title: "Protección de Derechos",
-    description: "Registro y vigilancia de propiedad intelectual automatizada",
+    description: "Protección de derechos como capacidad en desarrollo",
     status: "soon",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.08)",
@@ -231,7 +231,7 @@ const SERVICES: Service[] = [
   {
     icon: BadgeCheck,
     title: "Verificación de Lanzamientos",
-    description: "Revisión técnica antes de cada envío a plataformas",
+    description: "Revisión de lanzamientos como capacidad en desarrollo",
     status: "active",
     iconColor: "#60A5FA",
     iconBg: "rgba(96,165,250,0.10)",
@@ -239,7 +239,7 @@ const SERVICES: Service[] = [
   {
     icon: TrendingUp,
     title: "Análisis de Ingresos",
-    description: "Proyecciones, tendencias y reportes financieros detallados",
+    description: "Análisis financiero como capacidad en desarrollo",
     status: "active",
     iconColor: "#F5C400",
     iconBg: "rgba(245,196,0,0.10)",
@@ -299,7 +299,7 @@ export function ServicesScrollCard() {
               <span className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E] opacity-70" />
               <span className="w-2.5 h-2.5 rounded-full bg-[#28C840] opacity-70" />
             </div>
-            <span
+     <span
               className="text-[11px] font-semibold tracking-wide"
               style={{ color: "rgba(255,255,255,0.35)" }}
             >
@@ -323,7 +323,7 @@ export function ServicesScrollCard() {
               className="text-[10px] font-semibold"
               style={{ color: "#34D399" }}
             >
-              25 servicios
+              Vista de servicios
             </span>
           </div>
         </div>
@@ -467,7 +467,7 @@ export function ServicesScrollCard() {
                         letterSpacing: "0.04em",
                       }}
                     >
-                      {service.status === "active" ? "Activo" : "Pronto"}
+                      {service.status === "active" ? "En desarrollo" : "Próximamente"}
                     </span>
                   </div>
                 </div>
@@ -499,7 +499,7 @@ export function ServicesScrollCard() {
               className="text-[10px] font-semibold"
               style={{ color: "rgba(245,196,0,0.55)" }}
             >
-              Todo incluido
+              Espacio de trabajo
             </span>
           </div>
         </div>

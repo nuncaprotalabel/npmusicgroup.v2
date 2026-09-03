@@ -1,0 +1,160 @@
+NP MUSIC GROUP — FASE 1: LIMPIEZA ESTRATÉGICA DEL SITIO PÚBLICO
+
+IMPORTANTE — AHORRO DE CRÉDITOS:
+Este es un cambio pequeño y estrictamente controlado.
+
+NO reconstruyas el proyecto.
+NO cambies el framework.
+NO cambies la arquitectura.
+NO cambies Neon/PostgreSQL.
+NO cambies el panel administrativo.
+NO implementes autenticación.
+NO implementes Too Lost.
+NO implementes contratos.
+NO implementes distribución.
+NO implementes pagos.
+NO agregues nuevas dependencias salvo que sea absolutamente indispensable.
+NO hagas refactors generales.
+NO revises ni modifiques archivos que no sean necesarios para este objetivo.
+NO gastes créditos intentando "mejorar" otras partes del proyecto.
+
+Primero inspecciona únicamente los archivos/componentes necesarios para la página pública actual y realiza SOLO los cambios indicados abajo.
+
+OBJETIVO:
+
+Dejar la página pública de NP Music Group preparada para presentar un producto real, profesional y coherente con el modelo de plataforma privada.
+
+1. CORREGIR EL MENSAJE DE ACCESO
+
+NP Music Group NO es una plataforma de registro abierto.
+
+Eliminar cualquier comunicación que indique:
+
+"Regístrate"
+"Crea tu cuenta"
+"Sube tu música directamente"
+o cualquier flujo que implique acceso inmediato.
+
+El CTA principal debe llevar a:
+
+/aplicar
+
+El concepto correcto debe ser:
+
+Solicitar acceso → Evaluación → Aprobación → Invitación → Contrato → Cuenta → Acceso
+
+2. ACTUALIZAR LA SECCIÓN "CÓMO FUNCIONA"
+
+Reemplazar el proceso actual de registro/subida directa por:
+
+01 — Solicita acceso
+Cuéntanos sobre tu proyecto artístico mediante nuestra solicitud.
+
+02 — Evaluamos tu proyecto
+Nuestro equipo revisa la información y el perfil artístico.
+
+03 — Recibe tu invitación
+Si tu proyecto es aprobado, recibirás una invitación para continuar el proceso.
+
+04 — Firma y comienza
+Completa tu incorporación, crea tu cuenta y accede a la plataforma.
+
+Mantener el diseño visual existente y adaptar solamente el contenido.
+
+3. ELIMINAR PROMESAS O FUNCIONES NO CONFIRMADAS
+
+Eliminar de la página pública cualquier cifra o afirmación que actualmente no pueda demostrarse con datos reales del sistema.
+
+Especialmente eliminar o corregir:
+
+- número ficticio de artistas
+- número ficticio de streams
+- número ficticio de plataformas
+- uptime ficticio
+- soporte 24/7 si no existe realmente
+- ingresos en tiempo real si todavía no están conectados
+- estadísticas en tiempo real si todavía no están conectadas
+- Content ID si todavía no está implementado
+- YouTube Monetization si todavía no está implementado
+- pitching editorial si todavía no está implementado
+- distribución automática si todavía no está implementada
+- pagos automáticos si todavía no están implementados
+- cualquier otra funcionalidad presentada como disponible cuando todavía no existe
+
+NO reemplaces esas afirmaciones por números inventados.
+
+Si una sección depende de una funcionalidad futura, reformula el contenido para describir la plataforma de forma general sin afirmar que esa función ya está operativa.
+
+4. ELIMINAR CONTENIDO DUPLICADO
+
+Revisa únicamente la página pública y elimina cualquier sección de servicios/contenido que esté renderizándose duplicada.
+
+No reconstruyas el componente.
+
+Conserva una sola versión de cada sección.
+
+5. MANTENER EL DISEÑO
+
+MUY IMPORTANTE:
+
+NO rediseñar la página.
+
+NO cambiar:
+
+- logo oficial
+- colores de marca
+- tipografías actuales salvo que sea estrictamente necesario
+- animaciones existentes
+- estructura visual
+- responsive
+- hero
+- imágenes
+- estilo premium
+- estética negra/blanca/amarilla
+
+Solo modificar contenido, textos, enlaces y duplicaciones necesarias para que la página sea honesta y coherente.
+
+6. CTA PRINCIPAL
+
+El CTA principal relacionado con artistas debe apuntar a:
+
+/aplicar
+
+El texto recomendado:
+
+"Solicitar acceso"
+
+Mantener cualquier CTA secundario que tenga sentido, pero NO crear nuevos flujos.
+
+7. REGLA DE VERDAD
+
+NP Music Group debe comunicar únicamente funcionalidades que realmente existen actualmente.
+
+No crear datos ficticios.
+No crear usuarios ficticios.
+No crear artistas ficticios.
+No crear estadísticas ficticias.
+No simular APIs.
+No crear botones que aparenten funcionar si todavía no existe su lógica.
+
+Si una funcionalidad futura debe mencionarse, presentarla como parte de la plataforma, sin afirmar que ya está activa.
+
+8. VERIFICACIÓN FINAL
+
+Al terminar:
+
+- comprobar que la página pública sigue compilando
+- comprobar que /aplicar sigue funcionando
+- comprobar que no se rompió ninguna ruta existente
+- comprobar que el responsive no cambió negativamente
+- comprobar que no existen errores de build
+
+NO hagas ningún cambio adicional después de completar estos puntos.
+
+IMPORTANTE:
+
+Este sprint termina aquí.
+
+NO continúes automáticamente con autenticación, panel, contratos, Too Lost, distribución, ingresos, analíticas, splits ni otras funcionalidades.
+
+Solo realiza esta limpieza estratégica del sitio público.
