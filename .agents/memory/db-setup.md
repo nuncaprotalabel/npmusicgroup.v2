@@ -21,3 +21,10 @@ The schema was applied via the database tool. The `DATABASE_URL` environment var
 
 ## Important constraint
 Any future schema changes must be documented in `docs/DATABASE_PLAN.md` before being applied, per PROJECT_RULES.md.
+
+## Restoration check
+After a workspace/database restore, verify the public tables and active SUPER_ADMIN before debugging application code. A reachable PostgreSQL instance can still be completely empty.
+
+**Why:** The login route reports a generic 500 when its first `users` query hits a missing relation, which can look like an application regression even though the source code is valid.
+
+**How to apply:** Check table existence first, restore the documented idempotent schema when needed, then run the secure bootstrap flow if the user account is absent.
