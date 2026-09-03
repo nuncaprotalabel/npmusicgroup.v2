@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useId } from "react";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useInView } from "@/hooks/useInView";
 
@@ -48,7 +47,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
-  const emailId = useId();
+  const emailId = "footer-email";
   const { t } = useTranslation();
   const { ref, inView } = useInView({ threshold: 0.05 });
 
