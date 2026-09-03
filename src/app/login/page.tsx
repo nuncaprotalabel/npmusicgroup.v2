@@ -27,7 +27,7 @@ function LoginForm() {
   const [error,    setError]    = useState<string | null>(null);
 
   // Limpiar error al modificar campos
-  useEffect(() => { setError(null); }, [username, password]);
+  useEffect(() => { setError(null); }, [email, password]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

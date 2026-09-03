@@ -1,2 +1,3 @@
 - [Database setup](db-setup.md) — Schema + SUPER_ADMIN seed applied to Replit PostgreSQL; DATABASE_URL auto-provisioned.
 - [Dependency restoration](dependency-restoration.md) — After workspace restores, package.json dependencies may need reinstalling before API routes compile.
+- [Isolated production builds](build-workflow.md) — Stop the dev workflow before running `next build` because both processes write to `.next`.
