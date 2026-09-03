@@ -301,3 +301,34 @@ del entorno. El proceso es idempotente y no sobrescribe cuentas existentes.
 - Los logs de auditoría son **inmutables** — no se permiten UPDATE ni DELETE sobre `audit_log`.
 - Los `id` de tipo UUID se generan con `gen_random_uuid()` en PostgreSQL, nunca en la aplicación.
 - Toda modificación al esquema debe actualizarse en este documento antes de aplicarse.
+
+---
+
+## 10. Restauración del esquema de desarrollo
+
+La base de desarrollo fue restaurada de forma idempotente usando el modelo
+definido en este documento para las tablas `users`, `sessions`, `permissions`,
+`role_permissions`, `solicitudes`, `invitations`, `contracts`,
+`contract_signatures` y `audit_log`. También se recrearon sus claves foráneas,
+índices y restricciones de integridad.
+
+La restauración no crea credenciales administrativas por defecto. La cuenta
+`SUPER_ADMIN` se configura únicamente mediante el proceso seguro de bootstrap y
+secretos del entorno.
+
+## 11. Fase 2.8 — `artist_onboarding`
+
+Para mantener la trazabilidad sin duplicar las entidades existentes, se añade
+`artist_onboarding` como relación única entre una solicitud aprobada, su
+invitación utilizada, el contrato firmado y la cuenta ARTIST.
+
+La tabla controla el estado del onboarding y almacena únicamente:
+
+- `activation_token_hash`, nunca el token plano;
+- expiración y fecha de uso del token;
+- fechas de establecimiento de contraseña y activación;
+- `user_id` asociado, cuando la cuenta ya fue creada.
+
+`contract_id`, `invitation_id`, `solicitud_id` y `user_id` tienen restricciones
+de unicidad donde corresponde para hacer el proceso idempotente. No se crean
+nuevas tablas de usuarios, sesiones, invitaciones, contratos ni auditoría.
