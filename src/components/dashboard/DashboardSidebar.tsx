@@ -69,7 +69,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   {
     group: "Sistema",
     items: [
-      { href: "/dashboard/cuentas",       label: "Cuentas",       icon: UserCog },
+      { href: "/admin/cuentas",            label: "Cuentas",       icon: UserCog },
       { href: "/dashboard/permisos",      label: "Permisos",      icon: ShieldCheck },
       { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
     ],

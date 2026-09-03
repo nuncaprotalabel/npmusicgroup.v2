@@ -190,8 +190,8 @@ CREATE TRIGGER users_updated_at
 
 ### Permisos base
 
-29 permisos distribuidos en 9 módulos:
-`system`, `users`, `artists`, `releases`, `distribution`, `revenue`, `contracts`, `analytics`, `invitations`, `audit`
+31 permisos distribuidos en 10 módulos:
+`system`, `users`, `accounts`, `artists`, `releases`, `distribution`, `revenue`, `contracts`, `analytics`, `invitations`, `audit`
 
 ### Estado de implementación de Fase 2.1
 

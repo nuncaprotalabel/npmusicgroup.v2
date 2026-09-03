@@ -1,0 +1,328 @@
+NP MUSIC GROUP — FASE 2.3: CUENTAS
+
+OBJETIVO ÚNICO:
+Construir el módulo REAL de gestión de cuentas en:
+
+/admin/cuentas
+
+Usar exclusivamente la autenticación y RBAC que YA existen en las Fases 2.1 y 2.2.
+
+==================================================
+REGLA DE AHORRO DE CRÉDITOS — OBLIGATORIA
+==================================================
+
+Trabaja únicamente en esta fase.
+
+NO reconstruyas nada existente.
+NO reinstales autenticación.
+NO recrees roles.
+NO recrees permisos.
+NO rehagas sesiones.
+NO rehagas audit_log.
+NO rediseñes la aplicación.
+NO modifiques la landing.
+NO modifiques /aplicar.
+NO implementes artistas.
+NO implementes solicitudes.
+NO implementes invitaciones.
+NO implementes contratos.
+NO implementes lanzamientos.
+NO implementes distribución.
+NO implementes Too Lost.
+NO implementes splits.
+NO implementes ingresos.
+NO implementes analíticas.
+NO implementes mensajes.
+NO implementes recuperación de contraseña por email.
+NO hagas refactors generales.
+NO agregues dependencias salvo necesidad estricta.
+
+No analices todo el proyecto.
+Inspecciona solamente los archivos necesarios para users, RBAC, sessions, audit_log y /admin/cuentas.
+
+Reutiliza código existente siempre que sea posible.
+
+Si algo necesario ya existe, úsalo.
+Si algo no es necesario para esta fase, NO lo construyas.
+
+==================================================
+1. ACCESO
+==================================================
+
+/admin/cuentas requiere:
+
+accounts.view
+
+Las acciones de administración requieren:
+
+accounts.manage
+
+La autorización debe comprobarse SERVER-SIDE.
+
+No confiar únicamente en botones ocultos o permisos del frontend.
+
+==================================================
+2. LISTADO REAL
+==================================================
+
+Crear /admin/cuentas utilizando Neon/PostgreSQL.
+
+Mostrar únicamente cuentas reales.
+
+Columnas:
+
+- Usuario
+- Correo
+- Rol
+- Estado
+- Creación
+- Acciones
+
+Estados:
+
+ACTIVA
+DESACTIVADA
+
+Si actualmente solo existe SUPER_ADMIN, mostrar únicamente esa cuenta.
+
+NO crear usuarios demo.
+
+NO crear datos ficticios.
+
+==================================================
+3. CREAR CUENTA
+==================================================
+
+Permitir al usuario autorizado crear una cuenta real.
+
+Campos:
+
+- Username
+- Email
+- Rol
+
+Roles permitidos exclusivamente:
+
+SUPER_ADMIN
+ADMIN
+DISTRIBUTION_MANAGER
+MANAGER
+ARTIST
+VIEWER
+
+Validar:
+
+- email válido
+- username válido
+- email único
+- username único
+- rol válido
+
+La contraseña nunca debe almacenarse en texto plano.
+
+Utilizar bcrypt y la infraestructura de autenticación existente.
+
+Para esta fase, si todavía no existe sistema de correo, NO construyas uno.
+
+En su lugar, permite crear la cuenta mediante un flujo seguro de establecimiento de contraseña que NO exponga secretos en logs ni en el código.
+
+Si esto requiere una decisión arquitectónica que afecte otros módulos, DETENTE y reporta el bloqueo en lugar de improvisar.
+
+==================================================
+4. EDITAR CUENTA
+==================================================
+
+Permitir editar:
+
+- username
+- email
+- rol
+
+Los cambios deben persistir en Neon.
+
+Después de cambiar el rol, invalidar las sesiones existentes de esa cuenta para evitar que conserve permisos antiguos.
+
+==================================================
+5. ACTIVAR / DESACTIVAR
+==================================================
+
+Permitir activar y desactivar cuentas.
+
+Desactivar NO debe eliminar físicamente el usuario.
+
+Una cuenta desactivada:
+
+- no puede iniciar sesión
+- debe conservar sus datos
+- debe conservar su historial
+- sus sesiones activas deben invalidarse
+
+==================================================
+6. PROTECCIÓN SUPER_ADMIN
+==================================================
+
+La cuenta SUPER_ADMIN existente debe permanecer protegida.
+
+Nunca permitir una operación que deje el sistema sin ningún SUPER_ADMIN.
+
+No permitir eliminar físicamente al único SUPER_ADMIN.
+
+No implementar todavía gestión avanzada de múltiples SUPER_ADMIN.
+
+==================================================
+7. SESIONES
+==================================================
+
+Utilizar la tabla sessions existente.
+
+Permitir invalidar las sesiones activas de una cuenta cuando sea necesario.
+
+No crear otro sistema de sesiones.
+
+==================================================
+8. AUDITORÍA
+==================================================
+
+Usar el audit_log existente.
+
+Registrar:
+
+- creación de cuenta
+- modificación de cuenta
+- cambio de rol
+- activación
+- desactivación
+- invalidación de sesiones
+
+Nunca registrar:
+
+- contraseñas
+- hashes
+- tokens
+- secretos
+
+==================================================
+9. INTERFAZ
+==================================================
+
+Utilizar el diseño administrativo que ya existe.
+
+No crear un nuevo sistema visual.
+
+Mantener:
+
+- negro
+- blanco
+- amarillo
+- estética premium
+- responsive
+- experiencia Android
+
+La página debe incluir como mínimo:
+
+- título
+- listado
+- botón "Crear cuenta"
+- formulario/modal para crear
+- acciones de edición
+- activar/desactivar
+
+No agregar widgets decorativos, estadísticas falsas ni tarjetas innecesarias.
+
+==================================================
+10. API / SEGURIDAD
+==================================================
+
+Toda operación de:
+
+crear
+editar
+cambiar rol
+activar
+desactivar
+invalidar sesiones
+
+debe verificar server-side:
+
+- sesión válida
+- usuario activo
+- accounts.manage
+
+No confiar en datos del cliente.
+
+No permitir modificar usuarios mediante llamadas directas no autorizadas.
+
+==================================================
+11. BASE DE DATOS
+==================================================
+
+Reutilizar las tablas existentes:
+
+users
+sessions
+audit_log
+roles
+permissions
+role_permissions
+
+NO crear tablas duplicadas.
+
+NO borrar datos existentes.
+
+Solo modificar el esquema si existe una necesidad estrictamente indispensable para esta fase.
+
+==================================================
+12. VERIFICACIÓN
+==================================================
+
+Antes de terminar comprobar:
+
+- /admin/cuentas protegido.
+- SUPER_ADMIN puede acceder.
+- accounts.manage protege las acciones.
+- listado utiliza datos reales de Neon.
+- crear cuenta funciona.
+- edición funciona.
+- cambio de rol funciona.
+- cambio de rol invalida sesiones existentes.
+- desactivar cuenta funciona.
+- cuenta desactivada no puede iniciar sesión.
+- sesiones pueden invalidarse.
+- audit_log registra acciones.
+- único SUPER_ADMIN no puede quedar eliminado/desactivado de forma insegura.
+- no hay contraseñas en texto plano.
+- no hay secretos en código/logs.
+- TypeScript correcto.
+- build correcto.
+- login continúa funcionando.
+- logout continúa funcionando.
+- / continúa funcionando.
+- /aplicar continúa funcionando.
+
+==================================================
+REGLA FINAL — MUY IMPORTANTE
+==================================================
+
+Cuando termines esta fase:
+
+DETENTE.
+
+NO continúes con la siguiente fase.
+
+NO implementes solicitudes, artistas, invitaciones, contratos, lanzamientos, distribución, Too Lost, splits, ingresos, analíticas o mensajes.
+
+No hagas mejoras adicionales.
+
+El objetivo es dejar ÚNICAMENTE:
+
+/admin/cuentas
+
+funcional, seguro y conectado a Neon.
+
+PRIORIDAD:
+
+FUNCIONALIDAD REAL
+SEGURIDAD
+REUTILIZAR CÓDIGO EXISTENTE
+MÍNIMOS ARCHIVOS MODIFICADOS
+MÍNIMO CONSUMO DE CRÉDITOS
