@@ -1,4 +1,5 @@
 import type { CreateSolicitudRequest, Solicitud, SolicitudErrorResponse } from '@/types/solicitud';
+import type { InvitationLinkResult } from '@/types/invitations';
 
 export interface SubmitSolicitudResult {
   solicitud?: Solicitud;
@@ -58,6 +59,23 @@ export async function updateSolicitudStatus(
     const payload = await response.json() as UpdateSolicitudResult;
     if (!response.ok) return { error: payload.error || 'No se pudo actualizar la solicitud.' };
     return { solicitud: payload.solicitud };
+  } catch {
+    return { error: 'No se pudo conectar con el servidor. Intenta de nuevo.' };
+  }
+}
+
+export async function createInvitationForSolicitud(
+  solicitudId: string,
+): Promise<InvitationLinkResult> {
+  try {
+    const response = await fetch('/api/admin/invitaciones', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ solicitudId }),
+    });
+    const payload = await response.json() as InvitationLinkResult;
+    if (!response.ok) return { error: payload.error || 'No se pudo crear la invitación.' };
+    return payload;
   } catch {
     return { error: 'No se pudo conectar con el servidor. Intenta de nuevo.' };
   }

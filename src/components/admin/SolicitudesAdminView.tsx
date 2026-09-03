@@ -8,13 +8,20 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock3,
+  Copy,
   ExternalLink,
+  Link2,
   Loader2,
   X,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { getSolicitudes, updateSolicitudStatus } from "@/services/solicitudService";
+import {
+  createInvitationForSolicitud,
+  getSolicitudes,
+  updateSolicitudStatus,
+} from "@/services/solicitudService";
+import type { InvitationLinkResult } from "@/types/invitations";
 import type { Solicitud, SolicitudEstado } from "@/types/solicitud";
 
 const STATUS_CONFIG: Record<SolicitudEstado, {
@@ -34,6 +41,8 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Solicitud | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [invitationLink, setInvitationLink] = useState<InvitationLinkResult | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -62,6 +71,28 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
     }
     setSelected(null);
     await load();
+  }
+
+  async function createInvitation(solicitud: Solicitud) {
+    if (!window.confirm(`¿Generar una invitación para ${solicitud.nombreArtistico}?`)) return;
+    setBusyId(solicitud.id);
+    const result = await createInvitationForSolicitud(solicitud.id);
+    setBusyId(null);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setInvitationLink(result);
+    setCopied(false);
+  }
+
+  async function copyInvitationLink() {
+    if (!invitationLink?.invitationUrl) return;
+    await navigator.clipboard.writeText(
+      new URL(invitationLink.invitationUrl, window.location.origin).toString(),
+    );
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
   }
 
   return (
@@ -135,8 +166,14 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
           solicitud={selected}
           canManage={canManage}
           busy={busyId === selected.id}
+          invitationLink={
+            invitationLink?.invitation?.solicitudId === selected.id ? invitationLink : null
+          }
+          copied={copied}
           onClose={() => setSelected(null)}
           onProcess={(estado) => void processSolicitud(selected, estado)}
+          onCreateInvitation={() => void createInvitation(selected)}
+          onCopyInvitationLink={() => void copyInvitationLink()}
         />
       )}
     </div>
@@ -196,14 +233,22 @@ function SolicitudDetail({
   solicitud,
   canManage,
   busy,
+  invitationLink,
+  copied,
   onClose,
   onProcess,
+  onCreateInvitation,
+  onCopyInvitationLink,
 }: {
   solicitud: Solicitud;
   canManage: boolean;
   busy: boolean;
+  invitationLink: InvitationLinkResult | null;
+  copied: boolean;
   onClose: () => void;
   onProcess: (estado: Extract<SolicitudEstado, "APROBADA" | "RECHAZADA">) => void;
+  onCreateInvitation: () => void;
+  onCopyInvitationLink: () => void;
 }) {
   const isPending = solicitud.estado === "PENDIENTE";
   return (
@@ -245,6 +290,50 @@ function SolicitudDetail({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {solicitud.instagram && <Info label="Instagram" value={solicitud.instagram} />}
               {solicitud.tiktok && <Info label="TikTok" value={solicitud.tiktok} />}
+            </div>
+          )}
+
+          {canManage && solicitud.estado === "APROBADA" && (
+            <div className="border-t border-[#141414] pt-5">
+              <p className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-[#404040]">
+                Incorporación
+              </p>
+              {invitationLink?.invitationUrl ? (
+                <div className="rounded-lg border border-[#F5C518]/25 bg-[#F5C518]/[0.06] p-3">
+                  <p className="mb-2 flex items-center gap-2 text-xs font-medium text-white">
+                    <Link2 size={14} className="text-[#F5C518]" />
+                    Enlace de invitación generado
+                  </p>
+                  <code className="block break-all rounded border border-[#2A2A2A] bg-[#0A0A0A] px-2.5 py-2 text-xs text-[#F5C518]">
+                    {new URL(
+                      invitationLink.invitationUrl,
+                      typeof window === "undefined" ? "http://localhost" : window.location.origin,
+                    ).toString()}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    className="mt-2"
+                    icon={copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+                    onClick={onCopyInvitationLink}
+                  >
+                    {copied ? "Copiado" : "Copiar enlace"}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  fullWidth
+                  disabled={busy}
+                  loading={busy}
+                  icon={!busy ? <Link2 size={15} /> : undefined}
+                  onClick={onCreateInvitation}
+                >
+                  Crear invitación
+                </Button>
+              )}
             </div>
           )}
 

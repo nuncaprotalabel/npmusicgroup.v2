@@ -106,18 +106,29 @@ Registro de sesiones para auditoría y seguimiento.
 
 ### 3.6 `invitations`
 
-Invitaciones para nuevos usuarios.
+Invitaciones seguras relacionadas con solicitudes aprobadas. La tabla existente
+se amplió sin crear una tabla duplicada; conserva columnas legadas para
+compatibilidad con el flujo de cuentas.
 
 | Columna      | Tipo        | Restricciones                               | Descripción                    |
 |--------------|-------------|---------------------------------------------|--------------------------------|
 | `id`         | UUID        | PK, DEFAULT gen_random_uuid()               | Identificador único            |
+| `solicitud_id`| UUID       | FK → solicitudes(id), NULLABLE              | Solicitud aprobada relacionada |
 | `email`      | VARCHAR(255)| NOT NULL                                    | Email del invitado             |
-| `role`       | user_role   | NOT NULL                                    | Rol asignado al aceptar        |
-| `token`      | VARCHAR(255)| UNIQUE NOT NULL                             | Token de invitación (único)    |
+| `role`       | user_role   | NULLABLE, legado                            | Rol asignado al aceptar        |
+| `token_hash` | VARCHAR(128)| UNIQUE cuando existe, NULLABLE              | Hash del token seguro           |
+| `token`      | VARCHAR(255)| UNIQUE, NULLABLE, legado                    | Columna de compatibilidad       |
 | `invited_by` | UUID        | FK → users(id) ON DELETE SET NULL, NULLABLE | Quien envió la invitación      |
 | `expires_at` | TIMESTAMPTZ | NOT NULL                                    | Vencimiento de la invitación   |
+| `status`     | VARCHAR(20) | NOT NULL, CHECK de estados válidos           | PENDIENTE / UTILIZADA / EXPIRADA / REVOCADA |
+| `created_by` | UUID        | FK → users(id) ON DELETE SET NULL, NULLABLE | Usuario administrativo creador |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW()                               | Última actualización            |
 | `accepted_at`| TIMESTAMPTZ | NULLABLE                                    | Fecha de aceptación            |
 | `created_at` | TIMESTAMPTZ | DEFAULT NOW()                               | Fecha de creación              |
+
+Las invitaciones vinculadas a solicitudes nuevas guardan únicamente
+`token_hash`; el token plano existe solo al generar el enlace y no se registra
+en `audit_log`.
 
 ### 3.7 `audit_log`
 

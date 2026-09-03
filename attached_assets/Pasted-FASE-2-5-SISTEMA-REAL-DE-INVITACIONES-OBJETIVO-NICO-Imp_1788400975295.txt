@@ -1,0 +1,445 @@
+FASE 2.5 — SISTEMA REAL DE INVITACIONES
+
+OBJETIVO ÚNICO:
+Implementar el módulo administrativo real de invitaciones para conectar solicitudes APROBADAS con el futuro flujo de incorporación.
+
+IMPORTANTE — AHORRO DE CRÉDITOS:
+- NO reconstruyas el proyecto.
+- NO hagas refactors generales.
+- NO cambies el sitio público.
+- NO modifiques /aplicar.
+- NO modifiques autenticación existente.
+- NO modifiques RBAC existente salvo que sea estrictamente necesario.
+- NO modifiques /admin/cuentas salvo compatibilidad mínima.
+- NO implementes contratos.
+- NO implementes firma de contratos.
+- NO implementes artistas.
+- NO implementes distribución.
+- NO implementes lanzamientos.
+- NO envíes contraseñas.
+- NO crees contraseñas temporales.
+- NO actives cuentas automáticamente.
+- NO agregues dependencias innecesarias.
+
+Inspecciona únicamente los archivos necesarios y reutiliza la arquitectura existente.
+
+REGLA PRINCIPAL:
+Todo debe ser real y persistir en PostgreSQL.
+NO mock data.
+NO datos demo.
+NO simulaciones.
+
+==================================================
+1. OBJETIVO DEL FLUJO
+==================================================
+
+Una solicitud solamente puede generar una invitación cuando está:
+
+PENDIENTE → APROBADA
+
+Una solicitud RECHAZADA no puede generar invitación.
+
+Una solicitud APROBADA podrá tener una invitación asociada.
+
+La invitación será el puente entre:
+
+Solicitud aprobada
+        ↓
+Invitación
+        ↓
+Futuro contrato
+        ↓
+Futura activación de cuenta
+
+En esta fase solamente implementar el segundo paso.
+
+==================================================
+2. BASE DE DATOS
+==================================================
+
+Crear una tabla real `invitaciones` solamente si no existe una equivalente.
+
+NO crear duplicados.
+
+La tabla debe permitir como mínimo:
+
+- id UUID
+- solicitud_id UUID, relacionada con solicitudes
+- email
+- token_hash o mecanismo equivalente seguro
+- expires_at
+- status
+- created_at
+- updated_at
+- created_by
+
+Estados mínimos:
+
+PENDIENTE
+UTILIZADA
+EXPIRADA
+REVOCADA
+
+La invitación debe tener un token seguro y no predecible.
+
+IMPORTANTE:
+NO guardar el token plano en PostgreSQL si la arquitectura existente permite guardar únicamente su hash.
+
+El token plano solamente debe existir durante la creación/generación del enlace.
+
+NO registrar el token en audit_log.
+
+Si la arquitectura actual requiere una migración:
+- crear una migración mínima
+- no modificar tablas existentes innecesariamente.
+
+==================================================
+3. RELACIÓN CON SOLICITUDES
+==================================================
+
+Una invitación debe estar relacionada con una solicitud aprobada.
+
+Validar server-side:
+
+- solicitud existe
+- solicitud está APROBADA
+- solicitud no tiene una invitación pendiente/activa incompatible
+
+Evitar duplicar invitaciones accidentalmente.
+
+Si ya existe una invitación pendiente válida para la solicitud:
+- no crear otra automáticamente
+- mostrar que ya existe.
+
+==================================================
+4. PERMISOS
+==================================================
+
+El módulo debe utilizar RBAC existente.
+
+Usar:
+
+invitations.view
+
+para consultar.
+
+Usar:
+
+invitations.manage
+
+para:
+
+- crear invitación
+- revocar invitación
+- regenerar invitación si corresponde
+
+Nunca confiar solamente en frontend.
+
+Las APIs deben devolver 401/403 correctamente.
+
+No crear un sistema de permisos paralelo.
+
+==================================================
+5. MÓDULO /admin/invitaciones
+==================================================
+
+Crear:
+
+/admin/invitaciones
+
+Debe mostrar invitaciones reales de PostgreSQL.
+
+Como mínimo:
+
+- Solicitud relacionada
+- Nombre artístico
+- Email
+- Estado
+- Fecha de creación
+- Vencimiento
+- Usuario que la creó
+- Acciones disponibles
+
+Estados claramente diferenciados.
+
+No agregar estadísticas falsas.
+
+==================================================
+6. CREAR INVITACIÓN
+==================================================
+
+Desde una solicitud APROBADA debe existir una acción:
+
+"Crear invitación"
+
+Al ejecutarla:
+
+1. Validar permisos.
+2. Validar sesión.
+3. Validar que la solicitud está APROBADA.
+4. Validar que no existe invitación pendiente válida.
+5. Generar token criptográficamente seguro.
+6. Guardar únicamente la representación segura del token.
+7. Crear invitación con expiración.
+8. Registrar creador.
+9. Registrar auditoría.
+10. Generar el enlace de invitación.
+
+IMPORTANTE:
+
+NO enviar email todavía.
+
+La fase actual solamente debe generar el enlace.
+
+El enlace debe apuntar a una ruta pública dedicada, por ejemplo:
+
+/invitacion/[token]
+
+Pero esa página solamente necesita quedar preparada para validar la invitación.
+
+NO permitir todavía establecer contraseña ni activar la cuenta.
+
+==================================================
+7. PÁGINA PÚBLICA DE INVITACIÓN
+==================================================
+
+Crear la ruta pública necesaria para abrir una invitación.
+
+Debe:
+
+- recibir el token
+- validarlo server-side
+- comprobar expiración
+- comprobar estado
+- comprobar que no fue revocado/utilizado
+- mostrar una pantalla profesional
+
+Estados posibles:
+
+INVITACIÓN VÁLIDA
+INVITACIÓN EXPIRADA
+INVITACIÓN REVOCADA
+INVITACIÓN NO VÁLIDA
+INVITACIÓN YA UTILIZADA
+
+NO mostrar el token internamente.
+
+NO permitir acceso al panel.
+
+NO permitir establecer contraseña todavía.
+
+NO activar ninguna cuenta.
+
+La página debe dejar preparado el siguiente paso del sistema.
+
+==================================================
+8. REVOCAR INVITACIÓN
+==================================================
+
+Implementar revocación administrativa.
+
+Solo:
+
+PENDIENTE → REVOCADA
+
+Debe:
+
+- actualizar PostgreSQL
+- registrar audit_log
+- impedir el uso posterior del token
+
+No eliminar físicamente la invitación.
+
+==================================================
+9. REGENERAR INVITACIÓN
+==================================================
+
+Si una invitación expira, debe poder generarse una nueva.
+
+No reutilizar el token anterior.
+
+El nuevo token debe ser completamente diferente.
+
+La invitación anterior debe quedar EXPIRADA o REVOCADA según corresponda.
+
+No crear múltiples invitaciones activas para la misma solicitud.
+
+==================================================
+10. AUDITORÍA
+==================================================
+
+Usar el audit_log existente.
+
+Registrar:
+
+- invitación creada
+- invitación revocada
+- invitación regenerada
+- uso/validación relevante de invitación si corresponde
+
+Registrar:
+
+- usuario administrativo responsable
+- acción
+- invitación afectada
+- solicitud afectada
+- timestamp
+
+NUNCA registrar:
+
+- token plano
+- contraseñas
+- secretos
+
+==================================================
+11. SEGURIDAD
+==================================================
+
+El token debe ser criptográficamente seguro.
+
+Debe tener suficiente entropía.
+
+No usar:
+
+- IDs como token
+- emails como token
+- timestamps como token
+- UUID predecible como único secreto
+- información de la solicitud dentro del token
+
+La validación del token debe hacerse server-side.
+
+No confiar en datos enviados por el navegador.
+
+Evitar filtración del token en logs.
+
+==================================================
+12. NAVEGACIÓN
+==================================================
+
+Agregar /admin/invitaciones a la navegación administrativa existente.
+
+Reutilizar:
+
+DashboardSidebar
+DashboardMobileSidebar
+DashboardHeader
+
+Mantener la estructura visual existente.
+
+No crear una segunda navegación.
+
+Si existe /dashboard/invitaciones:
+redirigir hacia /admin/invitaciones.
+
+==================================================
+13. DISEÑO
+==================================================
+
+Mantener exactamente el lenguaje visual administrativo existente:
+
+- negro
+- blanco
+- amarillo para acciones
+- rojo únicamente para acciones críticas
+- limpio
+- profesional
+- minimalista
+- responsive
+- excelente Android
+
+No agregar:
+
+- gráficos innecesarios
+- widgets decorativos
+- estadísticas falsas
+- cards vacías
+- elementos gamer
+- gradientes exagerados
+
+==================================================
+14. NO HACER TODAVÍA
+==================================================
+
+Esta fase NO debe implementar:
+
+- contratos
+- firma electrónica
+- cuentas activas
+- establecimiento de contraseña
+- login mediante invitación
+- artistas
+- colaboradores
+- splits
+- lanzamientos
+- distribución
+- Too Lost
+- emails automáticos
+
+Si alguna parte de la arquitectura futura necesita prepararse, hacerlo únicamente de forma mínima y sin activar funcionalidades futuras.
+
+==================================================
+15. VERIFICACIÓN
+==================================================
+
+Verificar obligatoriamente:
+
+- sin sesión → /admin/invitaciones requiere login
+- sin invitations.view → 403
+- sin invitations.manage → no puede crear/revocar/regenerar
+- SUPER_ADMIN → acceso completo
+- solicitud PENDIENTE → no puede generar invitación
+- solicitud RECHAZADA → no puede generar invitación
+- solicitud APROBADA → puede generar invitación
+- no se generan duplicados activos
+- token no aparece en audit_log
+- invitación expirada no funciona
+- invitación revocada no funciona
+- invitación válida se valida correctamente
+- revocación persiste
+- regeneración crea token nuevo
+- no se crea ninguna cuenta automáticamente
+- no se activa ninguna cuenta
+- no se establece ninguna contraseña
+- no se envían emails
+
+Ejecutar:
+
+npx tsc --noEmit
+npm run build
+
+Si existen tests relevantes, ejecutarlos.
+
+==================================================
+16. CRITERIO DE FINALIZACIÓN
+==================================================
+
+La fase termina cuando exista:
+
+SOLICITUD APROBADA
+        ↓
+INVITACIÓN REAL
+        ↓
+ENLACE SEGURO
+        ↓
+VALIDACIÓN PÚBLICA
+
+con:
+
+- PostgreSQL
+- RBAC
+- auditoría
+- expiración
+- revocación
+- regeneración segura
+
+DETENTE AL TERMINAR ESTA FASE.
+
+Al finalizar responde solamente con:
+
+1. Archivos modificados.
+2. Migraciones realizadas.
+3. Endpoints creados/modificados.
+4. Rutas nuevas.
+5. Verificaciones ejecutadas.
+6. Confirmación explícita de que NO se implementaron contratos, contraseñas, cuentas activas ni emails.
