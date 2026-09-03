@@ -38,7 +38,7 @@ const NAV_GROUPS = [
     group: "Gestión",
     items: [
       { href: "/dashboard/artistas",    label: "Artistas",            icon: Users },
-      { href: "/dashboard/solicitudes", label: "Solicitudes",         icon: Inbox },
+      { href: "/admin/solicitudes", label: "Solicitudes",              icon: Inbox },
       { href: "/dashboard/invitaciones",label: "Invitaciones",        icon: Mail },
       { href: "/dashboard/contratos",   label: "Contratos",           icon: FileText },
       { href: "/dashboard/lanzamientos",label: "Lanzamientos",        icon: Send,

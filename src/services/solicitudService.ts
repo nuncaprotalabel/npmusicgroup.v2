@@ -23,3 +23,42 @@ export async function submitSolicitud(data: CreateSolicitudRequest): Promise<Sub
     return { error: 'No se pudo conectar con el servidor. Intenta de nuevo.' };
   }
 }
+
+export interface GetSolicitudesResult {
+  solicitudes?: Solicitud[];
+  error?: string;
+}
+
+export interface UpdateSolicitudResult {
+  solicitud?: Solicitud;
+  error?: string;
+}
+
+export async function getSolicitudes(): Promise<GetSolicitudesResult> {
+  try {
+    const response = await fetch('/api/admin/solicitudes', { cache: 'no-store' });
+    const payload = await response.json() as GetSolicitudesResult;
+    if (!response.ok) return { error: payload.error || 'No se pudieron cargar las solicitudes.' };
+    return { solicitudes: payload.solicitudes ?? [] };
+  } catch {
+    return { error: 'No se pudo conectar con el servidor. Intenta de nuevo.' };
+  }
+}
+
+export async function updateSolicitudStatus(
+  id: string,
+  estado: Extract<Solicitud['estado'], 'APROBADA' | 'RECHAZADA'>,
+): Promise<UpdateSolicitudResult> {
+  try {
+    const response = await fetch(`/api/admin/solicitudes/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado }),
+    });
+    const payload = await response.json() as UpdateSolicitudResult;
+    if (!response.ok) return { error: payload.error || 'No se pudo actualizar la solicitud.' };
+    return { solicitud: payload.solicitud };
+  } catch {
+    return { error: 'No se pudo conectar con el servidor. Intenta de nuevo.' };
+  }
+}

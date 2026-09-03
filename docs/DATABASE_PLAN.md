@@ -67,7 +67,29 @@ Tabla de relación N:M entre roles y permisos.
 | `role`          | user_role | NOT NULL, PK compuesto                      | Rol del usuario   |
 | `permission_id` | INTEGER   | NOT NULL, FK → permissions(id) ON DELETE CASCADE, PK compuesto | Permiso asignado |
 
-### 3.4 `sessions`
+### 3.4 `solicitudes`
+
+Solicitudes públicas de ingreso recibidas desde `/aplicar`.
+
+| Columna              | Tipo         | Restricciones                                      | Descripción                         |
+|----------------------|--------------|----------------------------------------------------|-------------------------------------|
+| `id`                 | UUID         | PK, DEFAULT gen_random_uuid()                      | Identificador único                 |
+| `nombre_artistico`   | VARCHAR(150) | NOT NULL                                           | Nombre artístico                    |
+| `email`              | VARCHAR(255) | NOT NULL                                           | Correo de contacto                  |
+| `pais`               | VARCHAR(100) | NOT NULL                                           | País                                |
+| `genero_principal`   | VARCHAR(100) | NOT NULL                                           | Género musical principal            |
+| `enlace_principal`   | TEXT         | NOT NULL                                           | Link musical principal              |
+| `instagram`          | VARCHAR(255) | NULLABLE                                           | Usuario o enlace de Instagram      |
+| `tiktok`             | VARCHAR(255) | NULLABLE                                           | Usuario o enlace de TikTok          |
+| `mensaje`            | TEXT         | NULLABLE                                           | Mensaje de presentación             |
+| `estado`             | VARCHAR(20)  | DEFAULT 'PENDIENTE', CHECK de estados válidos      | PENDIENTE / REVISANDO / APROBADA / RECHAZADA |
+| `created_at`         | TIMESTAMPTZ  | DEFAULT NOW()                                      | Fecha de solicitud                  |
+| `updated_at`         | TIMESTAMPTZ  | DEFAULT NOW()                                      | Última actualización                |
+
+El módulo administrativo solo permite las transiciones `PENDIENTE → APROBADA`
+y `PENDIENTE → RECHAZADA`.
+
+### 3.5 `sessions`
 
 Registro de sesiones para auditoría y seguimiento.
 
@@ -82,7 +104,7 @@ Registro de sesiones para auditoría y seguimiento.
 | `ended_at`   | TIMESTAMPTZ | NULLABLE                                 | Fin de la sesión (logout)    |
 | `is_active`  | BOOLEAN     | DEFAULT true                             | Sesión activa                |
 
-### 3.5 `invitations`
+### 3.6 `invitations`
 
 Invitaciones para nuevos usuarios.
 
@@ -97,7 +119,7 @@ Invitaciones para nuevos usuarios.
 | `accepted_at`| TIMESTAMPTZ | NULLABLE                                    | Fecha de aceptación            |
 | `created_at` | TIMESTAMPTZ | DEFAULT NOW()                               | Fecha de creación              |
 
-### 3.6 `audit_log`
+### 3.7 `audit_log`
 
 Log inmutable de eventos importantes del sistema.
 
@@ -190,8 +212,8 @@ CREATE TRIGGER users_updated_at
 
 ### Permisos base
 
-31 permisos distribuidos en 10 módulos:
-`system`, `users`, `accounts`, `artists`, `releases`, `distribution`, `revenue`, `contracts`, `analytics`, `invitations`, `audit`
+33 permisos distribuidos en 12 módulos:
+`system`, `users`, `accounts`, `applications`, `artists`, `releases`, `distribution`, `revenue`, `contracts`, `analytics`, `invitations`, `audit`
 
 ### Estado de implementación de Fase 2.1
 

@@ -1,0 +1,290 @@
+FASE 2.4 — GESTIÓN ADMINISTRATIVA DE SOLICITUDES
+
+OBJETIVO ÚNICO:
+Construir exclusivamente el módulo administrativo /admin/solicitudes para gestionar las solicitudes reales que ya llegan desde /aplicar.
+
+IMPORTANTE — AHORRO DE CRÉDITOS:
+- NO reconstruyas el proyecto.
+- NO hagas refactors generales.
+- NO cambies la arquitectura existente.
+- NO modifiques el diseño público.
+- NO modifiques /aplicar salvo que sea estrictamente necesario para compatibilidad.
+- NO modifiques autenticación, RBAC ni /admin/cuentas.
+- NO implementes todavía invitaciones, contratos, artistas, lanzamientos ni distribución.
+- NO agregues dependencias innecesarias.
+- Inspecciona únicamente los archivos necesarios para entender la tabla solicitudes, el patrón de autorización existente y el layout administrativo.
+- Reutiliza todo lo que ya existe.
+
+REGLA PRINCIPAL:
+Todo lo que aparezca en la interfaz debe ser funcional y trabajar con PostgreSQL.
+NO crear datos demo, mock data, usuarios ficticios ni estados simulados.
+
+==================================================
+1. ACCESO Y SEGURIDAD
+==================================================
+
+La página /admin/solicitudes requiere server-side:
+
+applications.view
+
+Las acciones de modificación requieren:
+
+applications.manage
+
+Nunca confiar únicamente en ocultar botones en frontend.
+
+Si un usuario no tiene permiso:
+- devolver 403 en API
+- no permitir la operación aunque llame directamente al endpoint.
+
+SUPER_ADMIN debe conservar acceso total mediante el sistema RBAC existente.
+
+Reutiliza requirePermission(...) y el sistema de sesión/RBAC existente.
+NO crear otro sistema de autorización.
+
+==================================================
+2. LISTADO REAL
+==================================================
+
+Crear /admin/solicitudes usando exclusivamente los registros existentes en PostgreSQL.
+
+Mostrar como mínimo:
+
+- Nombre artístico
+- Email
+- País
+- Género principal
+- Link principal
+- Instagram si existe
+- TikTok si existe
+- Fecha de solicitud
+- Estado
+
+Estados actuales esperados:
+
+PENDIENTE
+APROBADA
+RECHAZADA
+
+Si la base de datos actual utiliza otro formato/enumeración, reutilizarlo en lugar de crear una estructura duplicada.
+
+Orden:
+- solicitudes pendientes primero
+- después las más recientes
+
+NO crear solicitudes artificiales.
+
+==================================================
+3. VISTA / DETALLE
+==================================================
+
+Permitir abrir una solicitud y consultar todos sus datos completos.
+
+El detalle debe mostrar claramente:
+
+- Nombre artístico
+- Email
+- País
+- Género
+- Link principal
+- Instagram
+- TikTok
+- Mensaje de presentación
+- Fecha de creación
+- Estado
+
+No mostrar datos técnicos innecesarios al usuario administrativo.
+
+==================================================
+4. APROBAR SOLICITUD
+==================================================
+
+Implementar solamente la aprobación administrativa de la solicitud.
+
+Al aprobar:
+
+- cambiar el estado real de la solicitud en PostgreSQL a APROBADA.
+- registrar fecha de actualización si existe el campo correspondiente.
+- registrar la acción en audit_log.
+- NO crear todavía una cuenta.
+- NO enviar todavía una invitación.
+- NO crear contrato.
+- NO enviar emails.
+
+La aprobación únicamente significa:
+
+"Esta solicitud fue aprobada y queda lista para el siguiente flujo."
+
+No inventar automáticamente pasos que pertenecen a fases posteriores.
+
+==================================================
+5. RECHAZAR SOLICITUD
+==================================================
+
+Implementar rechazo administrativo.
+
+Al rechazar:
+
+- cambiar estado real a RECHAZADA.
+- persistirlo en PostgreSQL.
+- registrar la acción en audit_log.
+- NO eliminar la solicitud.
+- NO crear cuenta.
+- NO enviar email todavía.
+
+Si el modelo actual permite guardar motivo de rechazo sin alterar arquitectura, puede agregarse de forma mínima.
+
+Si requiere migraciones o cambios estructurales importantes, NO improvisar:
+documentar la necesidad y dejarla para una fase posterior.
+
+==================================================
+6. EVITAR OPERACIONES INCORRECTAS
+==================================================
+
+Una solicitud APROBADA no debe poder aprobarse nuevamente innecesariamente.
+
+Una solicitud RECHAZADA no debe poder rechazarse nuevamente innecesariamente.
+
+No permitir transiciones arbitrarias desde frontend.
+
+Toda transición debe validarse server-side.
+
+Si se considera necesario permitir cambiar posteriormente APROBADA ↔ RECHAZADA, no implementarlo ahora sin una necesidad clara.
+
+Por ahora:
+
+PENDIENTE → APROBADA
+PENDIENTE → RECHAZADA
+
+==================================================
+7. AUDITORÍA
+==================================================
+
+Usar el audit_log existente.
+
+Registrar como mínimo:
+
+- aprobación de solicitud
+- rechazo de solicitud
+
+La auditoría debe identificar:
+- usuario que realizó la acción
+- acción
+- solicitud afectada
+- timestamp
+
+NO registrar contraseñas, tokens ni secretos.
+
+No crear un sistema paralelo de auditoría.
+
+==================================================
+8. UI / DISEÑO
+==================================================
+
+Reutilizar exactamente el sistema visual administrativo existente.
+
+Debe sentirse como una aplicación profesional de gestión.
+
+Mantener:
+
+- negro como base
+- blanco para texto
+- amarillo para identidad/acciones
+- rojo únicamente para estados críticos/rechazo
+- diseño limpio
+- mucho espacio
+- responsive
+- excelente experiencia Android
+- sin tarjetas decorativas innecesarias
+- sin widgets falsos
+- sin estadísticas inventadas
+
+Estados visuales claros:
+
+PENDIENTE
+APROBADA
+RECHAZADA
+
+No agregar gráficos ni métricas ficticias.
+
+==================================================
+9. NAVEGACIÓN
+==================================================
+
+Conectar correctamente:
+
+/admin/solicitudes
+
+desde la navegación administrativa existente.
+
+No crear una segunda navegación.
+
+Si existe /dashboard/solicitudes, mantener compatibilidad mediante redirección al módulo administrativo, siguiendo el patrón utilizado en /dashboard/cuentas.
+
+==================================================
+10. BASE DE DATOS
+==================================================
+
+REGLA CRÍTICA:
+
+Reutilizar la tabla solicitudes existente.
+
+NO crear solicitudes2.
+NO crear applications_new.
+NO duplicar información.
+
+Antes de modificar schema:
+- inspeccionar estructura actual
+- reutilizar columnas existentes
+- crear migración únicamente si es estrictamente necesaria.
+
+No borrar datos existentes.
+
+==================================================
+11. VERIFICACIÓN OBLIGATORIA
+==================================================
+
+Antes de terminar verificar:
+
+- usuario sin sesión → /admin/solicitudes redirige a login
+- usuario sin applications.view → 403
+- usuario sin applications.manage → puede consultar si tiene view, pero no modificar
+- SUPER_ADMIN → acceso completo
+- listado consulta PostgreSQL real
+- detalle consulta PostgreSQL real
+- aprobar persiste APROBADA
+- rechazar persiste RECHAZADA
+- solicitudes no se eliminan
+- auditoría funciona
+- no se crean cuentas automáticamente
+- no se envían emails
+- no se crean contratos
+- no se crean datos ficticios
+
+Ejecutar:
+
+npx tsc --noEmit
+npm run build
+
+Si existen tests relevantes para auth/RBAC, ejecutarlos también.
+
+==================================================
+12. CRITERIO DE FINALIZACIÓN
+==================================================
+
+La fase termina cuando /admin/solicitudes permite:
+
+VER → DETALLE → APROBAR O RECHAZAR
+
+sobre solicitudes reales de PostgreSQL, con RBAC y auditoría.
+
+NO continuar automáticamente a invitaciones.
+
+Al terminar:
+1. Resume archivos modificados.
+2. Resume migraciones realizadas, si hubo alguna.
+3. Indica endpoints creados/modificados.
+4. Indica verificaciones realizadas.
+5. Indica explícitamente que NO se implementaron invitaciones, contratos ni cuentas automáticas.
+
+DETENTE AL TERMINAR ESTA FASE.
