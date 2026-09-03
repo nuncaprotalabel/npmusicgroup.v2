@@ -1,0 +1,452 @@
+# FASE 2.8 — CREACIÓN Y ACTIVACIÓN DE CUENTA DEL ARTISTA
+
+## CONTEXTO
+
+NP Music Group ya tiene funcionando el flujo:
+
+**Solicitud → Aprobación → Invitación → Contrato → Firma**
+
+La Fase 2.7 terminó correctamente en:
+
+**CONTRATO FIRMADO → ONBOARDING PENDIENTE**
+
+Ahora debemos continuar exactamente desde ese punto.
+
+El objetivo de esta fase es que, después de que un artista firme su contrato, el sistema pueda crear su cuenta de artista, permitirle establecer su contraseña y activar su acceso al sistema.
+
+---
+
+# OBJETIVO
+
+Implementar el flujo:
+
+**Contrato firmado → Cuenta ARTIST creada → Establecer contraseña → Cuenta activa → Login → Dashboard del artista**
+
+Al finalizar esta fase, un artista que haya firmado correctamente su contrato debe poder entrar al sistema con su propia cuenta.
+
+---
+
+# 1. ANTES DE PROGRAMAR
+
+Primero revisa el proyecto actual.
+
+NO crees estructuras duplicadas.
+
+Debes identificar y reutilizar las estructuras que ya existen para:
+
+* `users`
+* `sessions`
+* `roles`
+* `permissions`
+* `role_permissions`
+* `invitations`
+* `contracts`
+* `contract_signatures`
+* `solicitudes`
+* `audit_log`
+
+También revisa cómo funciona actualmente:
+
+* login
+* sesiones
+* cookies
+* contraseñas
+* RBAC
+* roles
+* auditoría
+
+Si ya existe infraestructura para recuperación o establecimiento de contraseña, reutilízala.
+
+Solo crea una nueva estructura si realmente es necesaria para esta fase.
+
+---
+
+# 2. CREACIÓN DE LA CUENTA
+
+Cuando un contrato esté en estado:
+
+**FIRMADO**
+
+y exista una firma válida asociada al contrato, el sistema debe permitir iniciar el onboarding del artista.
+
+La cuenta debe utilizar la información de la solicitud aprobada.
+
+### Datos principales
+
+* Email → email de la solicitud aprobada
+* Nombre artístico → nombre artístico de la solicitud
+* Rol → `ARTIST`
+* Estado inicial → INACTIVA
+* Contraseña → todavía no establecida
+
+No se debe crear una cuenta duplicada si ese email ya tiene una cuenta.
+
+### Importante
+
+El sistema NO debe aceptar desde el frontend datos críticos como:
+
+* `user_id`
+* `contract_id`
+* `invitation_id`
+* `email`
+* `role`
+
+La relación debe resolverse en el servidor utilizando la información existente en la base de datos.
+
+---
+
+# 3. VALIDACIONES
+
+Antes de crear la cuenta, el servidor debe comprobar:
+
+1. La solicitud existe.
+2. La solicitud está aprobada.
+3. La invitación corresponde a esa solicitud.
+4. El contrato corresponde a esa invitación/solicitud.
+5. El contrato está `FIRMADO`.
+6. Existe una firma válida del contrato.
+7. La cuenta del artista todavía no ha sido creada/activada.
+
+Si alguna condición no se cumple, el onboarding debe detenerse.
+
+No se deben saltar pasos del flujo.
+
+---
+
+# 4. ESTABLECER CONTRASEÑA
+
+Después de crear la cuenta, el artista debe recibir acceso a un flujo seguro para establecer su contraseña.
+
+Debe utilizarse un token independiente para este proceso.
+
+NO reutilizar el token original de la invitación.
+
+El token de activación debe:
+
+* ser generado de forma segura
+* tener expiración
+* utilizarse una sola vez
+* almacenarse de forma segura
+* invalidarse después de utilizarse
+
+La contraseña debe almacenarse utilizando el sistema de hash existente del proyecto.
+
+Si el proyecto utiliza bcrypt, continuar utilizando bcrypt.
+
+Nunca guardar:
+
+* contraseña en texto plano
+* token en texto plano si la arquitectura permite almacenar únicamente su hash
+* contraseña dentro de `audit_log`
+* token dentro de `audit_log`
+
+---
+
+# 5. ACTIVACIÓN
+
+La cuenta debe permanecer inactiva hasta que el artista establezca correctamente su contraseña.
+
+Flujo:
+
+**CUENTA CREADA**
+↓
+**PENDIENTE DE CONTRASEÑA**
+↓
+**CONTRASEÑA ESTABLECIDA**
+↓
+**CUENTA ACTIVA**
+
+La visita a una página NO debe activar la cuenta.
+
+La activación debe realizarse únicamente después de que el servidor valide correctamente el proceso de establecimiento de contraseña.
+
+Una vez activada:
+
+* guardar fecha de activación
+* invalidar el token
+* registrar auditoría
+* permitir login
+
+---
+
+# 6. LOGIN
+
+No crear un nuevo sistema de autenticación.
+
+Debe utilizarse el sistema de login que ya existe.
+
+El artista debe iniciar sesión utilizando:
+
+* email
+* contraseña
+
+El sistema debe reconocer:
+
+**role = ARTIST**
+
+y aplicar las restricciones correspondientes de RBAC.
+
+Después del login correcto, debe enviarlo al dashboard correspondiente al artista.
+
+---
+
+# 7. PERMISOS DEL ARTISTA
+
+Revisa los permisos actuales del rol:
+
+`ARTIST`
+
+No modifiques innecesariamente los demás roles.
+
+Si el rol ARTIST ya tiene los permisos necesarios para acceder al dashboard, no cambies nada.
+
+Si falta únicamente algún permiso necesario para completar este flujo, agrega solo lo estrictamente necesario.
+
+El artista NO debe tener acceso al:
+
+* panel administrativo
+* gestión de cuentas
+* contratos administrativos
+* configuración administrativa
+* funciones exclusivas de administradores
+
+---
+
+# 8. AUDITORÍA
+
+Utiliza el `audit_log` existente.
+
+Registrar como mínimo:
+
+* creación de cuenta de artista
+* establecimiento de contraseña
+* activación de cuenta
+
+Los eventos deben permitir saber:
+
+* qué ocurrió
+* cuándo ocurrió
+* qué usuario/recurso estuvo involucrado
+
+Nunca registrar:
+
+* contraseña
+* hash de contraseña
+* token
+* hash de token
+* secretos
+
+Si la cuenta ya existía, no registrar falsamente una nueva creación.
+
+---
+
+# 9. IDEMPOTENCIA
+
+El proceso debe poder ejecutarse nuevamente sin romper el sistema.
+
+Si el onboarding se repite:
+
+* no crear usuarios duplicados
+* no cambiar una cuenta existente a `ARTIST` automáticamente si pertenece a otro rol
+* no sobrescribir una cuenta existente
+* no generar múltiples tokens activos innecesariamente
+* no duplicar registros
+* no romper el contrato firmado
+
+Si existe una cuenta con ese email pero pertenece a otro usuario/rol, detener el proceso y manejarlo de forma segura.
+
+---
+
+# 10. SEGURIDAD
+
+Todo lo relacionado con:
+
+* creación de usuarios
+* roles
+* activación
+* tokens
+* contraseñas
+* contratos
+* sesiones
+
+debe validarse en servidor.
+
+No confiar en información enviada por el frontend.
+
+Utilizar:
+
+* hash seguro de contraseñas
+* tokens criptográficamente seguros
+* expiración
+* uso único
+* validación server-side
+* transacciones de PostgreSQL cuando correspondan
+
+No revelar información sensible en errores.
+
+---
+
+# 11. INTERFAZ
+
+Crear únicamente las pantallas necesarias para este flujo.
+
+Mantener el diseño actual de NP Music Group:
+
+* negro
+* blanco
+* amarillo como color de identidad/acción
+* limpio
+* premium
+* moderno
+* minimalista
+* responsive
+* excelente experiencia móvil/Android
+
+No rediseñar todo el proyecto.
+
+No modificar el logo oficial.
+
+No agregar:
+
+* widgets innecesarios
+* estadísticas falsas
+* tarjetas decorativas
+* dashboards ficticios
+* funcionalidades de artistas que pertenecen a fases posteriores
+
+La pantalla de establecimiento de contraseña debe ser clara y profesional.
+
+Después de establecer correctamente la contraseña, mostrar una confirmación similar a:
+
+**CUENTA ACTIVADA**
+
+y permitir continuar al login.
+
+NO iniciar sesión automáticamente.
+
+---
+
+# 12. FLUJO FINAL
+
+El flujo completo de esta fase debe quedar:
+
+**CONTRATO FIRMADO**
+↓
+**ONBOARDING PENDIENTE**
+↓
+**CUENTA ARTIST CREADA**
+↓
+**PENDIENTE DE ESTABLECER CONTRASEÑA**
+↓
+**CONTRASEÑA ESTABLECIDA**
+↓
+**CUENTA ACTIVA**
+↓
+**LOGIN**
+↓
+**DASHBOARD ARTIST**
+
+---
+
+# 13. BASE DE DATOS
+
+Antes de modificar la base de datos, revisa el esquema existente.
+
+No crear tablas duplicadas.
+
+Si hace falta una estructura para controlar el proceso de activación, utilizar la mínima necesaria y documentarla en:
+
+`docs/DATABASE_PLAN.md`
+
+Toda migración debe quedar correctamente documentada.
+
+---
+
+# 14. NO HACER EN ESTA FASE
+
+Esta fase termina cuando el artista puede:
+
+1. Tener su cuenta creada.
+2. Establecer su contraseña.
+3. Activar su cuenta.
+4. Iniciar sesión.
+5. Llegar a su dashboard como `ARTIST`.
+
+NO implementar todavía:
+
+* perfil completo del artista
+* catálogo musical
+* subida de canciones
+* releases
+* distribución
+* MakeWaves
+* ingresos
+* estadísticas
+* splits
+* regalías
+* analytics
+* sistema completo de artistas
+* nuevas funciones administrativas
+
+Esas funcionalidades pertenecen a fases posteriores.
+
+---
+
+# 15. VERIFICACIÓN OBLIGATORIA
+
+Antes de finalizar, prueba el flujo completo.
+
+### Caso correcto
+
+Contrato firmado → onboarding → cuenta creada → contraseña → activación → login → dashboard ARTIST.
+
+### Casos que deben fallar
+
+* solicitud no aprobada
+* contrato no firmado
+* contrato inexistente
+* invitación inválida
+* token expirado
+* token utilizado anteriormente
+* intento de activar sin establecer contraseña
+* intento de crear cuenta duplicada
+* email asociado a una cuenta incompatible
+* intento de acceder a funciones administrativas como ARTIST
+
+También comprobar:
+
+* `npm run build`
+* `npx tsc --noEmit`
+* `git diff --check`
+
+Si existen comandos equivalentes definidos por el proyecto, utiliza los existentes.
+
+---
+
+# 16. REGLA PRINCIPAL
+
+Trabaja sobre lo que ya existe.
+
+No reconstruyas autenticación, RBAC, contratos, invitaciones ni sesiones.
+
+No hagas refactors grandes.
+
+No cambies funcionalidades que ya funcionan.
+
+Implementa únicamente lo necesario para conectar:
+
+**CONTRATO FIRMADO → CUENTA DEL ARTISTA → LOGIN**
+
+Si encuentras un problema previo que impide completar esta fase, detente, identifícalo y repórtalo en lugar de modificar partes no relacionadas del sistema.
+
+---
+
+# RESULTADO ESPERADO
+
+Al terminar esta fase, NP Music Group debe tener funcionando por primera vez el paso:
+
+**ARTISTA CON CONTRATO FIRMADO → ARTISTA CON CUENTA ACTIVA**
+
+La siguiente fase podrá comenzar ya desde:
+
+**ARTIST ACTIVO + LOGIN FUNCIONANDO + DASHBOARD DEL ARTISTA**
