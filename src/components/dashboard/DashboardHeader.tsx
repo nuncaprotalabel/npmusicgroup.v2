@@ -28,37 +28,46 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const MODULE_LABELS: Record<string, string> = {
-  "/dashboard/central":                  "Central",
-  "/dashboard/artistas":                 "Artistas",
-  "/dashboard/perfil":                   "Mi perfil",
-  "/dashboard/solicitudes":              "Solicitudes",
-  "/admin/solicitudes":                   "Solicitudes",
-  "/dashboard/invitaciones":             "Invitaciones",
-  "/admin/invitaciones":                  "Invitaciones",
-  "/dashboard/contratos":                "Contratos",
-  "/admin/contratos":                     "Contratos",
-  "/dashboard/lanzamientos":             "Lanzamientos",
-  "/dashboard/lanzamientos/recibidos":   "Recibidos / Pendientes",
-  "/dashboard/analiticas":               "Analíticas",
-  "/dashboard/ingresos":                 "Ingresos",
-  "/dashboard/mensajes":                 "Mensajes",
-  "/dashboard/cuentas":                  "Cuentas",
-  "/admin/cuentas":                       "Cuentas",
-  "/dashboard/permisos":                 "Permisos",
-  "/dashboard/configuracion":            "Configuración",
+  "/admin":                              "central",
+  "/dashboard/central":                  "central",
+  "/dashboard/artistas":                 "artists",
+  "/admin/artistas":                     "artists",
+  "/dashboard/perfil":                   "profile",
+  "/dashboard/solicitudes":              "requests",
+  "/admin/solicitudes":                  "requests",
+  "/dashboard/invitaciones":             "invitations",
+  "/admin/invitaciones":                 "invitations",
+  "/dashboard/contratos":                "contracts",
+  "/admin/contratos":                    "contracts",
+  "/dashboard/lanzamientos":             "releases",
+  "/admin/lanzamientos":                 "releases",
+  "/dashboard/lanzamientos/recibidos":   "releasesReceived",
+  "/admin/recibidos":                    "releasesReceived",
+  "/dashboard/analiticas":               "analytics",
+  "/admin/analiticas":                   "analytics",
+  "/dashboard/ingresos":                 "revenue",
+  "/admin/ingresos":                     "revenue",
+  "/dashboard/mensajes":                 "messaging",
+  "/admin/mensajes":                     "messaging",
+  "/dashboard/cuentas":                  "accounts",
+  "/admin/cuentas":                      "accounts",
+  "/dashboard/permisos":                 "permissions",
+  "/admin/permisos":                     "permissions",
+  "/dashboard/configuracion":            "settings",
+  "/admin/configuracion":                "settings",
 };
 
 function getInitials(username: string): string {
   return username.slice(0, 2).toUpperCase();
 }
 
-function getCurrentModule(pathname: string): string {
+function getCurrentModule(pathname: string, modules: Record<string, string>): string {
   // Buscar match exacto primero, luego por prefijo (más específico primero)
   const sorted = Object.entries(MODULE_LABELS).sort((a, b) => b[0].length - a[0].length);
   for (const [path, label] of sorted) {
-    if (pathname === path || pathname.startsWith(path + "/")) return label;
+    if (pathname === path || pathname.startsWith(path + "/")) return modules[label] ?? label;
   }
-  return "Dashboard";
+  return modules.central ?? "Dashboard";
 }
 
 export function DashboardHeader({ username, role, onMenuToggle }: DashboardHeaderProps) {
@@ -66,7 +75,7 @@ export function DashboardHeader({ username, role, onMenuToggle }: DashboardHeade
   const pathname = usePathname();
   const [busy, setBusy] = useState(false);
 
-  const moduleName = getCurrentModule(pathname);
+  const moduleName = getCurrentModule(pathname, t.dashboard.modules);
   const initials   = getInitials(username);
   const roleLabel  = ROLE_LABELS[role] ?? role;
 
@@ -98,7 +107,7 @@ export function DashboardHeader({ username, role, onMenuToggle }: DashboardHeade
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-[0.8125rem]" style={{ color: "#444444" }}>
-            Dashboard
+            {t.nav.dashboard}
           </span>
           <span className="text-[0.8125rem]" style={{ color: "#2A2A2A" }}>
             /

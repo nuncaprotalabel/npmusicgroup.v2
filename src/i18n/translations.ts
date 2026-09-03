@@ -186,6 +186,7 @@ export const translations = {
     dashboard: {
       modules: {
         central: "Central",
+        profile: "Mi perfil",
         artists: "Artistas",
         releases: "Lanzamientos",
         distribution: "Distribución",
@@ -414,6 +415,7 @@ export const translations = {
     dashboard: {
       modules: {
         central: "Central",
+        profile: "My profile",
         artists: "Artists",
         releases: "Releases",
         distribution: "Distribution",
@@ -462,4 +464,4 @@ export const translations = {
   },
 } as const;
 
-export type Translations = typeof translations.es;
+export type Translations = (typeof translations)[Language];

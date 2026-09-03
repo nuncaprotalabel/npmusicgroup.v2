@@ -15,6 +15,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
 
   return (
     <button
+      type="button"
       onClick={toggle}
       aria-label={language === "es" ? "Switch to English" : "Cambiar a Español"}
       className={cn(
@@ -26,7 +27,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
       )}
     >
       <Globe size={12} aria-hidden="true" />
-      <span>{language.toUpperCase()}</span>
+      <span aria-live="polite">{language.toUpperCase()}</span>
     </button>
   );
 }

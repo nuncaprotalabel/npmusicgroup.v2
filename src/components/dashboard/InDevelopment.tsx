@@ -3,15 +3,25 @@
  * Muestra un mensaje claro y profesional sin romper la pantalla.
  * Conforme a PROJECT_RULES.md: nunca mostrar una pantalla rota.
  */
+"use client";
+
 import { Wrench } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
+import type { DashboardModuleKey } from "./navigation";
+
+export type { DashboardModuleKey };
 
 interface InDevelopmentProps {
-  moduleName: string;
+  moduleName?: string;
+  moduleKey?: DashboardModuleKey;
   /** Descripción adicional opcional */
   description?: string;
 }
 
-export function InDevelopment({ moduleName, description }: InDevelopmentProps) {
+export function InDevelopment({ moduleName, moduleKey, description }: InDevelopmentProps) {
+  const { t } = useTranslation();
+  const title = moduleKey ? t.dashboard.modules[moduleKey] : moduleName ?? t.dashboard.inDevelopment.title;
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 text-center">
       <div
@@ -30,15 +40,15 @@ export function InDevelopment({ moduleName, description }: InDevelopmentProps) {
           color:      "#F5C518",
         }}
       >
-        Próximamente
+        {t.dashboard.inDevelopment.badge}
       </span>
 
       <h1 className="text-xl font-bold text-white mb-2 tracking-tight">
-        {moduleName}
+        {title}
       </h1>
 
       <p className="text-sm max-w-sm leading-relaxed" style={{ color: "#737373" }}>
-        {description ?? "Este módulo se encuentra en desarrollo y estará disponible próximamente."}
+        {description ?? t.dashboard.inDevelopment.description}
       </p>
     </div>
   );

@@ -34,9 +34,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      // The UI still updates when browser storage is unavailable.
+    }
   };
 
   return (

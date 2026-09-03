@@ -8,73 +8,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { X, ChevronRight } from "lucide-react";
-import {
-  LayoutDashboard,
-  Users,
-  FileText,
-  BarChart2,
-  DollarSign,
-  MessageSquare,
-  UserCog,
-  UserRound,
-  ShieldCheck,
-  Settings,
-  Mail,
-  Send,
-  Inbox,
-  ShieldAlert,
-} from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { UserRole } from "@/types/auth";
-
-interface MobileNavItem {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
-  children?: { href: string; label: string }[];
-  roles?: UserRole[];
-}
-
-const NAV_GROUPS: { group: string; items: MobileNavItem[] }[] = [
-  {
-    group: "Plataforma",
-    items: [
-      { href: "/dashboard/central",    label: "Central",              icon: LayoutDashboard },
-      { href: "/dashboard/perfil",     label: "Mi perfil",             icon: UserRound, roles: ["ARTIST"] },
-    ],
-  },
-  {
-    group: "Gestión",
-    items: [
-      { href: "/dashboard/artistas",    label: "Artistas",            icon: Users },
-      { href: "/admin/solicitudes", label: "Solicitudes",              icon: Inbox },
-      { href: "/admin/invitaciones", label: "Invitaciones",             icon: Mail },
-      { href: "/admin/contratos", label: "Contratos",                     icon: FileText },
-      { href: "/dashboard/lanzamientos",label: "Lanzamientos",        icon: Send,
-        children: [
-          { href: "/dashboard/lanzamientos/recibidos", label: "Recibidos / Pendientes" },
-        ],
-      },
-    ],
-  },
-  {
-    group: "Finanzas",
-    items: [
-      { href: "/dashboard/analiticas", label: "Analíticas",   icon: BarChart2 },
-      { href: "/dashboard/ingresos",   label: "Ingresos",     icon: DollarSign },
-      { href: "/dashboard/mensajes",   label: "Mensajes",     icon: MessageSquare },
-    ],
-  },
-  {
-    group: "Sistema",
-    items: [
-      { href: "/admin/cuentas",            label: "Cuentas",       icon: UserCog },
-      { href: "/dashboard/permisos",      label: "Permisos",      icon: ShieldCheck },
-      { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
-    ],
-  },
-];
+import { getNavigationGroups, isNavigationChildActive, isNavigationItemActive } from "./navigation";
 
 interface Props {
   role: UserRole;
@@ -84,13 +22,10 @@ interface Props {
 
 export function DashboardMobileSidebar({ role, open, onClose }: Props) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const navGroups = getNavigationGroups(t);
 
   if (!open) return null;
-
-  function isActive(href: string) {
-    if (href === "/dashboard/central") return pathname === href || pathname === "/dashboard";
-    return pathname === href || pathname.startsWith(href + "/");
-  }
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
@@ -130,7 +65,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-          {NAV_GROUPS.map(({ group, items }) => (
+           {navGroups.map(({ group, items }) => (
             <div key={group}>
               <p
                 className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
@@ -140,7 +75,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
               </p>
               <div className="space-y-0.5">
                 {items.filter(({ roles }) => !roles || roles.includes(role)).map(({ href, label, icon: Icon, children }) => {
-                  const active = isActive(href);
+                   const active = isNavigationItemActive(pathname, href);
                   return (
                     <div key={href}>
                       <Link
@@ -161,7 +96,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
                       {children && pathname.startsWith(href) && (
                         <div className="ml-4 mt-0.5 space-y-0.5">
                           {children.map(({ href: childHref, label: childLabel }) => {
-                            const childActive = pathname === childHref || pathname.startsWith(childHref + "/");
+                           const childActive = isNavigationChildActive(pathname, childHref);
                             return (
                               <Link
                                 key={childHref}
