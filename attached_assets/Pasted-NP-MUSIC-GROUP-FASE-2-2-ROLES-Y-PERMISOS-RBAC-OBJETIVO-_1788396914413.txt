@@ -1,0 +1,299 @@
+NP MUSIC GROUP — FASE 2.2: ROLES Y PERMISOS RBAC
+
+OBJETIVO ÚNICO:
+
+Implementar el sistema REAL de roles y permisos de NP Music Group sobre la autenticación que acaba de completarse.
+
+AHORRO DE CRÉDITOS — MUY IMPORTANTE:
+
+Este sprint debe ser pequeño y estrictamente limitado.
+
+NO reconstruyas el proyecto.
+NO cambies el diseño general.
+NO rediseñes el login.
+NO modifiques la landing pública.
+NO modifiques /aplicar.
+NO implementes Too Lost.
+NO implementes distribución.
+NO implementes contratos.
+NO implementes lanzamientos.
+NO implementes ingresos.
+NO implementes analíticas.
+NO implementes splits.
+NO implementes mensajería.
+NO implementes notificaciones.
+NO implementes recuperación de contraseña.
+NO implementes funciones internas de artistas.
+NO hagas refactors generales.
+NO agregues dependencias innecesarias.
+NO crees datos ficticios.
+NO crees usuarios ficticios.
+
+Trabaja únicamente en ROLES, PERMISOS Y AUTORIZACIÓN.
+
+ANTES DE MODIFICAR:
+
+Inspecciona únicamente los archivos necesarios para:
+
+- users
+- sessions
+- user_role
+- middleware/auth
+- autorización existente
+- esquema Neon relacionado con usuarios
+
+No hagas una revisión general del proyecto.
+
+==================================================
+ROLES DEFINITIVOS
+==================================================
+
+Implementar exactamente estos roles:
+
+SUPER_ADMIN
+ADMIN
+DISTRIBUTION_MANAGER
+MANAGER
+ARTIST
+VIEWER
+
+No crear otros roles.
+
+==================================================
+JERARQUÍA
+==================================================
+
+SUPER_ADMIN:
+
+Control absoluto.
+
+Debe poder acceder a todas las áreas administrativas y tener capacidad futura para administrar cuentas, roles, permisos y configuración.
+
+IMPORTANTE:
+
+No implementar todavía esas funciones.
+Solo dejar la autorización preparada.
+
+ADMIN:
+
+Acceso administrativo general, pero siempre por debajo de SUPER_ADMIN.
+
+DISTRIBUTION_MANAGER:
+
+Acceso relacionado con lanzamientos y distribución.
+
+MANAGER:
+
+Acceso relacionado con artistas y gestión.
+
+ARTIST:
+
+Acceso únicamente a las áreas propias del artista.
+
+VIEWER:
+
+Acceso estrictamente de lectura donde corresponda.
+
+==================================================
+AUTORIZACIÓN REAL
+==================================================
+
+Los permisos deben verificarse SERVER-SIDE.
+
+Nunca confiar únicamente en:
+
+- botones ocultos
+- componentes React
+- rutas del frontend
+- JavaScript del navegador
+
+Un usuario no autorizado no debe poder ejecutar directamente un endpoint/API protegido aunque intente acceder manualmente a la URL.
+
+Crear una capa reutilizable de autorización, por ejemplo:
+
+requireRole(...)
+requirePermission(...)
+
+o una estructura equivalente coherente con la arquitectura existente.
+
+NO crear una arquitectura innecesariamente compleja.
+
+==================================================
+PERMISOS
+==================================================
+
+Crear una estructura preparada para permisos granulares.
+
+Como mínimo definir permisos conceptuales para:
+
+- dashboard.view
+- artists.view
+- artists.manage
+- applications.view
+- applications.manage
+- invitations.view
+- invitations.manage
+- contracts.view
+- contracts.manage
+- releases.view
+- releases.manage
+- distribution.view
+- distribution.manage
+- analytics.view
+- income.view
+- income.manage
+- messages.view
+- messages.manage
+- accounts.view
+- accounts.manage
+- roles.view
+- roles.manage
+- settings.view
+- settings.manage
+- audit.view
+
+SUPER_ADMIN debe tener todos los permisos.
+
+NO implementar todavía la lógica funcional de cada módulo.
+
+Solo establecer correctamente el sistema de autorización.
+
+==================================================
+NP CONTROL
+==================================================
+
+Mantener la regla existente:
+
+/np-control
+
+es EXCLUSIVO de SUPER_ADMIN.
+
+Ningún otro rol debe acceder.
+
+No modificar su diseño ni construir todavía sus funciones administrativas.
+
+==================================================
+ADMIN
+==================================================
+
+Las rutas /admin/* deben dejar de depender de una regla simplista de "solo SUPER_ADMIN" y utilizar el nuevo sistema RBAC.
+
+IMPORTANTE:
+
+No crear todavía funcionalidades nuevas dentro de /admin.
+
+Únicamente preparar el acceso según rol/permisos.
+
+==================================================
+BASE DE DATOS
+==================================================
+
+Utilizar Neon/PostgreSQL existente.
+
+Si el esquema actual de roles es insuficiente, crear únicamente las tablas/migraciones necesarias para RBAC.
+
+Preferir una estructura limpia y normalizada.
+
+Conceptualmente:
+
+users
+roles
+permissions
+role_permissions
+
+Si ya existe una estructura equivalente, reutilizarla.
+
+NO duplicar tablas existentes.
+
+NO borrar datos existentes.
+
+NO modificar innecesariamente sessions, audit_log o autenticación ya funcional.
+
+El SUPER_ADMIN existente debe conservarse.
+
+==================================================
+AUDITORÍA
+==================================================
+
+Conservar el sistema de audit_log existente.
+
+No implementar todavía una auditoría completa de todas las acciones.
+
+Únicamente asegurar que los cambios críticos de roles/permisos puedan registrarse correctamente cuando corresponda.
+
+==================================================
+NO DATOS FICTICIOS
+==================================================
+
+NO crear:
+
+- artistas de prueba
+- usuarios de prueba
+- cuentas demo
+- estadísticas
+- releases
+- ingresos
+
+Los únicos datos iniciales permitidos son los estrictamente necesarios para:
+
+- roles
+- permisos
+- relaciones role_permissions
+
+El SUPER_ADMIN existente debe permanecer intacto.
+
+==================================================
+VERIFICACIÓN
+==================================================
+
+Al terminar comprobar:
+
+1. SUPER_ADMIN puede autenticarse.
+2. SUPER_ADMIN conserva acceso a /np-control.
+3. Usuarios sin autenticación no pueden acceder a áreas protegidas.
+4. Un usuario con un rol sin permiso no puede ejecutar directamente un endpoint protegido.
+5. La autorización funciona server-side.
+6. Los roles existen correctamente en Neon.
+7. Los permisos existen correctamente en Neon.
+8. Las relaciones rol-permiso son correctas.
+9. No existen contraseñas o secretos en el código.
+10. Build correcto.
+11. TypeScript correcto.
+12. / continúa funcionando.
+13. /aplicar continúa funcionando.
+14. Login/logout continúan funcionando.
+
+Si no existe una forma segura de probar otros roles porque todavía no tenemos cuentas de esos tipos, NO inventes usuarios para hacerlo.
+
+==================================================
+REGLA FINAL
+==================================================
+
+ESTE SPRINT TERMINA AQUÍ.
+
+NO continúes automáticamente con:
+
+- cuentas
+- artistas
+- solicitudes
+- invitaciones
+- contratos
+- lanzamientos
+- distribución
+- Too Lost
+- ingresos
+- analíticas
+- splits
+- mensajes
+
+El siguiente sprint será independiente.
+
+PRIORIDAD:
+
+RBAC REAL + AUTORIZACIÓN SERVER-SIDE + NEON + SEGURIDAD.
+
+MÍNIMOS CAMBIOS NECESARIOS.
+
+MÍNIMO CONSUMO DE CRÉDITOS.
+
+NO HAGAS NADA FUERA DEL ALCANCE DE ESTE PROMPT.

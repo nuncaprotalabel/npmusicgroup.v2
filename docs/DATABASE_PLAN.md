@@ -195,7 +195,8 @@ CREATE TRIGGER users_updated_at
 
 ### Estado de implementación de Fase 2.1
 
-Para autenticación se aplican inicialmente únicamente las tablas `users`, `sessions` y `audit_log`.
+Para autenticación y RBAC se aplican las tablas `users`, `sessions`, `audit_log`,
+`permissions` y `role_permissions`.
 El alta del primer `SUPER_ADMIN` se realiza con `npm run auth:bootstrap`, usando
 `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD` y opcionalmente `SUPER_ADMIN_USERNAME` como secretos
 del entorno. El proceso es idempotente y no sobrescribe cuentas existentes.

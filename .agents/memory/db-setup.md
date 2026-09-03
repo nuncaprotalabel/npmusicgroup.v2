@@ -1,14 +1,14 @@
 ---
 name: Database setup
-description: NP Music Group V2 — Replit PostgreSQL auth schema applied and SUPER_ADMIN bootstrapped securely.
+description: NP Music Group V2 — Replit PostgreSQL auth/RBAC schema applied and SUPER_ADMIN bootstrapped securely.
 ---
 
 ## Status
-Authentication schema applied. SUPER_ADMIN created through environment secrets.
+Authentication and RBAC schema applied. SUPER_ADMIN created through environment secrets.
 
 ## Tables created
-`users`, `sessions`, `audit_log`
-Also: `user_role` ENUM, auth indexes, and `update_users_updated_at()` trigger on `users`.
+`users`, `sessions`, `audit_log`, `permissions`, `role_permissions`
+Also: `user_role` ENUM, auth/RBAC indexes, and `update_users_updated_at()` trigger on `users`.
 
 ## Seed user
 - username: `npmusicadmin`

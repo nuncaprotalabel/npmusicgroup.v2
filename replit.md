@@ -114,9 +114,9 @@ Conectar la base de datos desde el panel de Replit o agregar la variable de ento
 ### Infraestructura implementada
 
 **Base de datos (PostgreSQL)**
-- Tablas: `users`, `permissions`, `role_permissions`, `sessions`, `invitations`, `audit_log`
+- Tablas actuales: `users`, `permissions`, `role_permissions`, `sessions`, `audit_log`
 - ENUM `user_role`: SUPER_ADMIN, ADMIN, DISTRIBUTION_MANAGER, MANAGER, ARTIST, VIEWER
-- 29 permisos distribuidos en 9 módulos con asignación correcta por rol
+- 25 permisos RBAC distribuidos por módulo con asignación por rol
 - Trigger `updated_at` automático en `users`
 
 **Autenticación**

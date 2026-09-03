@@ -25,13 +25,14 @@ export interface SessionPayload extends JWTPayload {
   username: string;
   role: UserRole;
   sessionId: string;
+  permissions: string[];
 }
 
 // ─── JWT ─────────────────────────────────────────────────────────────────────
 
 /** Firma un JWT con los datos de sesión. */
 export async function signToken(
-  payload: Pick<SessionPayload, 'userId' | 'username' | 'role' | 'sessionId'>
+  payload: Pick<SessionPayload, 'userId' | 'username' | 'role' | 'sessionId' | 'permissions'>
 ): Promise<string> {
   return new SignJWT(payload as unknown as JWTPayload)
     .setProtectedHeader({ alg: 'HS256' })

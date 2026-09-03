@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, COOKIE_NAME, clearCookieOptions } from '@/lib/auth';
 import type { UserRole } from '@/types/auth';
+import type { Permission } from '@/lib/permissions';
 
 // ─── Configuración de rutas protegidas ────────────────────────────────────────
 
@@ -14,12 +15,25 @@ interface RouteRule {
   roles?: UserRole[];
   /** Ruta de redirección si no tiene permisos (default: /login). */
   forbidden?: string;
+  permission?: Permission;
 }
 
 const PROTECTED_ROUTES: Record<string, RouteRule> = {
   '/np-control': { roles: ['SUPER_ADMIN'] },
   '/dashboard':  { roles: ['SUPER_ADMIN', 'ADMIN', 'DISTRIBUTION_MANAGER', 'MANAGER', 'ARTIST', 'VIEWER'] },
-  '/admin':      { roles: ['SUPER_ADMIN'] },
+  '/admin/artistas':       { permission: 'artists.view' },
+  '/admin/solicitudes':    { permission: 'applications.view' },
+  '/admin/invitaciones':   { permission: 'invitations.view' },
+  '/admin/contratos':      { permission: 'contracts.view' },
+  '/admin/lanzamientos':   { permission: 'releases.view' },
+  '/admin/recibidos':      { permission: 'releases.view' },
+  '/admin/analiticas':     { permission: 'analytics.view' },
+  '/admin/ingresos':       { permission: 'income.view' },
+  '/admin/mensajes':       { permission: 'messages.view' },
+  '/admin/cuentas':        { permission: 'accounts.view' },
+  '/admin/permisos':       { permission: 'roles.view' },
+  '/admin/configuracion':  { permission: 'settings.view' },
+  '/admin':                { permission: 'dashboard.view' },
 };
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
@@ -50,13 +64,20 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // Sin restricción de rol → permitir
   if (!routeRule.roles || routeRule.roles.length === 0) {
-    return NextResponse.next();
+    if (!routeRule.permission || session.role === 'SUPER_ADMIN' || session.permissions?.includes(routeRule.permission)) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL(routeRule.forbidden ?? '/403', request.url));
   }
 
   // Verificar rol
   if (!routeRule.roles.includes(session.role)) {
     const forbidden = routeRule.forbidden ?? '/403';
     return NextResponse.redirect(new URL(forbidden, request.url));
+  }
+
+  if (routeRule.permission && session.role !== 'SUPER_ADMIN' && !session.permissions?.includes(routeRule.permission)) {
+    return NextResponse.redirect(new URL(routeRule.forbidden ?? '/403', request.url));
   }
 
   // Pasar datos de sesión como headers internos (lectura en Server Components)

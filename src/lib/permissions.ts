@@ -1,115 +1,109 @@
 /**
- * Sistema de roles y permisos de NP Music Group.
- * Fuente de verdad para validaciones de autorización en el servidor.
+ * Catálogo y consultas server-side del sistema RBAC.
+ * Las decisiones de autorización se respaldan en Neon, no en la interfaz.
  */
-import type { UserRole } from '@/types/auth';
-
-// ─── Jerarquía de roles (menor = más privilegios) ────────────────────────────
+import { queryOne } from "@/lib/db";
+import type { UserRole } from "@/types/auth";
 
 export const ROLE_LEVEL: Record<UserRole, number> = {
-  SUPER_ADMIN:          1,
-  ADMIN:                2,
+  SUPER_ADMIN: 1,
+  ADMIN: 2,
   DISTRIBUTION_MANAGER: 3,
-  MANAGER:              4,
-  ARTIST:               5,
-  VIEWER:               6,
+  MANAGER: 4,
+  ARTIST: 5,
+  VIEWER: 6,
 };
 
-// ─── Permisos por módulo ──────────────────────────────────────────────────────
+export const PERMISSION_KEYS = [
+  "dashboard.view",
+  "artists.view",
+  "artists.manage",
+  "applications.view",
+  "applications.manage",
+  "invitations.view",
+  "invitations.manage",
+  "contracts.view",
+  "contracts.manage",
+  "releases.view",
+  "releases.manage",
+  "distribution.view",
+  "distribution.manage",
+  "analytics.view",
+  "income.view",
+  "income.manage",
+  "messages.view",
+  "messages.manage",
+  "accounts.view",
+  "accounts.manage",
+  "roles.view",
+  "roles.manage",
+  "settings.view",
+  "settings.manage",
+  "audit.view",
+] as const;
 
-export type Permission =
-  | 'system.view'         | 'system.manage'
-  | 'users.view'          | 'users.create'      | 'users.update'    | 'users.delete'    | 'users.manage'
-  | 'artists.view'        | 'artists.create'    | 'artists.update'  | 'artists.delete'  | 'artists.manage'
-  | 'releases.view'       | 'releases.create'   | 'releases.update' | 'releases.delete' | 'releases.manage'
-  | 'distribution.view'   | 'distribution.manage'
-  | 'revenue.view'        | 'revenue.manage'
-  | 'contracts.view'      | 'contracts.manage'
-  | 'analytics.view'      | 'analytics.manage'
-  | 'invitations.view'    | 'invitations.create' | 'invitations.manage'
-  | 'audit.view';
+export type Permission = (typeof PERMISSION_KEYS)[number];
 
-// Permisos estáticos por rol (caché en memoria, en sync con la DB)
-const ROLE_PERMISSIONS: Record<UserRole, Set<Permission>> = {
-  SUPER_ADMIN: new Set([
-    'system.view', 'system.manage',
-    'users.view', 'users.create', 'users.update', 'users.delete', 'users.manage',
-    'artists.view', 'artists.create', 'artists.update', 'artists.delete', 'artists.manage',
-    'releases.view', 'releases.create', 'releases.update', 'releases.delete', 'releases.manage',
-    'distribution.view', 'distribution.manage',
-    'revenue.view', 'revenue.manage',
-    'contracts.view', 'contracts.manage',
-    'analytics.view', 'analytics.manage',
-    'invitations.view', 'invitations.create', 'invitations.manage',
-    'audit.view',
-  ]),
-  ADMIN: new Set([
-    'system.view',
-    'users.view', 'users.create', 'users.update', 'users.delete', 'users.manage',
-    'artists.view', 'artists.create', 'artists.update', 'artists.delete', 'artists.manage',
-    'releases.view', 'releases.create', 'releases.update', 'releases.delete', 'releases.manage',
-    'distribution.view', 'distribution.manage',
-    'revenue.view', 'revenue.manage',
-    'contracts.view', 'contracts.manage',
-    'analytics.view', 'analytics.manage',
-    'invitations.view', 'invitations.create', 'invitations.manage',
-    'audit.view',
-  ]),
-  DISTRIBUTION_MANAGER: new Set([
-    'artists.view',
-    'releases.view', 'releases.create', 'releases.update', 'releases.manage',
-    'distribution.view', 'distribution.manage',
-    'analytics.view',
-    'revenue.view',
-  ]),
-  MANAGER: new Set([
-    'artists.view', 'artists.create', 'artists.update', 'artists.manage',
-    'releases.view',
-    'analytics.view',
-    'revenue.view',
-    'contracts.view',
-  ]),
-  ARTIST: new Set([
-    'artists.view',
-    'releases.view',
-    'revenue.view',
-    'analytics.view',
-  ]),
-  VIEWER: new Set([
-    'artists.view',
-    'releases.view',
-    'analytics.view',
-  ]),
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Verifica si un rol tiene un permiso específico. */
-export function hasPermission(role: UserRole, permission: Permission): boolean {
-  return ROLE_PERMISSIONS[role]?.has(permission) ?? false;
+export function isPermission(value: string): value is Permission {
+  return (PERMISSION_KEYS as readonly string[]).includes(value);
 }
 
-/** Verifica si un rol tiene todos los permisos indicados. */
-export function hasAllPermissions(role: UserRole, permissions: Permission[]): boolean {
-  return permissions.every(p => hasPermission(role, p));
+/** Consulta la asignación efectiva del rol en Neon. */
+export async function hasPermission(
+  role: UserRole,
+  permission: Permission,
+): Promise<boolean> {
+  if (role === "SUPER_ADMIN") return true;
+
+  const row = await queryOne<{ allowed: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM role_permissions rp
+       INNER JOIN permissions p ON p.id = rp.permission_id
+       WHERE rp.role = $1 AND p.name = $2
+     ) AS allowed`,
+    [role, permission],
+  );
+
+  return row?.allowed === true;
 }
 
-/** Retorna true si roleA tiene el mismo nivel o más privilegios que roleB. */
+export async function hasAllPermissions(
+  role: UserRole,
+  permissions: Permission[],
+): Promise<boolean> {
+  for (const permission of permissions) {
+    if (!(await hasPermission(role, permission))) return false;
+  }
+  return true;
+}
+
 export function isRoleAtLeast(roleA: UserRole, roleB: UserRole): boolean {
   return ROLE_LEVEL[roleA] <= ROLE_LEVEL[roleB];
 }
 
-/** Retorna todos los permisos de un rol. */
-export function getPermissionsForRole(role: UserRole): Permission[] {
-  return Array.from(ROLE_PERMISSIONS[role] ?? []);
+export async function getPermissionsForRole(
+  role: UserRole,
+): Promise<Permission[]> {
+  const rows = await import("@/lib/db").then(({ query }) =>
+    query<{ name: string }>(
+      `SELECT p.name
+       FROM permissions p
+       INNER JOIN role_permissions rp ON rp.permission_id = p.id
+       WHERE rp.role = $1
+       ORDER BY p.name`,
+      [role],
+    ),
+  );
+
+  return rows.map((row) => row.name).filter(isPermission);
 }
 
-/** Etiquetas en español para los roles. */
 export const ROLE_LABELS: Record<UserRole, string> = {
-  SUPER_ADMIN:          'Super Administrador',
-  ADMIN:                'Administrador',
-  DISTRIBUTION_MANAGER: 'Gestor de Distribución',
-  MANAGER:              'Manager',
-  ARTIST:               'Artista',
-  VIEWER:               'Observador',
+  SUPER_ADMIN: "Super Administrador",
+  ADMIN: "Administrador",
+  DISTRIBUTION_MANAGER: "Gestor de Distribución",
+  MANAGER: "Manager",
+  ARTIST: "Artista",
+  VIEWER: "Observador",
 };

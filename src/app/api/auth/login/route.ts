@@ -7,6 +7,7 @@ import { queryOne, query } from '@/lib/db';
 import { comparePassword } from '@/lib/password';
 import { signToken, sessionCookieOptions } from '@/lib/auth';
 import { logLogin, getClientIp } from '@/lib/audit';
+import { getPermissionsForRole } from '@/lib/permissions';
 
 interface UserRow {
   id: string;
@@ -86,12 +87,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       [user.id]
     );
 
-    // Firmar JWT
+    const permissions = await getPermissionsForRole(user.role as import('@/types/auth').UserRole);
+
+    // Firmar JWT con los permisos efectivos del rol
     const token = await signToken({
       userId:    user.id,
       username:  user.username,
       role:      user.role as import('@/types/auth').UserRole,
       sessionId,
+      permissions,
     });
 
     // Registrar éxito en auditoría

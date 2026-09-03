@@ -4,6 +4,7 @@
  */
 import { queryOne } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getPermissionsForRole, type Permission } from "@/lib/permissions";
 import type { UserRole } from "@/types/auth";
 
 interface ActiveSessionRow {
@@ -17,7 +18,7 @@ export async function getActiveSession() {
   const tokenSession = await getSession();
   if (!tokenSession) return null;
 
-  return queryOne<ActiveSessionRow>(
+  const row = await queryOne<ActiveSessionRow>(
     `SELECT s.id, s.user_id, u.username, u.role
      FROM sessions s
      INNER JOIN users u ON u.id = s.user_id
@@ -27,14 +28,15 @@ export async function getActiveSession() {
        AND s.expires_at > NOW()
        AND u.is_active = true`,
     [tokenSession.sessionId, tokenSession.userId]
-  ).then((row) =>
-    row
-      ? {
-          userId: row.user_id,
-          username: row.username,
-          role: row.role,
-          sessionId: row.id,
-        }
-      : null
   );
+
+  if (!row) return null;
+
+  return {
+    userId: row.user_id,
+    username: row.username,
+    role: row.role,
+    sessionId: row.id,
+    permissions: await getPermissionsForRole(row.role),
+  };
 }
