@@ -332,3 +332,38 @@ La tabla controla el estado del onboarding y almacena únicamente:
 `contract_id`, `invitation_id`, `solicitud_id` y `user_id` tienen restricciones
 de unicidad donde corresponde para hacer el proceso idempotente. No se crean
 nuevas tablas de usuarios, sesiones, invitaciones, contratos ni auditoría.
+
+## 12. Fase 2.9 — `artists`
+
+`artists` representa la entidad de negocio del artista y mantiene separada la
+identidad artística de la cuenta de autenticación `users`.
+
+| Columna | Tipo | Restricciones | Descripción |
+|---|---|---|---|
+| `id` | UUID | PK, `gen_random_uuid()` | Identificador del artista |
+| `user_id` | UUID | NOT NULL, UNIQUE, FK → `users(id)` RESTRICT | Cuenta ARTIST asociada |
+| `onboarding_id` | UUID | NOT NULL, UNIQUE, FK → `artist_onboarding(id)` RESTRICT | Incorporación que originó el artista |
+| `nombre_artistico` | VARCHAR(150) | NOT NULL | Nombre artístico editable |
+| `pais` | VARCHAR(100) | NOT NULL | País editable |
+| `genero_principal` | VARCHAR(100) | NOT NULL | Género editable |
+| `enlace_principal` | TEXT | NOT NULL | Enlace musical principal editable |
+| `instagram` | VARCHAR(255) | NULLABLE | Instagram editable |
+| `tiktok` | VARCHAR(255) | NULLABLE | TikTok editable |
+| `bio` | TEXT | NULLABLE | Presentación editable |
+| `status` | VARCHAR(32) | `ONBOARDING_PENDIENTE` / `ACTIVO` | Estado del artista, independiente de `users.is_active` |
+| `created_at` / `updated_at` | TIMESTAMPTZ | DEFAULT `NOW()` | Auditoría temporal |
+
+`email` no se duplica: se obtiene desde `users`. La solicitud y el contrato se
+obtienen mediante `artist_onboarding`, que ya mantiene ambas relaciones.
+Los campos de perfil se inicializan desde `solicitudes` y luego pueden cambiar
+sin alterar la solicitud original.
+
+Las restricciones `UNIQUE` sobre `user_id` y `onboarding_id` impiden dos
+artistas para una misma cuenta o incorporación. La aplicación valida además
+que la cuenta relacionada tenga rol `ARTIST` antes de crear o actualizar la
+relación.
+
+La creación inicial ocurre en el onboarding de cuenta y la transición a
+`ACTIVO` ocurre en la misma transacción de activación de contraseña. No se
+crean todavía tablas de releases, tracks, catálogo, distribución, ingresos ni
+colaboradores.

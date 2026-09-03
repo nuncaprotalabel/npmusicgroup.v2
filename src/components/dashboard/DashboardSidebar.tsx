@@ -15,6 +15,7 @@ import {
   DollarSign,
   MessageSquare,
   UserCog,
+  UserRound,
   ShieldCheck,
   Settings,
   Mail,
@@ -32,6 +33,7 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
   children?: { href: string; label: string }[];
+  roles?: UserRole[];
 }
 
 const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
@@ -39,6 +41,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     group: "Plataforma",
     items: [
       { href: "/dashboard/central", label: "Central", icon: LayoutDashboard },
+      { href: "/dashboard/perfil", label: "Mi perfil", icon: UserRound, roles: ["ARTIST"] },
     ],
   },
   {
@@ -123,7 +126,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
               {group}
             </p>
             <div className="space-y-0.5">
-              {items.map(({ href, label, icon: Icon, children }) => {
+              {items.filter(({ roles }) => !roles || roles.includes(role)).map(({ href, label, icon: Icon, children }) => {
                 const active = isActive(href);
                 return (
                   <div key={href}>

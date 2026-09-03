@@ -16,6 +16,7 @@ import {
   DollarSign,
   MessageSquare,
   UserCog,
+  UserRound,
   ShieldCheck,
   Settings,
   Mail,
@@ -27,11 +28,20 @@ import { cn } from "@/utils/cn";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { UserRole } from "@/types/auth";
 
-const NAV_GROUPS = [
+interface MobileNavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
+  children?: { href: string; label: string }[];
+  roles?: UserRole[];
+}
+
+const NAV_GROUPS: { group: string; items: MobileNavItem[] }[] = [
   {
     group: "Plataforma",
     items: [
       { href: "/dashboard/central",    label: "Central",              icon: LayoutDashboard },
+      { href: "/dashboard/perfil",     label: "Mi perfil",             icon: UserRound, roles: ["ARTIST"] },
     ],
   },
   {
@@ -129,12 +139,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
                 {group}
               </p>
               <div className="space-y-0.5">
-                {items.map(({ href, label, icon: Icon, children }: {
-                  href: string;
-                  label: string;
-                  icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
-                  children?: { href: string; label: string }[];
-                }) => {
+                {items.filter(({ roles }) => !roles || roles.includes(role)).map(({ href, label, icon: Icon, children }) => {
                   const active = isActive(href);
                   return (
                     <div key={href}>

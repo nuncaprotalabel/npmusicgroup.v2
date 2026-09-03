@@ -178,11 +178,13 @@ export async function POST(
     ).rows[0];
 
     const activation = createActivationToken();
-    await client.query(
+    const onboarding = (
+      await client.query<{ id: string }>(
       `INSERT INTO artist_onboarding
         (solicitud_id, invitation_id, contract_id, user_id, status,
          activation_token_hash, activation_expires_at)
-       VALUES ($1, $2, $3, $4, 'PENDIENTE_PASSWORD', $5, $6)`,
+       VALUES ($1, $2, $3, $4, 'PENDIENTE_PASSWORD', $5, $6)
+       RETURNING id`,
       [
         context.solicitud_id,
         context.invitation_id,
@@ -191,7 +193,23 @@ export async function POST(
         activation.tokenHash,
         activation.expiresAt,
       ],
-    );
+      )
+    ).rows[0];
+
+    const artist = (
+      await client.query<{ id: string }>(
+      `INSERT INTO artists
+        (user_id, onboarding_id, nombre_artistico, pais, genero_principal,
+         enlace_principal, instagram, tiktok, bio, status)
+       SELECT $1, $2, s.nombre_artistico, s.pais, s.genero_principal,
+              s.enlace_principal, s.instagram, s.tiktok, s.mensaje,
+              'ONBOARDING_PENDIENTE'
+       FROM solicitudes s
+       WHERE s.id = $3
+       RETURNING id`,
+      [user.id, onboarding.id, context.solicitud_id],
+      )
+    ).rows[0];
 
     await client.query("COMMIT");
 
@@ -199,6 +217,7 @@ export async function POST(
       solicitudId: context.solicitud_id,
       invitationId: context.invitation_id,
       contractId: context.contract_id,
+      artistId: artist.id,
       role: "ARTIST",
     };
     const auditRequest = {
@@ -207,6 +226,15 @@ export async function POST(
       severity: "INFO" as const,
     };
     await Promise.all([
+      logAudit({
+        userId: session.userId,
+        username: session.username,
+        action: "ARTIST_CREATED",
+        entityType: "artist",
+        entityId: artist.id,
+        metadata: auditContext,
+        ...auditRequest,
+      }),
       logAudit({
         userId: session.userId,
         username: session.username,

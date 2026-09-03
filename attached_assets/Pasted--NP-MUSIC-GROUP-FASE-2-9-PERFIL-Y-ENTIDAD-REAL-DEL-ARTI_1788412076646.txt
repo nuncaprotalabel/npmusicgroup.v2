@@ -1,0 +1,546 @@
+# NP MUSIC GROUP — FASE 2.9: PERFIL Y ENTIDAD REAL DEL ARTISTA
+
+## OBJETIVO
+
+Construir la estructura real de artistas de NP Music Group y conectar cada cuenta `ARTIST` con su artista correspondiente.
+
+Actualmente ya funciona:
+
+**Solicitud → Invitación → Contrato → Firma → Onboarding → Cuenta ARTIST → Activación → Login**
+
+La Fase 2.8 terminó con el artista pudiendo iniciar sesión.
+
+Ahora debemos convertir esa cuenta en un **artista real dentro del sistema**.
+
+El objetivo de esta fase es dejar funcionando:
+
+**USER ARTIST → ARTIST → PERFIL DEL ARTISTA**
+
+Esta entidad será la base futura para:
+
+* catálogo
+* releases
+* distribución
+* ingresos
+* estadísticas
+* colaboradores
+* contratos
+* operaciones del artista
+
+NO implementar todavía esas funciones.
+
+---
+
+# REGLAS IMPORTANTES — AHORRO DE CRÉDITOS
+
+Antes de programar:
+
+1. Inspecciona únicamente las estructuras relacionadas con:
+
+   * `users`
+   * `solicitudes`
+   * `contracts`
+   * `artist_onboarding`
+   * `audit_log`
+   * dashboard ARTIST
+   * `DATABASE_PLAN.md`
+
+2. Reutiliza las estructuras existentes.
+
+3. NO reconstruyas el proyecto.
+
+4. NO hagas refactors generales.
+
+5. NO modifiques autenticación.
+
+6. NO modifiques sesiones.
+
+7. NO modifiques contratos.
+
+8. NO modifiques invitaciones.
+
+9. NO modifiques `/aplicar`.
+
+10. NO modifiques el flujo de firma.
+
+11. NO crees otra tabla de usuarios.
+
+12. NO crees otra tabla de onboarding.
+
+13. NO dupliques información que ya existe innecesariamente.
+
+14. NO agregues dependencias innecesarias.
+
+15. Trabaja únicamente sobre lo necesario para crear y gestionar la entidad ARTIST.
+
+---
+
+# 1. ENTIDAD ARTIST
+
+Si después de inspeccionar el schema se confirma que todavía no existe una entidad equivalente a `artists`, crearla siguiendo la arquitectura existente.
+
+Si ya existe una estructura equivalente:
+
+**REUTILIZARLA.**
+
+La entidad `artist` representa al artista como entidad de negocio.
+
+No debe confundirse con:
+
+* `users` → cuenta/autenticación
+* `solicitudes` → solicitud original
+* `artist_onboarding` → proceso de incorporación
+* `contracts` → relación contractual
+
+La relación conceptual debe ser:
+
+```text
+USER
+ ↓
+ARTIST
+```
+
+Y el artista debe poder relacionarse con:
+
+```text
+SOLICITUD
+CONTRATO
+```
+
+utilizando las relaciones existentes cuando sea apropiado.
+
+---
+
+# 2. RELACIÓN USER ↔ ARTIST
+
+Cada artista debe estar asociado a una cuenta `users`.
+
+Regla:
+
+**Un usuario con rol ARTIST debe corresponder a un único artista.**
+
+Evitar:
+
+* dos artistas para el mismo usuario
+* dos usuarios para el mismo artista
+* relaciones duplicadas
+
+La relación debe estar protegida mediante una restricción/índice adecuado.
+
+NO modificar automáticamente cuentas que tengan otro rol.
+
+---
+
+# 3. CREACIÓN DEL ARTISTA
+
+El artista debe crearse como parte del flujo real de onboarding.
+
+Utilizar la información ya existente en:
+
+* `users`
+* `solicitudes`
+* `artist_onboarding`
+* `contracts`
+
+No pedir nuevamente al artista información que ya tenemos almacenada, salvo que sea información adicional realmente necesaria.
+
+El proceso debe ser idempotente.
+
+Si el artista ya existe:
+
+**NO crear otro.**
+
+---
+
+# 4. INFORMACIÓN DEL PERFIL
+
+El perfil inicial debe aprovechar la información que ya fue proporcionada en `/aplicar`.
+
+Como mínimo debe poder representar:
+
+* nombre artístico
+* email
+* país
+* género principal
+* enlace principal
+* Instagram
+* TikTok
+* presentación/bio
+
+No duplicar innecesariamente el email de `users` si la arquitectura puede obtenerlo mediante la relación.
+
+El nombre artístico debe ser tratado como información del artista, no como username de autenticación.
+
+---
+
+# 5. IDENTIDAD DEL ARTISTA
+
+Debe quedar claramente separado:
+
+### USER
+
+Responsable de:
+
+* login
+* contraseña
+* sesión
+* rol
+* permisos
+* estado de cuenta
+
+### ARTIST
+
+Responsable de:
+
+* identidad artística
+* perfil
+* información pública/profesional
+* futuras relaciones con música, releases, catálogo e ingresos
+
+Esto es importante porque posteriormente un artista puede tener muchas entidades relacionadas con él.
+
+La arquitectura futura debe poder representar:
+
+```text
+ARTIST
+ ├── RELEASES
+ ├── TRACKS
+ ├── CATALOG
+ ├── DISTRIBUTION
+ ├── INCOME
+ ├── COLLABORATORS
+ └── CONTRACTS
+```
+
+NO implementar esas tablas todavía.
+
+---
+
+# 6. ESTADO DEL ARTISTA
+
+Utilizar únicamente los estados que realmente sean necesarios.
+
+Como mínimo debe poder distinguirse entre:
+
+* onboarding pendiente
+* activo
+
+Si el sistema existente ya tiene estados adecuados para este propósito, reutilizarlos.
+
+NO crear una cantidad innecesaria de estados.
+
+Importante:
+
+El estado del artista NO debe reemplazar el estado de la cuenta `users`.
+
+Son conceptos diferentes:
+
+```text
+USER → activo/inactivo
+ARTIST → estado dentro del ecosistema
+```
+
+---
+
+# 7. PERFIL DEL ARTISTA
+
+Crear dentro del dashboard ARTIST una sección para consultar su perfil.
+
+Ruta sugerida:
+
+```text
+/dashboard/perfil
+```
+
+Si el proyecto ya tiene una convención equivalente para el perfil, reutilizarla.
+
+El artista debe poder:
+
+* ver su información
+* editar los campos permitidos
+* guardar cambios
+
+El artista únicamente puede modificar **su propio perfil**.
+
+No confiar en un `artist_id` enviado desde el frontend.
+
+El servidor debe obtener el artista asociado a la sesión autenticada.
+
+---
+
+# 8. INFORMACIÓN EDITABLE
+
+El artista puede editar información no crítica como:
+
+* nombre artístico
+* género
+* país
+* enlace principal
+* Instagram
+* TikTok
+* biografía/presentación
+
+No permitir desde este módulo modificar:
+
+* rol
+* email de autenticación
+* estado de cuenta
+* contrato
+* porcentajes contractuales
+* información de firma
+* permisos
+* sesiones
+* datos administrativos
+
+Esos elementos pertenecen a otros sistemas.
+
+---
+
+# 9. ADMINISTRACIÓN
+
+Los administradores que tengan los permisos correspondientes deben poder consultar la información básica del artista.
+
+No construir todavía un módulo administrativo completo de artistas.
+
+Solo agregar lo estrictamente necesario para comprobar que:
+
+**USER → ARTIST**
+
+está funcionando correctamente.
+
+No crear un `/admin/artistas` completo si no es necesario para esta fase.
+
+---
+
+# 10. SEGURIDAD
+
+Toda operación debe validarse server-side.
+
+Especialmente:
+
+* creación
+* asociación USER/ARTIST
+* consulta
+* edición
+* identificación del artista actual
+
+Nunca confiar únicamente en restricciones de la interfaz.
+
+Un ARTIST no debe poder modificar:
+
+* otro artista
+* otro usuario
+* contratos
+* permisos
+* cuentas
+* información administrativa
+
+---
+
+# 11. AUDITORÍA
+
+Utilizar el `audit_log` existente.
+
+Registrar cambios importantes relacionados con el artista.
+
+Por ejemplo:
+
+* creación del artista
+* actualización de información relevante
+
+No registrar información sensible innecesariamente.
+
+No almacenar:
+
+* contraseñas
+* tokens
+* hashes
+* secretos
+
+---
+
+# 12. BASE DE DATOS
+
+Antes de crear una migración:
+
+Revisar exactamente qué relaciones ya existen entre:
+
+```text
+users
+solicitudes
+contracts
+artist_onboarding
+```
+
+No crear relaciones duplicadas.
+
+Si es necesario crear:
+
+```text
+artists
+```
+
+debe quedar correctamente documentado en:
+
+`docs/DATABASE_PLAN.md`
+
+La estructura debe estar preparada para futuras relaciones con releases, tracks, catálogo e ingresos, pero esas tablas NO deben crearse todavía.
+
+---
+
+# 13. INTERFAZ
+
+Mantener exactamente el lenguaje visual actual de NP Music Group:
+
+* negro
+* blanco
+* amarillo
+* limpio
+* premium
+* moderno
+* minimalista
+* responsive
+* excelente experiencia móvil/Android
+
+NO hacer un rediseño global.
+
+NO crear:
+
+* estadísticas falsas
+* widgets innecesarios
+* tarjetas decorativas
+* gráficos ficticios
+* módulos vacíos
+* dashboards nuevos sin función
+
+El perfil debe sentirse como una parte natural del sistema existente.
+
+---
+
+# 14. FLUJO FINAL
+
+Después de esta fase:
+
+```text
+SOLICITUD
+    ↓
+INVITACIÓN
+    ↓
+CONTRATO
+    ↓
+FIRMA
+    ↓
+ONBOARDING
+    ↓
+USER ARTIST
+    ↓
+ARTIST
+    ↓
+PERFIL
+    ↓
+DASHBOARD ARTIST
+```
+
+La cuenta continúa utilizando el sistema de autenticación existente.
+
+El artista continúa utilizando RBAC existente.
+
+---
+
+# 15. VERIFICACIÓN
+
+Probar como mínimo:
+
+### Caso correcto
+
+1. Utilizar una cuenta ARTIST real existente.
+2. Confirmar que existe su artista correspondiente.
+3. Entrar al dashboard.
+4. Abrir perfil.
+5. Consultar información.
+6. Modificar información permitida.
+7. Guardar.
+8. Recargar.
+9. Confirmar persistencia en Neon.
+
+### Seguridad
+
+Confirmar que un ARTIST:
+
+* no puede editar otro artista
+* no puede cambiar su rol
+* no puede cambiar permisos
+* no puede modificar contratos
+* no puede acceder a administración
+
+### Integridad
+
+Confirmar:
+
+* no existen artistas duplicados
+* un usuario ARTIST no tiene múltiples artistas
+* la relación con solicitud/onboarding no genera duplicados
+* los cambios permanecen después de cerrar sesión
+
+Ejecutar:
+
+```text
+npx tsc --noEmit
+npm run build
+git diff --check
+```
+
+Si existen pruebas relevantes, ejecutarlas.
+
+---
+
+# 16. NO IMPLEMENTAR TODAVÍA
+
+Esta fase termina con:
+
+**USER ARTIST + ARTIST + PERFIL FUNCIONANDO**
+
+NO implementar todavía:
+
+* releases
+* canciones
+* tracks
+* catálogo
+* distribución
+* MakeWaves
+* Too Lost
+* ingresos
+* regalías
+* splits completos
+* analytics
+* estadísticas
+* colaboradores
+* marketplace
+* pagos
+* mensajería
+* notificaciones
+* sistema avanzado de administración de artistas
+
+---
+
+# RESULTADO ESPERADO
+
+Al finalizar:
+
+Un artista que ya completó el onboarding debe tener una relación clara y persistente:
+
+```text
+USER
+  │
+  └── ARTIST
+        │
+        ├── PERFIL
+        ├── SOLICITUD
+        └── CONTRATO
+```
+
+La cuenta de autenticación y la entidad artística deben estar correctamente separadas.
+
+Esta estructura será la base sobre la que construiremos posteriormente el catálogo, releases, distribución e ingresos de NP Music Group.
+
+DETENTE AQUÍ.

@@ -157,6 +157,17 @@ export async function POST(
     if (updatedOnboarding.rowCount !== 1) {
       throw new Error("El onboarding no pudo completarse.");
     }
+    const updatedArtist = await client.query(
+      `UPDATE artists
+       SET status = 'ACTIVO', updated_at = NOW()
+       WHERE user_id = $1
+         AND onboarding_id = $2
+         AND status = 'ONBOARDING_PENDIENTE'`,
+      [activation.user_id, activation.id],
+    );
+    if (updatedArtist.rowCount !== 1) {
+      throw new Error("La entidad ARTIST no pudo activarse.");
+    }
     await client.query("COMMIT");
 
     const auditRequest = {

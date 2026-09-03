@@ -30,6 +30,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 const MODULE_LABELS: Record<string, string> = {
   "/dashboard/central":                  "Central",
   "/dashboard/artistas":                 "Artistas",
+  "/dashboard/perfil":                   "Mi perfil",
   "/dashboard/solicitudes":              "Solicitudes",
   "/admin/solicitudes":                   "Solicitudes",
   "/dashboard/invitaciones":             "Invitaciones",
