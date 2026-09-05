@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function AboutPage() { return <PublicInfoPage titleEs="Construimos estructura para la música independiente." titleEn="We build structure for independent music." descriptionEs="NP Music Group combina acompañamiento y herramientas para que tu proyecto avance con intención." descriptionEn="NP Music Group combines guidance and tools so your project can move forward with intention." eyebrowEs="Sobre nosotros" eyebrowEn="About us" />; }

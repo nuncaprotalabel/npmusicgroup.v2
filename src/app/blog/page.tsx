@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function BlogPage() { return <PublicInfoPage titleEs="Ideas para construir una carrera musical sostenible." titleEn="Ideas for building a sustainable music career." descriptionEs="Estamos preparando recursos y artículos prácticos para artistas independientes." descriptionEn="We are preparing practical resources and articles for independent artists." eyebrowEs="Blog" eyebrowEn="Blog" />; }

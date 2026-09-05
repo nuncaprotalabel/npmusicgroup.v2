@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function ReleasesPage() { return <PublicInfoPage titleEs="Tus lanzamientos, organizados de principio a fin." titleEn="Your releases, organized from start to finish." descriptionEs="Un flujo claro para preparar, revisar y distribuir cada proyecto musical." descriptionEn="A clear workflow to prepare, review, and distribute every music project." eyebrowEs="Lanzamientos" eyebrowEn="Releases" />; }

@@ -1,0 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
+export function NpControlPendingPage({ title }: { title: string }) {
+  return <div className="mx-auto max-w-3xl rounded-2xl border border-[#1E1E1E] bg-[#0A0A0A] p-8"><ShieldAlert className="mb-5 text-[#F5C518]" size={24}/><p className="text-[0.6875rem] uppercase tracking-[0.18em] text-[#F5C518]">Sección pendiente · Pending section</p><h1 className="mt-2 text-2xl font-bold text-white">{title}</h1><p className="mt-3 text-sm leading-7 text-[#737373]">Este apartado todavía no tiene operaciones conectadas a datos reales. No se muestran registros ficticios.<br/>This section is not connected to live data yet.</p><Link href="/np-control" className="mt-7 inline-flex items-center gap-2 text-sm text-[#F5C518]"><ArrowLeft size={15}/>Volver a Central / Back to Central</Link></div>;
+}

@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function StatusPage() { return <PublicInfoPage titleEs="Estado de la plataforma." titleEn="Platform status." descriptionEs="No hay incidentes públicos reportados en este momento." descriptionEn="There are no publicly reported incidents at this time." eyebrowEs="Estado" eyebrowEn="Status" />; }

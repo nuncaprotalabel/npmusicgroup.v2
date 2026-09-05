@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function IncomePage() { return <PublicInfoPage titleEs="Más claridad sobre tus ingresos musicales." titleEn="More clarity around your music income." descriptionEs="Centraliza la información financiera de tu proyecto y toma decisiones con contexto." descriptionEn="Keep your project's financial information organized and make decisions with context." eyebrowEs="Ingresos" eyebrowEn="Income" />; }

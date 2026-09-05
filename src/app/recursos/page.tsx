@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function ResourcesPage() { return <PublicInfoPage titleEs="Recursos para tu próximo paso." titleEn="Resources for your next step." descriptionEs="Estamos preparando guías y herramientas para ayudarte a profesionalizar tu proyecto." descriptionEn="We are preparing guides and tools to help you professionalize your project." eyebrowEs="Recursos" eyebrowEn="Resources" />; }

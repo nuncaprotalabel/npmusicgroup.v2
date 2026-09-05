@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function PricingPage() { return <PublicInfoPage titleEs="Un servicio adaptado a tu proyecto." titleEn="A service adapted to your project." descriptionEs="La disponibilidad y el alcance se revisan después de la solicitud de acceso." descriptionEn="Availability and scope are reviewed after your access request." eyebrowEs="Precios" eyebrowEn="Pricing" />; }

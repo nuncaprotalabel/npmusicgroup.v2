@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function TermsPage() { return <PublicInfoPage titleEs="Términos de uso." titleEn="Terms of use." descriptionEs="Los términos completos estarán disponibles antes de activar cualquier relación de servicio." descriptionEn="Full terms will be available before any service relationship is activated." eyebrowEs="Legal" eyebrowEn="Legal" />; }

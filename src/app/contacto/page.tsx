@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function ContactPage() { return <PublicInfoPage titleEs="Hablemos de tu proyecto." titleEn="Let's talk about your project." descriptionEs="El canal de contacto disponible es el formulario de acceso. Cuéntanos qué estás construyendo." descriptionEn="The available contact channel is the access form. Tell us what you are building." eyebrowEs="Contacto" eyebrowEn="Contact" />; }

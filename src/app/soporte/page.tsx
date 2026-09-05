@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function SupportPage() { return <PublicInfoPage titleEs="Soporte para avanzar sin fricción." titleEn="Support to keep moving without friction." descriptionEs="El canal disponible actualmente es la solicitud de acceso. Cuéntanos sobre tu proyecto y te responderemos." descriptionEn="The currently available channel is the access request. Tell us about your project and we will get back to you." eyebrowEs="Soporte" eyebrowEn="Support" />; }

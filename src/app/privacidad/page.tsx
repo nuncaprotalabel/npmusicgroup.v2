@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function PrivacyPage() { return <PublicInfoPage titleEs="Privacidad y datos." titleEn="Privacy and data." descriptionEs="La información de tu proyecto se trata con cuidado y solo se usa para evaluar y prestar el servicio solicitado." descriptionEn="Your project information is handled with care and used only to evaluate and provide the requested service." eyebrowEs="Privacidad" eyebrowEn="Privacy" />; }

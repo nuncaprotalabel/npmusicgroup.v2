@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function ArtistsPage() { return <PublicInfoPage titleEs="Artistas independientes, con estructura profesional." titleEn="Independent artists, with professional structure." descriptionEs="Organiza tu carrera, tus lanzamientos y tu relación con el equipo desde un solo espacio." descriptionEn="Organize your career, releases, and relationship with the team from one place." eyebrowEs="Para artistas" eyebrowEn="For artists" />; }

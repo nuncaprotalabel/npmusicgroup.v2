@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function AnalyticsPage() { return <PublicInfoPage titleEs="Analíticas para entender tu crecimiento." titleEn="Analytics to understand your growth." descriptionEs="Convierte tus datos de plataformas en señales útiles para tu próxima decisión." descriptionEn="Turn platform data into useful signals for your next decision." eyebrowEs="Analíticas" eyebrowEn="Analytics" />; }

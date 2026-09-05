@@ -1,0 +1,2 @@
+import { PublicInfoPage } from "@/components/public/PublicInfoPage";
+export default function FaqPage() { return <PublicInfoPage titleEs="Preguntas frecuentes." titleEn="Frequently asked questions." descriptionEs="Estamos reuniendo las respuestas más importantes sobre el proceso de acceso y trabajo con NP Music Group." descriptionEn="We are collecting the most important answers about access and working with NP Music Group." eyebrowEs="FAQ" eyebrowEn="FAQ" />; }
