@@ -4,3 +4,4 @@
 - [Secure account creation](account-creation.md) — New accounts use inactive bcrypt-backed records plus one-time setup tokens; never expose temporary passwords.
 - [Next.js preview origins](next-preview-origins.md) — Replit proxy previews need explicit local and REPLIT_DEV_DOMAIN origins for assets and HMR.
 - [Preview workflow stability](preview-workflow-stability.md) — Imported Next.js projects can retain stale build output or duplicate launch layers; keep one app workflow and rebuild `.next` cleanly when preview manifests break.
+- [Workspace restore verification](workspace-restore.md) — Verify newly added routes survive reconciliation before trusting the final build manifest.
