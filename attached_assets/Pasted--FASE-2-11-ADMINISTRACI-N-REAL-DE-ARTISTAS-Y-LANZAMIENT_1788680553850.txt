@@ -1,0 +1,515 @@
+## FASE 2.11 — ADMINISTRACIÓN REAL DE ARTISTAS Y LANZAMIENTOS
+
+### OBJETIVO
+
+Implementar únicamente la administración real del catálogo existente desde el panel privado de NP Music Group.
+
+Actualmente ya existen:
+
+USER → ARTIST → RELEASE → TRACK
+
+Y el sistema de ARTIST ya permite gestionar sus propios releases/tracks.
+
+Ahora necesitamos que el equipo administrativo pueda consultar y gestionar ese catálogo desde:
+
+* `/admin/artistas`
+* `/admin/lanzamientos`
+
+Los datos deben provenir de Neon/PostgreSQL.
+
+---
+
+## REGLA PRINCIPAL
+
+NO reconstruyas sistemas existentes.
+
+NO modificar:
+
+* autenticación
+* sesiones
+* RBAC general
+* contratos
+* invitaciones
+* firma contractual
+* onboarding
+* activación de cuentas
+* sistema público de solicitudes
+* dashboard ARTIST
+
+Solo reutiliza esos sistemas cuando sea necesario para autorización o relaciones.
+
+---
+
+# 1. INSPECCIÓN MÍNIMA
+
+Antes de modificar código, revisa únicamente:
+
+* `artists`
+* `releases`
+* `tracks`
+* `users`
+* `audit_log`
+* permisos/RBAC existentes
+* `/admin/artistas`
+* `/admin/lanzamientos`
+* APIs/services existentes relacionados
+
+No hagas una auditoría general del proyecto.
+
+No hagas una refactorización general.
+
+---
+
+# 2. /ADMIN/ARTISTAS
+
+Convertir `/admin/artistas` en una vista funcional.
+
+Consultar artistas reales desde Neon.
+
+Mostrar:
+
+* nombre artístico
+* cuenta asociada
+* email disponible
+* país
+* género
+* estado de cuenta
+* cantidad de releases
+* fecha de creación
+
+La cantidad de releases debe calcularse con datos reales.
+
+NO utilizar números inventados.
+
+NO utilizar mocks.
+
+NO utilizar arrays hardcodeados.
+
+---
+
+# 3. DETALLE DEL ARTISTA
+
+Al seleccionar un artista, mostrar su información real.
+
+Como mínimo:
+
+### Perfil
+
+* nombre artístico
+* email
+* país
+* género
+* enlace principal
+* Instagram si existe
+* TikTok si existe
+* bio/presentación si existe
+
+### Cuenta
+
+Mostrar únicamente información segura:
+
+* estado
+* rol
+
+Nunca mostrar:
+
+* password
+* password hash
+* tokens
+* sesiones
+* información sensible de autenticación
+
+### Catálogo
+
+Mostrar sus releases reales.
+
+Cada release debe mostrar:
+
+* título
+* tipo
+* estado
+* fecha de lanzamiento
+* cantidad de tracks
+
+---
+
+# 4. /ADMIN/LANZAMIENTOS
+
+Convertir `/admin/lanzamientos` en una vista funcional.
+
+Consultar releases reales desde Neon.
+
+Mostrar:
+
+* título
+* artista
+* tipo
+* estado
+* fecha de lanzamiento
+* número de tracks
+* fecha de creación
+
+Tipos existentes:
+
+* SINGLE
+* EP
+* ALBUM
+
+Estados existentes:
+
+* DRAFT
+* READY
+* RELEASED
+* ARCHIVED
+
+NO crear estados nuevos.
+
+---
+
+# 5. DETALLE DEL RELEASE
+
+Crear una vista funcional para consultar un release.
+
+Mostrar:
+
+### Información
+
+* título
+* artista
+* tipo
+* estado
+* release date
+* cover URL si existe
+
+### Tracks
+
+Mostrar:
+
+* track number
+* título
+* duración si existe
+* audio URL si existe
+
+Ordenar por `track_number`.
+
+---
+
+# 6. EDICIÓN ADMINISTRATIVA
+
+Permitir a un administrador autorizado editar únicamente los campos que el modelo actual permita editar de forma segura.
+
+No modificar reglas de negocio existentes sin necesidad.
+
+Si un release está en un estado que actualmente impide edición, respetar esa regla.
+
+No permitir que el panel administrativo cree estados inválidos.
+
+---
+
+# 7. ARCHIVAR RELEASE
+
+Permitir archivar un release cuando corresponda.
+
+Utilizar la lógica existente si ya existe.
+
+Si no existe una función reutilizable, crear únicamente la operación mínima necesaria.
+
+Registrar la acción en `audit_log`.
+
+---
+
+# 8. TRACKS
+
+Desde el detalle del release, permitir administrar tracks cuando las reglas actuales lo permitan.
+
+Acciones:
+
+* visualizar
+* editar
+* eliminar
+
+Respetar:
+
+* ownership
+* estado DRAFT
+* restricciones actuales de SINGLE
+* track number
+* duración
+* relaciones PostgreSQL
+
+No duplicar las APIs existentes si ya pueden reutilizarse de forma segura.
+
+---
+
+# 9. SEGURIDAD ADMINISTRATIVA
+
+Todas las operaciones deben validar server-side:
+
+1. sesión válida
+2. usuario activo
+3. permiso/rol correspondiente
+4. entidad existente
+5. relaciones correctas
+
+No confiar en:
+
+* `artist_id`
+* `user_id`
+* `release_id`
+
+enviados por el frontend como prueba de autorización.
+
+El servidor debe resolver las relaciones reales.
+
+Un usuario no autorizado:
+
+* sin sesión → `401`
+* autenticado sin permiso → `403`
+
+No depender únicamente de ocultar botones.
+
+---
+
+# 10. RBAC
+
+Reutilizar permisos existentes.
+
+NO crear una nueva arquitectura de permisos.
+
+Antes de agregar cualquier permiso, comprobar si ya existe uno equivalente.
+
+Si falta uno imprescindible:
+
+* crear solamente el mínimo necesario;
+* asignarlo siguiendo el sistema RBAC actual.
+
+---
+
+# 11. AUDITORÍA
+
+Reutilizar `audit_log`.
+
+Registrar acciones administrativas críticas.
+
+Como mínimo, utilizar los eventos existentes si ya están implementados para:
+
+* actualización de release
+* archivado de release
+* actualización de track
+* eliminación de track
+
+Si el proyecto utiliza nombres diferentes para esos eventos, reutilizar los existentes.
+
+NO crear un segundo sistema de auditoría.
+
+---
+
+# 12. ESTADOS DE INTERFAZ
+
+Las vistas deben manejar correctamente:
+
+* loading
+* error
+* sin datos
+* datos existentes
+* 401
+* 403
+* 404
+* acción exitosa
+* error de validación
+
+Nunca mostrar una pantalla vacía sin explicación.
+
+Cuando no existan artistas/releases, mostrar un estado vacío profesional.
+
+NO crear datos falsos para llenar la interfaz.
+
+---
+
+# 13. NAVEGACIÓN
+
+Verificar:
+
+* Dashboard → Artistas
+* Dashboard → Lanzamientos
+* Artista → detalle
+* Release → detalle
+* volver atrás
+* navegación desde menú lateral
+* navegación desde menú móvil
+
+No modificar el sistema de navegación completo.
+
+Solo reparar lo necesario para que estas rutas funcionen.
+
+---
+
+# 14. TRADUCCIÓN
+
+Utilizar exclusivamente el sistema de traducción existente.
+
+Las nuevas interfaces administrativas deben estar disponibles en:
+
+* español
+* inglés
+
+No crear otro sistema i18n.
+
+No dejar textos administrativos nuevos hardcodeados en un solo idioma cuando puedan formar parte del sistema existente.
+
+---
+
+# 15. RENDIMIENTO
+
+Mantener consultas razonables.
+
+Evitar:
+
+* N+1 queries innecesarias
+* peticiones duplicadas
+* loops de fetch
+* cargar todos los tracks cuando solo se necesita un contador
+* renders innecesarios
+
+NO implementar todavía paginación avanzada.
+
+La paginación será una fase separada.
+
+Si el proyecto ya tiene un límite de consulta razonable, reutilizarlo.
+
+---
+
+# 16. NO IMPLEMENTAR
+
+Esta fase NO incluye:
+
+* distribución digital
+* MakeWaves
+* Spotify
+* Apple Music
+* almacenamiento de audio
+* procesamiento de audio
+* ISRC
+* UPC/EAN
+* número de catálogo
+* regalías
+* splits
+* ingresos
+* analytics
+* publishing
+* colaboradores
+* pagos
+* almacenamiento externo
+* metadata avanzada
+
+Todo eso queda para fases posteriores.
+
+---
+
+# 17. COMPATIBILIDAD CON EL ARTIST DASHBOARD
+
+Después de implementar la administración, comprobar que:
+
+`/dashboard/releases`
+
+sigue funcionando exactamente como antes.
+
+No cambiar el comportamiento del ARTIST salvo para corregir una regresión provocada directamente por esta fase.
+
+La propiedad del catálogo continúa siendo:
+
+USER → ARTIST → RELEASE → TRACK
+
+---
+
+# 18. VERIFICACIÓN
+
+Ejecutar obligatoriamente:
+
+`npx tsc --noEmit`
+
+`git diff --check`
+
+`npm run build`
+
+Comprobar además:
+
+### Público
+
+* `/`
+* `/aplicar`
+* `/contacto`
+* `/blog`
+* `/login`
+
+### Admin
+
+* `/admin`
+* `/admin/artistas`
+* detalle de artista
+* `/admin/lanzamientos`
+* detalle de release
+
+### Artist
+
+* `/dashboard/releases`
+
+### Seguridad
+
+Probar:
+
+* admin autorizado
+* usuario sin permiso
+* usuario sin sesión
+* release inexistente
+* artista inexistente
+
+Comprobar también:
+
+* consola del navegador
+* errores 401
+* errores 403
+* errores 404
+* errores 500
+
+No crear datos permanentes de prueba.
+
+---
+
+# 19. LIMITACIÓN DE CRÉDITOS
+
+Los créditos de Replit son limitados.
+
+Trabaja de manera quirúrgica.
+
+NO:
+
+* rehacer arquitectura
+* refactorizar todo
+* cambiar dependencias
+* migrar framework
+* crear sistemas paralelos
+* analizar archivos innecesarios
+* modificar módulos que ya funcionan
+
+Modificar únicamente los archivos necesarios para completar esta fase.
+
+---
+
+# 20. REPORTE FINAL
+
+Al terminar, entregar únicamente:
+
+1. Problemas encontrados.
+2. Soluciones realizadas.
+3. Archivos modificados/creados.
+4. Rutas implementadas.
+5. Funciones administrativas disponibles.
+6. Permisos utilizados.
+7. Eventos de auditoría utilizados.
+8. Resultado de TypeScript.
+9. Resultado de build.
+10. Resultado de `git diff --check`.
+11. Problemas pendientes.
+
+NO continuar automáticamente con la Fase 2.12.
