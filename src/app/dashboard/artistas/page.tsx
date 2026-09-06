@@ -1,9 +1,16 @@
-import { InDevelopment } from "@/components/dashboard/InDevelopment";
-import { getActiveSession } from "@/lib/session";
+import { ArtistsAdminView } from "@/components/admin/ArtistsAdminView";
+import { AuthorizationError, requirePermission } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 export const metadata = { title: "Artistas — Dashboard | NP Music Group" };
 export default async function ArtistasPage() {
-  const session = await getActiveSession();
-  if (session?.role === "ARTIST") redirect("/dashboard/perfil");
-  return <InDevelopment moduleName="Artistas" description="Gestión de artistas, perfiles y roles. Disponible próximamente." />;
+  try {
+    await requirePermission("artists.view");
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      if (error.status === 401) redirect("/login?from=/dashboard/artistas");
+      redirect("/403");
+    }
+    throw error;
+  }
+  return <ArtistsAdminView />;
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getActiveSession } from "@/lib/session";
+import { AuthorizationError, requirePermission } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 import { ArtistsAdminView } from "@/components/admin/ArtistsAdminView";
 
@@ -9,7 +9,14 @@ export default function AdminArtistsPage() {
 }
 
 async function ArtistsContent() {
-  const session = await getActiveSession();
-  if (!session) redirect("/login?from=/admin/artistas");
+  try {
+    await requirePermission("artists.view");
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      if (error.status === 401) redirect("/login?from=/admin/artistas");
+      redirect("/403");
+    }
+    throw error;
+  }
   return <ArtistsAdminView />;
 }

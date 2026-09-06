@@ -1,4 +1,10 @@
-import type { ArtistProfile } from "@/types/artists";
+import type {
+  AdminArtistDetail,
+  AdminArtistRelease,
+  AdminArtistSummary,
+  ArtistProfile,
+} from "@/types/artists";
+import type { UserRole } from "@/types/auth";
 
 export interface ArtistProfileRow {
   id: string;
@@ -16,6 +22,22 @@ export interface ArtistProfileRow {
   status: ArtistProfile["status"];
   created_at: string;
   updated_at: string;
+}
+
+export interface AdminArtistRow extends ArtistProfileRow {
+  role: UserRole;
+  is_active: boolean;
+  release_count: number;
+}
+
+export interface AdminArtistReleaseRow {
+  id: string;
+  title: AdminArtistRelease["title"];
+  type: AdminArtistRelease["type"];
+  status: AdminArtistRelease["status"];
+  release_date: string | null;
+  track_count: number;
+  created_at: string;
 }
 
 export function toArtistProfile(row: ArtistProfileRow): ArtistProfile {
@@ -36,6 +58,34 @@ export function toArtistProfile(row: ArtistProfileRow): ArtistProfile {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+export function toAdminArtistSummary(row: AdminArtistRow): AdminArtistSummary {
+  return {
+    ...toArtistProfile(row),
+    accountRole: row.role,
+    accountActive: row.is_active,
+    releaseCount: Number(row.release_count ?? 0),
+  };
+}
+
+export function toAdminArtistRelease(row: AdminArtistReleaseRow): AdminArtistRelease {
+  return {
+    id: row.id,
+    title: row.title,
+    type: row.type,
+    status: row.status,
+    releaseDate: row.release_date,
+    trackCount: Number(row.track_count ?? 0),
+    createdAt: row.created_at,
+  };
+}
+
+export function toAdminArtistDetail(
+  row: AdminArtistRow,
+  releases: AdminArtistRelease[],
+): AdminArtistDetail {
+  return { ...toAdminArtistSummary(row), releases };
 }
 
 export const ARTIST_EDITABLE_FIELDS = [

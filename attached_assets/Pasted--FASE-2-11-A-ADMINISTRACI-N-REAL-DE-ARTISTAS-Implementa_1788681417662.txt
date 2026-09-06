@@ -1,0 +1,329 @@
+## FASE 2.11-A — ADMINISTRACIÓN REAL DE ARTISTAS
+
+Implementa únicamente la administración real de artistas.
+
+### ESTADO ACTUAL
+
+La navegación del panel ya fue corregida.
+
+Ya funcionan y fueron verificadas:
+
+* `/dashboard/artistas`
+* `/dashboard/lanzamientos`
+* `/admin/contratos`
+* `/admin/cuentas`
+* `/dashboard/analiticas`
+* `/dashboard/ingresos`
+* `/dashboard/mensajes`
+* `/dashboard/permisos`
+* `/dashboard/configuracion`
+
+NO vuelvas a trabajar navegación, menú móvil, selector ES/EN ni layout general salvo que esta fase provoque una regresión.
+
+La estructura existente del catálogo es:
+
+USER → ARTIST → RELEASE → TRACK
+
+Los datos deben provenir de Neon/PostgreSQL.
+
+---
+
+# 1. INSPECCIÓN MÍNIMA
+
+Revisa únicamente:
+
+* tabla `artists`
+* tabla `users`
+* tabla `solicitudes`
+* tabla `artist_onboarding`
+* tabla `releases`
+* tabla `tracks`
+* `audit_log`
+* permisos/RBAC existentes
+* implementación actual de `/dashboard/artistas`
+
+Antes de crear código nuevo, reutiliza las relaciones y servicios existentes.
+
+NO reconstruyas:
+
+* autenticación
+* sesiones
+* RBAC
+* onboarding
+* contratos
+* invitaciones
+* releases del ARTIST
+
+---
+
+# 2. LISTADO DE ARTISTAS
+
+Convertir `/dashboard/artistas` en una vista administrativa REAL.
+
+Consultar los artistas existentes desde Neon.
+
+Mostrar como mínimo:
+
+* nombre artístico
+* email/cuenta asociada si existe
+* país
+* género principal
+* estado de la cuenta
+* cantidad de releases
+* fecha de creación
+
+La cantidad de releases debe proceder de la relación real con `releases`.
+
+NO usar:
+
+* mocks
+* arrays hardcodeados
+* datos ficticios
+* estadísticas inventadas
+
+Si no existen artistas, mostrar un estado vacío profesional.
+
+---
+
+# 3. DETALLE DEL ARTISTA
+
+Al seleccionar un artista, mostrar su información real.
+
+Como mínimo:
+
+### Perfil
+
+* nombre artístico
+* email
+* país
+* género
+* enlace principal
+* Instagram si existe
+* TikTok si existe
+* bio/presentación si existe
+
+### Cuenta
+
+Mostrar únicamente información segura:
+
+* estado
+* rol
+
+Nunca mostrar:
+
+* contraseña
+* password hash
+* tokens
+* sesiones
+* secretos
+
+### Catálogo
+
+Mostrar sus releases existentes:
+
+* título
+* tipo
+* estado
+* fecha de lanzamiento
+* cantidad de tracks
+
+No implementar todavía edición administrativa de releases.
+
+---
+
+# 4. SEGURIDAD
+
+El acceso debe estar protegido server-side mediante el RBAC existente.
+
+No depender solamente de ocultar elementos en React.
+
+Validar:
+
+* sesión
+* usuario activo
+* permiso correspondiente
+
+Un usuario sin sesión debe recibir `401` cuando corresponda.
+
+Un usuario autenticado sin autorización debe recibir `403`.
+
+Al consultar un artista, el servidor debe validar que el artista exista y resolver sus relaciones mediante PostgreSQL.
+
+No confiar en datos enviados por el frontend como prueba de autorización.
+
+---
+
+# 5. RBAC
+
+Reutilizar los permisos existentes.
+
+Antes de crear un permiso nuevo, comprobar si ya existe uno equivalente.
+
+Si no existe y es estrictamente necesario, crear únicamente el permiso mínimo siguiendo la arquitectura RBAC actual.
+
+NO modificar la arquitectura de permisos.
+
+---
+
+# 6. AUDITORÍA
+
+Esta fase es principalmente de consulta.
+
+No crear un sistema de auditoría nuevo.
+
+Si únicamente se consultan artistas, no es necesario registrar cada visualización.
+
+Si se realiza alguna modificación real de datos, utilizar `audit_log` existente.
+
+---
+
+# 7. UI
+
+Mantener el diseño actual de NP Music Group:
+
+* minimalista
+* premium
+* oscuro
+* limpio
+* buena separación visual
+* responsive
+* excelente experiencia Android
+
+No rediseñar el dashboard completo.
+
+No añadir widgets decorativos.
+
+No añadir estadísticas falsas.
+
+No llenar la pantalla con tarjetas innecesarias.
+
+---
+
+# 8. ES / EN
+
+Utilizar el sistema i18n existente.
+
+Todo texto NUEVO de esta fase debe estar disponible en:
+
+* español
+* inglés
+
+NO modificar nuevamente el sistema de traducción existente.
+
+NO crear otro sistema de idiomas.
+
+---
+
+# 9. ESTADOS
+
+Implementar correctamente:
+
+* loading
+* error
+* vacío
+* datos existentes
+* 401
+* 403
+* 404
+
+No dejar una pantalla completamente vacía cuando una consulta falle.
+
+---
+
+# 10. RENDIMIENTO
+
+Usar consultas razonables.
+
+Evitar N+1 queries innecesarias.
+
+No cargar tracks completos solamente para calcular cantidades.
+
+No crear peticiones duplicadas.
+
+NO implementar todavía paginación avanzada.
+
+La paginación se realizará posteriormente como tarea independiente.
+
+---
+
+# 11. NO IMPLEMENTAR EN ESTA FASE
+
+NO tocar:
+
+* administración de releases
+* administración de tracks
+* edición de releases
+* eliminación de tracks
+* distribución
+* MakeWaves
+* Spotify
+* Apple Music
+* audio/storage
+* ISRC
+* UPC/EAN
+* catálogo musical
+* splits
+* regalías
+* ingresos
+* analytics
+* publishing
+* colaboradores
+* pagos
+
+Esta fase termina con la administración de consulta de ARTIST.
+
+---
+
+# 12. VERIFICACIÓN
+
+Ejecutar:
+
+`npx tsc --noEmit`
+
+`git diff --check`
+
+`npm run build`
+
+Probar:
+
+### Admin autorizado
+
+* `/dashboard/artistas`
+* listado
+* abrir artista
+* consultar perfil
+* consultar catálogo
+
+### Seguridad
+
+* sin sesión
+* usuario sin permiso
+* artista inexistente
+
+### Regresión
+
+* `/dashboard/lanzamientos`
+* `/dashboard/releases`
+
+Comprobar que el dashboard ARTIST continúe funcionando.
+
+No crear datos permanentes de prueba.
+
+---
+
+# 13. REPORTE FINAL
+
+Entregar únicamente:
+
+1. Qué estaba pendiente.
+2. Qué se implementó.
+3. Archivos modificados/creados.
+4. Consultas/relaciones utilizadas.
+5. Permisos utilizados.
+6. Rutas verificadas.
+7. Resultado de TypeScript.
+8. Resultado de build.
+9. Resultado de `git diff --check`.
+10. Problemas pendientes.
+
+NO continuar automáticamente con 2.11-B.
