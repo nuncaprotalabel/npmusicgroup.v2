@@ -364,6 +364,28 @@ que la cuenta relacionada tenga rol `ARTIST` antes de crear o actualizar la
 relación.
 
 La creación inicial ocurre en el onboarding de cuenta y la transición a
-`ACTIVO` ocurre en la misma transacción de activación de contraseña. No se
-crean todavía tablas de releases, tracks, catálogo, distribución, ingresos ni
-colaboradores.
+`ACTIVO` ocurre en la misma transacción de activación de contraseña.
+
+## 13. Fase 2.10 — `releases` y `tracks`
+
+El catálogo musical mantiene la relación `users → artists → releases → tracks`.
+Los releases no guardan una relación directa con `users`; su propiedad se
+resuelve siempre a través del artista asociado.
+
+`releases` contiene:
+
+- `artist_id` con FK a `artists(id)` y eliminación restringida;
+- `title`, `type` (`SINGLE`, `EP`, `ALBUM`) y `status`
+  (`DRAFT`, `READY`, `RELEASED`, `ARCHIVED`);
+- `release_date`, `cover_url`, `created_at` y `updated_at`.
+
+`tracks` contiene:
+
+- `release_id` con FK a `releases(id)` y eliminación en cascada;
+- `title`, `track_number`, `duration_seconds`, `audio_url`,
+  `created_at` y `updated_at`.
+
+Existe una restricción única por `(release_id, track_number)`, índices por
+artista, estado y release, y checks para tipos, estados, números y duración.
+Esta fase no incorpora almacenamiento definitivo, procesamiento de audio ni
+distribución.

@@ -114,7 +114,8 @@ Conectar la base de datos desde el panel de Replit o agregar la variable de ento
 ### Infraestructura implementada
 
 **Base de datos (PostgreSQL)**
-- Tablas actuales: `users`, `permissions`, `role_permissions`, `sessions`, `audit_log`
+- Tablas actuales: `users`, `permissions`, `role_permissions`, `sessions`, `audit_log`,
+  `artist_onboarding`, `artists`, `releases`, `tracks`
 - ENUM `user_role`: SUPER_ADMIN, ADMIN, DISTRIBUTION_MANAGER, MANAGER, ARTIST, VIEWER
 - 25 permisos RBAC distribuidos por módulo con asignación por rol
 - Trigger `updated_at` automático en `users`
@@ -151,7 +152,7 @@ Conectar la base de datos desde el panel de Replit o agregar la variable de ento
 - `src/lib/db.ts` — pool de conexión PostgreSQL
 - `src/lib/auth.ts` — JWT + session cookies
 - `src/lib/password.ts` — bcrypt utilities
-- `src/lib/permissions.ts` — rol/permiso constants
+- `src/lib/permissions.ts` — catálogo y consultas de permisos RBAC
 - `src/lib/audit.ts` — log de auditoría
 - `src/middleware.ts` — protección de rutas
 - `src/services/authService.ts` — cliente de la API de auth

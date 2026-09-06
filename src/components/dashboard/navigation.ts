@@ -51,6 +51,7 @@ const NAVIGATION: NavigationDefinition[] = [
     items: [
       { href: "/admin", label: "central", icon: LayoutDashboard },
       { href: "/dashboard/perfil", label: "profile", icon: UserRound, roles: ["ARTIST"] },
+      { href: "/dashboard/releases", label: "releases", icon: Send, roles: ["ARTIST"] },
     ],
   },
   {

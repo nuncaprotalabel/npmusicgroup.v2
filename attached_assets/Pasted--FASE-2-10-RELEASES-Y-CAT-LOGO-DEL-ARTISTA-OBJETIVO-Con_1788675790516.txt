@@ -1,0 +1,397 @@
+# FASE 2.10 — RELEASES Y CATÁLOGO DEL ARTISTA
+
+## OBJETIVO
+
+Construir el primer módulo real del ecosistema musical de NP Music Group:
+
+**USER → ARTIST → RELEASES → TRACKS**
+
+El objetivo es permitir que cada artista tenga un catálogo estructurado de lanzamientos musicales dentro de la plataforma.
+
+NO reconstruir autenticación, onboarding, contratos, invitaciones ni perfiles.
+
+---
+
+## 1. ANTES DE MODIFICAR
+
+Inspecciona únicamente lo necesario para entender la implementación actual:
+
+* `users`
+* `artists`
+* `solicitudes`
+* `contracts`
+* `artist_onboarding`
+* `audit_log`
+* perfil/dashboard actual del artista
+* `DATABASE_PLAN.md`
+* navegación/sidebar existente
+
+Determina si ya existe alguna tabla, tipo, servicio o componente relacionado con:
+
+* releases
+* tracks
+* canciones
+* catálogo musical
+
+Si existe algo equivalente, REUTILÍZALO.
+
+NO crear estructuras duplicadas.
+
+---
+
+# 2. CREAR ENTIDAD RELEASE
+
+Si no existe una entidad equivalente, crear:
+
+`releases`
+
+La entidad debe representar un lanzamiento musical.
+
+Campos mínimos:
+
+* `id`
+* `artist_id`
+* `title`
+* `type`
+* `status`
+* `release_date`
+* `cover_url` o referencia equivalente preparada para futuro almacenamiento
+* `created_at`
+* `updated_at`
+
+Tipos iniciales de release:
+
+* `SINGLE`
+* `EP`
+* `ALBUM`
+
+Estados iniciales:
+
+* `DRAFT`
+* `READY`
+* `RELEASED`
+* `ARCHIVED`
+
+No implementar todavía distribución automática.
+
+---
+
+# 3. CREAR ENTIDAD TRACK
+
+Si no existe una entidad equivalente, crear:
+
+`tracks`
+
+Cada track pertenece a un release.
+
+Campos mínimos:
+
+* `id`
+* `release_id`
+* `title`
+* `track_number`
+* `duration_seconds` nullable
+* `audio_url` o referencia equivalente preparada para futuro almacenamiento
+* `created_at`
+* `updated_at`
+
+Relación:
+
+`ARTIST → RELEASE → TRACK`
+
+Un release puede contener uno o múltiples tracks.
+
+---
+
+# 4. RELACIONES
+
+Implementar correctamente:
+
+`artists.id → releases.artist_id`
+
+`releases.id → tracks.release_id`
+
+Agregar índices y constraints necesarios.
+
+Evitar registros huérfanos.
+
+No crear relación directa `users → releases`.
+
+La relación debe resolverse mediante:
+
+`USER → ARTIST → RELEASE`
+
+---
+
+# 5. CREACIÓN DE RELEASES
+
+Crear funcionalidad para que un artista pueda crear un release desde su dashboard.
+
+Ruta sugerida:
+
+`/dashboard/releases`
+
+Si el proyecto ya tiene una convención equivalente, reutilizarla.
+
+Debe permitir:
+
+* ver sus releases
+* crear release
+* editar un release en `DRAFT`
+* agregar tracks
+* editar tracks
+* guardar cambios
+
+El `artist_id` debe obtenerse SIEMPRE desde la sesión autenticada.
+
+Nunca confiar en un `artist_id` enviado por el frontend para determinar propiedad.
+
+---
+
+# 6. SEGURIDAD
+
+Un ARTIST únicamente puede:
+
+* ver sus propios releases
+* crear sus propios releases
+* modificar sus propios releases
+* modificar tracks pertenecientes a sus releases
+
+Debe ser imposible acceder/modificar releases de otro artista cambiando un ID en la URL o request.
+
+SUPER_ADMIN/roles administrativos podrán consultar según las permissions existentes, pero NO construir todavía un sistema completo de administración de catálogo.
+
+---
+
+# 7. INFORMACIÓN DEL RELEASE
+
+El formulario inicial debe ser simple y profesional.
+
+Campos:
+
+* Título
+* Tipo: Single / EP / Album
+* Fecha de lanzamiento
+* Portada
+* Estado
+
+No agregar todavía:
+
+* ISRC
+* UPC/EAN
+* catálogo number
+* distributor
+* plataformas
+* royalties
+* splits
+* ingresos
+* streams
+* publishing
+* metadata avanzada
+
+Esas funciones pertenecen a fases posteriores.
+
+---
+
+# 8. TRACKS
+
+Dentro del release debe existir una forma clara de administrar sus tracks.
+
+Permitir:
+
+* agregar track
+* editar título
+* cambiar número de track
+* eliminar track mientras el release esté en `DRAFT`
+
+Para un SINGLE:
+
+* permitir 1 track como configuración normal.
+
+Para EP/ALBUM:
+
+* permitir múltiples tracks.
+
+No implementar todavía procesamiento de audio, transcoding, waveform, almacenamiento definitivo ni distribución.
+
+---
+
+# 9. INTERFAZ
+
+Mantener exactamente la identidad visual actual de NP Music Group.
+
+Debe sentirse como un:
+
+**Music Operating System**
+
+No como un CMS genérico.
+
+Prioridades:
+
+* limpio
+* premium
+* minimalista
+* oscuro
+* excelente experiencia móvil
+* jerarquía visual clara
+* pocos elementos
+* sin widgets decorativos
+* sin estadísticas falsas
+* sin dashboards llenos de tarjetas
+
+Crear únicamente las pantallas necesarias:
+
+`/dashboard/releases`
+
+y la vista/formulario necesario para crear o editar un release.
+
+---
+
+# 10. AUDITORÍA
+
+Utilizar el `audit_log` existente.
+
+Registrar acciones importantes:
+
+* `RELEASE_CREATED`
+* `RELEASE_UPDATED`
+* `RELEASE_ARCHIVED`
+* `TRACK_CREATED`
+* `TRACK_UPDATED`
+* `TRACK_DELETED`
+
+No registrar audio, URLs sensibles ni secretos innecesarios.
+
+---
+
+# 11. INTEGRACIÓN CON EL ARTISTA
+
+El release debe quedar ligado al `artist` real creado en la fase anterior.
+
+No duplicar:
+
+* artistic name
+* email
+* country
+* genre
+* social links
+
+Toda esa información continúa perteneciendo al perfil del artista.
+
+El release únicamente referencia al artista.
+
+---
+
+# 12. NO HACER EN ESTA FASE
+
+NO implementar:
+
+* distribución
+* MakeWaves
+* Too Lost
+* DSPs
+* Spotify API
+* Apple Music API
+* regalías
+* splits
+* ingresos
+* analytics
+* streams
+* ISRC automático
+* UPC automático
+* publishing
+* contratos nuevos
+* pagos
+* marketplace
+* colaboradores avanzados
+* notificaciones
+* email provider
+* almacenamiento definitivo de audio
+* procesamiento/transcoding
+* rediseño global
+* nuevo sistema de autenticación
+* nuevo sistema de roles
+
+---
+
+# 13. IDEMPOTENCIA Y CALIDAD
+
+Antes de crear migraciones o tablas:
+
+1. Inspecciona el esquema real.
+2. Reutiliza estructuras existentes.
+3. Evita duplicados.
+4. Mantén las relaciones con foreign keys.
+5. No rompas datos existentes.
+6. No cambies fases anteriores salvo que sea estrictamente necesario para integrar esta fase.
+
+No hagas refactors generales.
+
+No agregues dependencias si no son imprescindibles.
+
+---
+
+# 14. VERIFICACIÓN OBLIGATORIA
+
+Al finalizar comprobar:
+
+### Base de datos
+
+* `artists → releases` funciona.
+* `releases → tracks` funciona.
+* foreign keys correctas.
+* índices correctos.
+* no existen duplicados innecesarios.
+
+### Seguridad
+
+* artista A no puede leer release de artista B.
+* artista A no puede modificar release de artista B.
+* artista A no puede modificar tracks de otro artista.
+
+### Flujo real
+
+Probar:
+
+`ARTIST LOGIN`
+→ `/dashboard/releases`
+→ crear release
+→ agregar track
+→ guardar
+→ editar
+→ volver a cargar
+→ comprobar persistencia.
+
+### Calidad
+
+Ejecutar:
+
+* `npx tsc --noEmit`
+* `git diff --check`
+* `npm run build`
+
+Si existen tests E2E del proyecto, agregar únicamente los necesarios para este flujo.
+
+---
+
+# RESULTADO FINAL
+
+Al terminar esta fase, el sistema debe tener:
+
+**USER**
+↓
+**ARTIST**
+↓
+**PROFILE**
+↓
+**RELEASE**
+↓
+**TRACK**
+
+El artista ya no será solamente una cuenta con perfil.
+
+Comenzará a existir su **catálogo musical real dentro de NP Music Group**.
+
+DETENTE AL TERMINAR ESTA FASE.
+
+No continúes automáticamente hacia distribución, royalties, analytics ni otras funcionalidades.

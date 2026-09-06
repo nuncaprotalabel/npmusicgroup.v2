@@ -7,8 +7,9 @@ description: NP Music Group V2 — Replit PostgreSQL auth/RBAC schema applied an
 Authentication and RBAC schema applied. SUPER_ADMIN created through environment secrets.
 
 ## Tables created
-`users`, `sessions`, `audit_log`, `permissions`, `role_permissions`
-Also: `user_role` ENUM, auth/RBAC indexes, and `update_users_updated_at()` trigger on `users`.
+`users`, `sessions`, `audit_log`, `permissions`, `role_permissions`,
+`artist_onboarding`, `artists`, `releases`, `tracks`
+Also: `user_role` ENUM, auth/RBAC/catalog indexes, and timestamp triggers.
 
 ## Seed user
 - username: `npmusicadmin`
@@ -28,3 +29,8 @@ After a workspace/database restore, verify the public tables and active SUPER_AD
 **Why:** The login route reports a generic 500 when its first `users` query hits a missing relation, which can look like an application regression even though the source code is valid.
 
 **How to apply:** Check table existence first, restore the documented idempotent schema when needed, then run the secure bootstrap flow if the user account is absent.
+
+## Catalog constraint
+The development database can lag the documented prior phases and be empty of artist prerequisites even when the application already references them. Verify `information_schema` before assuming an artist account exists; never create test artists to exercise catalog flows.
+
+**Why:** Releases must resolve ownership through a real `users → artists` relationship, and fabricated catalog data would violate the product's real-data policy.
