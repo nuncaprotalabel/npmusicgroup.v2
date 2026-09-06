@@ -29,7 +29,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (release?.status !== "DRAFT") {
       return NextResponse.json({ error: "Solo puedes editar tracks de un release DRAFT." }, { status: 409 });
     }
-    const parsed = parseTrackInput(await request.json().catch(() => null));
+    const body = await request.json().catch(() => null);
+    const input = body && typeof body === "object" ? body as Record<string, unknown> : {};
+    const parsed = parseTrackInput({
+      ...input,
+      title: input.title ?? existing.title,
+      trackNumber: input.trackNumber ?? existing.track_number,
+      durationSeconds: input.durationSeconds ?? existing.duration_seconds,
+      audioUrl: input.audioUrl ?? existing.audio_url,
+    });
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const updated = await queryOne<TrackRow>(
       `UPDATE tracks

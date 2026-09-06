@@ -57,14 +57,15 @@ const NAVIGATION: NavigationDefinition[] = [
   {
     group: "management",
     items: [
-      { href: "/admin/artistas", label: "artists", icon: Users },
-      { href: "/admin/solicitudes", label: "requests", icon: Inbox },
-      { href: "/admin/invitaciones", label: "invitations", icon: Mail },
-      { href: "/admin/contratos", label: "contracts", icon: FileText },
+      { href: "/admin/artistas", label: "artists", icon: Users, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] },
+      { href: "/admin/solicitudes", label: "requests", icon: Inbox, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] },
+      { href: "/admin/invitaciones", label: "invitations", icon: Mail, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] },
+      { href: "/admin/contratos", label: "contracts", icon: FileText, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] },
       {
         href: "/admin/lanzamientos",
         label: "releases",
         icon: Send,
+        roles: ["SUPER_ADMIN", "ADMIN", "DISTRIBUTION_MANAGER", "MANAGER"],
         children: [{ href: "/admin/recibidos", label: "releasesReceived" }],
       },
     ],
@@ -72,25 +73,27 @@ const NAVIGATION: NavigationDefinition[] = [
   {
     group: "finance",
     items: [
-      { href: "/admin/analiticas", label: "analytics", icon: BarChart2 },
-      { href: "/admin/ingresos", label: "revenue", icon: DollarSign },
-      { href: "/admin/mensajes", label: "messaging", icon: MessageSquare },
+      { href: "/admin/analiticas", label: "analytics", icon: BarChart2, roles: ["SUPER_ADMIN", "ADMIN"] },
+      { href: "/admin/ingresos", label: "revenue", icon: DollarSign, roles: ["SUPER_ADMIN", "ADMIN"] },
+      { href: "/admin/mensajes", label: "messaging", icon: MessageSquare, roles: ["SUPER_ADMIN", "ADMIN"] },
     ],
   },
   {
     group: "system",
     items: [
-      { href: "/admin/cuentas", label: "accounts", icon: UserCog },
-      { href: "/admin/permisos", label: "permissions", icon: ShieldCheck },
-      { href: "/admin/configuracion", label: "settings", icon: Settings },
+      { href: "/admin/cuentas", label: "accounts", icon: UserCog, roles: ["SUPER_ADMIN", "ADMIN"] },
+      { href: "/admin/permisos", label: "permissions", icon: ShieldCheck, roles: ["SUPER_ADMIN"] },
+      { href: "/admin/configuracion", label: "settings", icon: Settings, roles: ["SUPER_ADMIN"] },
     ],
   },
 ];
 
-export function getNavigationGroups(t: Translations): NavigationGroup[] {
+export function getNavigationGroups(t: Translations, role?: UserRole): NavigationGroup[] {
   return NAVIGATION.map(({ group, items }) => ({
     group: t.dashboard.sidebar[group],
-    items: items.map(({ label, children, ...item }) => ({
+    items: items
+      .filter(({ roles }) => !role || !roles || roles.includes(role))
+      .map(({ label, children, ...item }) => ({
       ...item,
       label: t.dashboard.modules[label],
       ...(children
@@ -101,8 +104,12 @@ export function getNavigationGroups(t: Translations): NavigationGroup[] {
             })),
           }
         : {}),
-    })),
-  }));
+      })),
+  })).filter(({ items }) => items.length > 0);
+}
+
+export function getNavigationGroupsForRole(t: Translations, role: UserRole): NavigationGroup[] {
+  return getNavigationGroups(t, role);
 }
 
 export function isNavigationItemActive(pathname: string, href: string) {

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "node:crypto";
 import type { PoolClient } from "pg";
 import { db, query } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { requirePermission, AuthorizationError } from "@/lib/authorization";
 import { logAudit, getClientIp } from "@/lib/audit";
+import { createActivationToken } from "@/lib/onboarding";
 import type { UserRole } from "@/types/auth";
 import type { Account } from "@/types/accounts";
 
@@ -116,6 +116,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!isValidRole(role)) {
       return NextResponse.json({ error: "El rol seleccionado no es válido." }, { status: 400 });
     }
+    if (role === "SUPER_ADMIN" && session.role !== "SUPER_ADMIN") {
+      return NextResponse.json(
+        { error: "Solo un SUPER_ADMIN puede crear cuentas con ese rol." },
+        { status: 403 },
+      );
+    }
 
     const duplicate = await query<{ username: string; email: string }>(
       `SELECT username, email FROM users
@@ -133,9 +139,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // El hash aleatorio hace que la cuenta no sea utilizable hasta establecer contraseña.
     // El secreto solo existe en memoria y el enlace se entrega una única vez en la respuesta.
-    const passwordHash = await hashPassword(randomBytes(32).toString("base64url"));
-    const setupToken = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const activation = createActivationToken();
+    const passwordHash = await hashPassword(activation.token);
 
     client = await db.connect();
     await client.query("BEGIN");
@@ -146,9 +151,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       [username, email, passwordHash, role, session.userId],
     );
     await client.query(
-      `INSERT INTO invitations (email, role, token, invited_by, expires_at)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [email, role, setupToken, session.userId, expiresAt],
+      `INSERT INTO invitations
+         (email, role, token_hash, invited_by, expires_at, status, created_by)
+       VALUES ($1, $2, $3, $4, $5, 'PENDIENTE', $4)`,
+      [email, role, activation.tokenHash, session.userId, activation.expiresAt],
     );
     await client.query("COMMIT");
 
@@ -167,8 +173,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         account,
-        setupUrl: `/invitar/${setupToken}`,
-        expiresAt: expiresAt.toISOString(),
+        setupUrl: `/activar-cuenta/${activation.token}`,
+        expiresAt: activation.expiresAt.toISOString(),
       },
       { status: 201 },
     );

@@ -1,0 +1,452 @@
+# FASE 2.10.1 — ESTABILIZACIÓN Y REPARACIÓN DEL SISTEMA
+
+## OBJETIVO
+
+DETENER temporalmente el desarrollo de nuevas funcionalidades.
+
+El objetivo de esta fase es hacer que el sistema existente sea realmente funcional, estable y conectado a Neon PostgreSQL.
+
+NO implementar Releases nuevos, distribución, royalties ni nuevas funcionalidades de negocio.
+
+---
+
+# PRIORIDAD ABSOLUTA
+
+Existen problemas actuales:
+
+1. El panel administrativo tiene botones y navegación que no funcionan correctamente.
+2. Algunas funciones funcionan y después dejan de funcionar.
+3. El menú lateral/móvil de tres rayas presenta problemas.
+4. Existen botones de la web pública que no hacen nada.
+5. Algunas secciones no están correctamente conectadas con datos reales.
+6. El selector de idioma del área privada no traduce toda la interfaz.
+7. La web se siente poco optimizada.
+
+REPARA ESTOS PROBLEMAS ANTES DE CONTINUAR EL DESARROLLO.
+
+---
+
+# REGLA DE TRABAJO
+
+NO rehagas la arquitectura.
+
+NO reemplaces autenticación.
+
+NO reemplaces RBAC.
+
+NO reemplaces Neon/PostgreSQL.
+
+NO reemplaces contratos.
+
+NO reemplaces onboarding.
+
+NO reemplaces artistas.
+
+NO reemplaces releases.
+
+NO instales dependencias innecesarias.
+
+NO hagas un refactor general.
+
+Primero identifica la causa concreta del problema y después modifica solamente los archivos necesarios.
+
+---
+
+# 1. PANEL ADMINISTRATIVO
+
+Inspecciona la implementación REAL del panel administrativo.
+
+Prueba y repara:
+
+* Dashboard
+* Artistas
+* Lanzamientos
+* Solicitudes
+* Invitaciones
+* Contratos
+* Cuentas
+* Configuración
+* cualquier otra sección que aparezca actualmente en el panel
+
+Verifica:
+
+* navegación
+* rutas
+* botones
+* `onClick`
+* enlaces
+* estados
+* llamadas API
+* permisos RBAC
+* sesión
+* middleware
+* carga de datos
+* errores JavaScript
+* errores de hydration
+* componentes que desmontan incorrectamente
+* overlays que bloquean clicks
+* elementos que quedan encima de otros elementos
+
+NO asumir que el problema es CSS.
+
+Encuentra la causa real.
+
+---
+
+# 2. MENÚ DE TRES RAYAS
+
+El menú móvil/lateral debe funcionar completamente.
+
+Probar:
+
+* abrir
+* cerrar
+* seleccionar una sección
+* navegar
+* cerrar automáticamente después de navegar
+* overlay
+* scroll
+* botones internos
+* volver al dashboard
+* cambiar idioma
+
+No debe bloquear la pantalla ni dejar elementos invisibles capturando clicks.
+
+---
+
+# 3. NAVEGACIÓN PÚBLICA
+
+Inspecciona la homepage completa.
+
+TODO botón o enlace visible debe funcionar.
+
+Incluye como mínimo:
+
+* Inicio
+* Aplicar
+* Login
+* Contacto
+* Blog
+* navegación principal
+* footer
+* redes/enlaces existentes
+* CTA existentes
+
+Regla:
+
+**Si existe visualmente, debe funcionar.**
+
+Eliminar cualquier:
+
+* `href="#"`
+* botón sin acción
+* `onClick` vacío
+* placeholder que parezca funcional
+* enlace hacia una ruta inexistente
+
+Si una página realmente todavía no tiene contenido:
+
+crear solamente una página funcional de estado vacío.
+
+NO inventar contenido.
+
+NO crear artículos falsos.
+
+NO crear estadísticas falsas.
+
+---
+
+# 4. DATOS REALES
+
+Toda información dinámica debe utilizar la base de datos Neon existente.
+
+Comprobar especialmente:
+
+* solicitudes
+* invitaciones
+* contratos
+* cuentas
+* artistas
+* releases
+* tracks
+
+No utilizar:
+
+* mocks
+* arrays hardcodeados
+* datos ficticios
+* estadísticas inventadas
+
+Si Neon no contiene registros:
+
+mostrar un estado vacío profesional.
+
+NO crear registros de prueba para esconder errores.
+
+---
+
+# 5. CONSISTENCIA ENTRE FRONTEND Y API
+
+Para cada módulo existente verifica:
+
+**UI → API → servicio/query → Neon**
+
+Si un botón existe pero no tiene endpoint:
+→ determinar si la acción debería existir según la funcionalidad actual.
+
+Si la API existe pero falla:
+→ corregirla.
+
+Si el frontend llama a una ruta incorrecta:
+→ corregir la llamada.
+
+Si existe una ruta antigua y otra nueva:
+→ mantener una única ruta funcional y redirigir correctamente cuando corresponda.
+
+NO crear APIs duplicadas.
+
+---
+
+# 6. TRADUCCIÓN COMPLETA DEL ÁREA PRIVADA
+
+Reparar el sistema actual de idiomas.
+
+Cuando el usuario cambie:
+
+**ES ↔ EN**
+
+debe traducirse TODO el contenido visible del área privada.
+
+Incluye:
+
+* sidebar
+* menú móvil
+* header
+* dashboard
+* títulos
+* subtítulos
+* botones
+* formularios
+* labels
+* placeholders
+* tablas
+* estados
+* mensajes de error
+* mensajes de éxito
+* modales
+* confirmaciones
+* perfil
+* artistas
+* solicitudes
+* invitaciones
+* contratos
+* cuentas
+* configuración
+* releases
+* tracks
+* navegación
+* cualquier otro componente privado existente
+
+NO dejar textos parcialmente traducidos.
+
+NO traducir solamente el sidebar.
+
+NO duplicar el sistema de internacionalización si ya existe uno.
+
+Si ya existe un sistema de traducciones:
+→ completarlo.
+
+El idioma seleccionado debe mantenerse mientras el usuario navega por el área privada.
+
+---
+
+# 7. OPTIMIZACIÓN
+
+Investiga por qué la web se siente lenta o poco optimizada.
+
+Prioriza problemas evidentes:
+
+* consultas duplicadas
+* requests innecesarios
+* renders innecesarios
+* componentes excesivamente pesados
+* imágenes innecesariamente grandes
+* JavaScript innecesario en cliente
+* cargas repetidas al navegar
+* errores que generan reintentos
+* efectos excesivos
+* loading states defectuosos
+
+Corrige únicamente problemas reales encontrados.
+
+NO eliminar funcionalidades.
+
+NO hacer un rediseño.
+
+NO sacrificar UX por rendimiento.
+
+Prioridad especial:
+
+* homepage
+* login
+* dashboard
+* panel admin
+* navegación móvil
+
+---
+
+# 8. SEGURIDAD
+
+No debilitar las protecciones existentes.
+
+Mantener:
+
+* autenticación
+* sesiones
+* RBAC
+* permisos
+* ownership del artista
+* protección de rutas administrativas
+
+Especialmente:
+
+ARTIST no debe poder acceder a información administrativa cambiando URLs o IDs.
+
+ARTIST solo debe acceder a sus propios datos.
+
+---
+
+# 9. VERIFICACIÓN REAL
+
+No considerar la fase terminada únicamente porque compile.
+
+Realizar pruebas reales de navegación.
+
+## PÚBLICO
+
+Homepage
+→ Aplicar
+→ Contacto
+→ Blog
+→ Login
+→ volver
+→ navegación principal
+→ footer
+
+## ADMIN
+
+Login
+→ Dashboard
+→ Artistas
+→ Solicitudes
+→ Invitaciones
+→ Contratos
+→ Cuentas
+→ Configuración
+→ menú móvil
+→ abrir/cerrar menú
+→ volver
+→ cambiar idioma
+→ navegar entre varias páginas manteniendo idioma
+
+## ARTIST
+
+Login
+→ Dashboard
+→ Perfil
+→ Releases
+→ crear/editar release
+→ tracks
+→ cambiar idioma
+→ navegar
+→ volver
+
+---
+
+# 10. ERRORES DEL NAVEGADOR
+
+Durante las pruebas presta atención a:
+
+* errores de consola
+* errores de red
+* respuestas 401
+* respuestas 403
+* respuestas 404
+* respuestas 500
+* errores de hydration
+* errores de JavaScript
+* requests duplicados
+* rutas incorrectas
+
+Corrige las causas reales que estén relacionadas con los problemas de esta fase.
+
+---
+
+# 11. VERIFICACIÓN FINAL
+
+Ejecutar:
+
+`npx tsc --noEmit`
+
+`git diff --check`
+
+`npm run build`
+
+Después probar la aplicación funcionando realmente.
+
+---
+
+# RESTRICCIÓN DE CRÉDITOS
+
+Los créditos disponibles son limitados.
+
+Por lo tanto:
+
+NO hagas análisis interminables.
+
+NO recorras todo el proyecto sin propósito.
+
+NO refactorices archivos que no estén relacionados.
+
+NO agregues dependencias salvo necesidad absoluta.
+
+NO reconstruyas módulos que ya existen.
+
+Trabaja directamente sobre los problemas indicados.
+
+---
+
+# CRITERIO DE TERMINACIÓN
+
+La fase termina únicamente cuando:
+
+* el panel administrativo navega correctamente;
+* el menú de tres rayas funciona;
+* los botones existentes tienen acciones reales;
+* las rutas existentes funcionan;
+* las secciones existentes cargan datos reales cuando corresponda;
+* Neon es la fuente de datos;
+* no existen mocks utilizados para aparentar funcionalidad;
+* el selector ES/EN traduce toda el área privada;
+* el idioma persiste durante la navegación;
+* la navegación pública funciona;
+* la interfaz se siente más estable y optimizada;
+* no se rompieron autenticación, RBAC, contratos, onboarding, artistas ni releases;
+* TypeScript pasa;
+* build pasa;
+* `git diff --check` pasa.
+
+NO implementar ninguna fase posterior.
+
+Al terminar, entregar únicamente:
+
+1. Problemas encontrados.
+2. Archivos modificados.
+3. Problemas reparados.
+4. Rutas probadas.
+5. Módulos que siguen sin estar implementados.
+6. Resultado de TypeScript.
+7. Resultado del build.
+8. Problemas pendientes, si existen.
+
+DETENTE.

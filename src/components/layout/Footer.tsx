@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useInView } from "@/hooks/useInView";
 
-const socialLinks = [
+const socialLinks: Array<{ label: string; href: string; icon: React.ReactNode }> = [];
+/*
   {
     label: "Instagram",
     href: "#",
@@ -45,31 +46,31 @@ const socialLinks = [
     ),
   },
 ];
+*/
 
 export function Footer() {
-  const emailId = "footer-email";
   const { t } = useTranslation();
   const { ref, inView } = useInView({ threshold: 0.05 });
 
   const footerLinks = {
     [t.footer.sections.platform]: [
-      { label: t.footer.links.artists, href: "#" },
-      { label: t.footer.links.releases, href: "#" },
-      { label: t.footer.links.distribution, href: "#" },
-      { label: t.footer.links.revenue, href: "#" },
-      { label: t.footer.links.analytics, href: "#" },
+      { label: t.footer.links.artists, href: "/artistas" },
+      { label: t.footer.links.releases, href: "/lanzamientos" },
+      { label: t.footer.links.distribution, href: "/#distribucion" },
+      { label: t.footer.links.revenue, href: "/ingresos" },
+      { label: t.footer.links.analytics, href: "/analiticas" },
     ],
     [t.footer.sections.resources]: [
-      { label: t.footer.links.blog, href: "#" },
-      { label: t.footer.links.support, href: "#" },
-      { label: t.footer.links.faq, href: "#" },
-      { label: t.footer.links.status, href: "#" },
+      { label: t.footer.links.blog, href: "/blog" },
+      { label: t.footer.links.support, href: "/soporte" },
+      { label: t.footer.links.faq, href: "/faq" },
+      { label: t.footer.links.status, href: "/estado" },
     ],
     [t.footer.sections.company]: [
-      { label: t.footer.links.about, href: "#" },
-      { label: t.footer.links.contact, href: "#" },
-      { label: t.footer.links.terms, href: "#" },
-      { label: t.footer.links.privacy, href: "#" },
+      { label: t.footer.links.about, href: "/sobre-nosotros" },
+      { label: t.footer.links.contact, href: "/contacto" },
+      { label: t.footer.links.terms, href: "/terminos" },
+      { label: t.footer.links.privacy, href: "/privacidad" },
     ],
   };
 
@@ -80,7 +81,7 @@ export function Footer() {
 
           {/* Brand Column */}
           <div className={`sm:col-span-2 reveal${inView ? " in-view" : ""}`}>
-            <a href="#inicio" className="flex items-center gap-2.5 mb-5 group w-fit">
+            <a href="/" className="flex items-center gap-2.5 mb-5 group w-fit">
               <div className="w-10 h-10 relative transition-transform duration-200 group-hover:scale-105">
                 <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
               </div>
@@ -141,29 +142,8 @@ export function Footer() {
                 {t.footer.newsletter.description}
               </p>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <label htmlFor={emailId} className="sr-only">
-                {t.footer.newsletter.placeholder}
-              </label>
-              <input
-                id={emailId}
-                type="email"
-                placeholder={t.footer.newsletter.placeholder}
-                readOnly
-                aria-label={t.footer.newsletter.ariaLabel}
-                className="flex-1 sm:w-64 h-10 px-4 text-sm bg-[#080808] border border-[#1A1A1A] rounded-[8px] text-[#555] placeholder:text-[#333] focus:outline-none cursor-not-allowed select-none"
-              />
-              <button
-                type="button"
-                aria-label={t.footer.newsletter.ariaLabel}
-                aria-disabled="true"
-                className="h-10 w-10 flex items-center justify-center bg-[#F5C518] rounded-[8px] text-black cursor-not-allowed opacity-60 transition-opacity"
-                onClick={(e) => e.preventDefault()}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
+            <div className="rounded-lg border border-[#1A1A1A] bg-[#080808] px-4 py-3 text-sm text-[#555] sm:w-64">
+              {t.common.comingSoon}
             </div>
           </div>
         </div>

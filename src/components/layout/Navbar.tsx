@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
@@ -13,31 +13,35 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const previousOverflow = useRef("");
 
   const navItems = [
-    { label: t.nav.home, href: "#inicio" },
+    { label: t.nav.home, href: "/" },
     {
       label: t.nav.platform,
       href: "#plataforma",
       children: [
-        { label: t.nav.dashboard, href: "#dashboard", description: t.nav.platformDesc },
-        { label: t.nav.analytics, href: "#analiticas", description: t.nav.analyticsDesc },
-        { label: t.nav.artists, href: "#artistas", description: t.nav.artistsDesc },
+        { label: t.nav.dashboard, href: "/login", description: t.nav.platformDesc },
+        { label: t.nav.analytics, href: "/analiticas", description: t.nav.analyticsDesc },
+        { label: t.nav.artists, href: "/artistas", description: t.nav.artistsDesc },
       ],
     },
     { label: t.nav.distribution, href: "#distribucion" },
     { label: t.nav.services, href: "#servicios" },
     {
       label: t.nav.resources,
-      href: "#recursos",
+      href: "/blog",
       children: [
-        { label: t.nav.blog, href: "#blog", description: t.nav.blogDesc },
-        { label: t.nav.support, href: "#soporte", description: t.nav.supportDesc },
-        { label: t.nav.faq, href: "#faq", description: t.nav.faqDesc },
+        { label: t.nav.blog, href: "/blog", description: t.nav.blogDesc },
+        { label: t.nav.support, href: "/soporte", description: t.nav.supportDesc },
+        { label: t.nav.faq, href: "/faq", description: t.nav.faqDesc },
       ],
     },
-    { label: t.nav.pricing, href: "#precios" },
-    { label: t.nav.contact, href: "#contacto" },
+    { label: t.nav.pricing, href: "/precios" },
+    { label: t.nav.contact, href: "/contacto" },
   ];
 
   useEffect(() => {
@@ -47,12 +51,41 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (!mobileOpen) return;
+
+    previousOverflow.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !drawerRef.current) return;
+      const focusable = Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
-    return () => { document.body.style.overflow = ""; };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow.current;
+      menuButtonRef.current?.focus();
+    };
   }, [mobileOpen]);
 
   return (
@@ -80,7 +113,7 @@ export function Navbar() {
 
             {/* Logo */}
             <a
-              href="#inicio"
+              href="/"
               className="flex items-center gap-2.5 shrink-0 group"
             >
               <div className="w-9 h-9 relative transition-transform duration-200 group-hover:scale-105">
@@ -172,9 +205,12 @@ export function Navbar() {
             <div className="lg:hidden flex items-center gap-2">
               <LanguageSelector />
               <button
+                ref={menuButtonRef}
                 className="flex items-center justify-center w-9 h-9 rounded-lg text-[#737373] hover:text-white hover:bg-white/8 transition-all duration-150 active:scale-95"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Abrir menú"
+                aria-expanded={mobileOpen}
+                aria-controls="public-mobile-menu"
               >
                 <Menu size={20} />
               </button>
@@ -192,7 +228,15 @@ export function Navbar() {
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}
-          <div className="absolute top-0 right-0 bottom-0 w-full max-w-xs bg-[#080808] border-l border-[#1E1E1E] flex flex-col animate-slide-in-right shadow-[-20px_0_60px_rgba(0,0,0,0.6)]">
+          <div
+            ref={drawerRef}
+            id="public-mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navegación principal"
+            tabIndex={-1}
+            className="absolute top-0 right-0 bottom-0 w-full max-w-xs bg-[#080808] border-l border-[#1E1E1E] flex flex-col animate-slide-in-right shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
+          >
             {/* Header */}
             <div className="flex items-center justify-between px-5 h-16 border-b border-[#161616]">
               <div className="flex items-center gap-2.5">
@@ -202,6 +246,7 @@ export function Navbar() {
                 <span className="text-sm font-bold text-white">NP Music Group</span>
               </div>
               <button
+                ref={closeButtonRef}
                 className="flex items-center justify-center w-8 h-8 rounded-lg text-[#555] hover:text-white hover:bg-white/8 transition-all duration-150 active:scale-90"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Cerrar menú"

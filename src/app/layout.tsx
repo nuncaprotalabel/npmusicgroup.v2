@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { cookies } from "next/headers";
 import { Providers } from "./Providers";
 import "./globals.css";
 
@@ -52,15 +53,19 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const savedLanguage = cookieStore.get("np-language")?.value;
+  const initialLanguage = savedLanguage === "en" ? "en" : "es";
+
   return (
-    <html lang="es" className={plusJakartaSans.variable}>
+    <html lang={initialLanguage} className={plusJakartaSans.variable}>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers initialLanguage={initialLanguage}>{children}</Providers>
       </body>
     </html>
   );

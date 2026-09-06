@@ -55,6 +55,18 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (parsed.status && !["DRAFT", "READY"].includes(parsed.status)) {
       return NextResponse.json({ error: "Ese estado solo puede establecerse mediante un flujo autorizado." }, { status: 403 });
     }
+    if (parsed.status === "READY") {
+      const trackCount = await queryOne<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM tracks WHERE release_id = $1`,
+        [id],
+      );
+      if (Number(trackCount?.count ?? 0) === 0) {
+        return NextResponse.json(
+          { error: "Añade al menos un track antes de marcar el release como listo." },
+          { status: 409 },
+        );
+      }
+    }
     const fields: string[] = [];
     const values: unknown[] = [];
     const add = (column: string, value: unknown) => {

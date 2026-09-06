@@ -24,17 +24,25 @@ async function getStats(role: string) {
   }
   try {
     const { query } = await import("@/lib/db");
-    const [users, sessions] = await Promise.all([
+    const [users, sessions, artists, releases] = await Promise.all([
       query<{ count: string }>(
         `SELECT COUNT(*) as count FROM users WHERE is_active = true`
       ),
       query<{ count: string }>(
         `SELECT COUNT(*) as count FROM sessions WHERE is_active = true AND expires_at > NOW()`
       ),
+      query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM artists WHERE status = 'ACTIVO'`
+      ),
+      query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM releases WHERE status <> 'ARCHIVED'`
+      ),
     ]);
     return {
       totalUsers:     Number(users[0]?.count ?? 0),
       activeSessions: Number(sessions[0]?.count ?? 0),
+      artists:        Number(artists[0]?.count ?? 0),
+      releases:       Number(releases[0]?.count ?? 0),
     };
   } catch {
     return null;
@@ -67,13 +75,13 @@ export default async function CentralPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Users}      label="Usuarios activos"    value={stats.totalUsers}     description="en el sistema" />
           <StatCard icon={Clock}      label="Sesiones activas"    value={stats.activeSessions} description="en este momento" />
-          <StatCard icon={Music}      label="Artistas"            value={0}                    description="registrados" />
-          <StatCard icon={TrendingUp} label="Lanzamientos"        value={0}                    description="publicados" />
+          <StatCard icon={Music}      label="Artistas"            value={stats.artists}        description="registrados" />
+          <StatCard icon={TrendingUp} label="Lanzamientos"        value={stats.releases}       description="activos" />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Music}      label="Artistas"   value={0} description="registrados" />
-          <StatCard icon={TrendingUp} label="Lanzamientos" value={0} description="publicados" />
+          <StatCard icon={Music}      label="Artistas"   value="—" description="sin datos disponibles" isText />
+          <StatCard icon={TrendingUp} label="Lanzamientos" value="—" description="sin datos disponibles" isText />
           <StatCard icon={TrendingUp} label="Ingresos"   value="—" description="sin datos aún" isText />
           <StatCard icon={Clock}      label="Actividad"  value="—" description="sin actividad" isText />
         </div>

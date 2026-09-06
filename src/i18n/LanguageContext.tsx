@@ -21,18 +21,27 @@ const LanguageContext = createContext<LanguageContextValue>({
   setLanguage: () => {},
 });
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es");
+export function LanguageProvider({
+  children,
+  initialLanguage = "es",
+}: {
+  children: ReactNode;
+  initialLanguage?: Language;
+}) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as Language | null;
     if (saved === "es" || saved === "en") {
       setLanguageState(saved);
+      document.cookie = `${STORAGE_KEY}=${saved}; Path=/; Max-Age=31536000; SameSite=Lax`;
     } else {
       const browserLang = navigator.language.toLowerCase();
-      setLanguageState(browserLang.startsWith("en") ? "en" : "es");
+      const detected = browserLang.startsWith("en") ? "en" : initialLanguage;
+      setLanguageState(detected);
+      document.cookie = `${STORAGE_KEY}=${detected}; Path=/; Max-Age=31536000; SameSite=Lax`;
     }
-  }, []);
+  }, [initialLanguage]);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -42,6 +51,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     try {
       localStorage.setItem(STORAGE_KEY, lang);
+      document.cookie = `${STORAGE_KEY}=${lang}; Path=/; Max-Age=31536000; SameSite=Lax`;
     } catch {
       // The UI still updates when browser storage is unavailable.
     }

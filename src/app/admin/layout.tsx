@@ -5,7 +5,7 @@ import { DashboardHeaderWrapper } from "@/components/dashboard/DashboardHeaderWr
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getActiveSession();
-  if (!session) redirect("/login?from=/admin/cuentas");
+  if (!session) redirect("/login?from=/admin");
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "#000000" }}>

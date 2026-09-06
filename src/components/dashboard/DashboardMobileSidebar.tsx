@@ -23,7 +23,7 @@ interface Props {
 export function DashboardMobileSidebar({ role, open, onClose }: Props) {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const navGroups = getNavigationGroups(t);
+  const navGroups = getNavigationGroups(t, role);
 
   if (!open) return null;
 
@@ -74,7 +74,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
                 {group}
               </p>
               <div className="space-y-0.5">
-                {items.filter(({ roles }) => !roles || roles.includes(role)).map(({ href, label, icon: Icon, children }) => {
+               {items.map(({ href, label, icon: Icon, children }) => {
                    const active = isNavigationItemActive(pathname, href);
                   return (
                     <div key={href}>
@@ -133,7 +133,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
                 className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
                 style={{ color: "#333333" }}
               >
-                Admin
+                {t.dashboard.sidebar.system}
               </p>
               <div className="space-y-0.5">
                 {(() => {
@@ -149,7 +149,7 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
                       style={active ? { background: "#F5C518", color: "#000000" } : undefined}
                     >
                       <ShieldAlert size={16} strokeWidth={1.75} style={{ color: active ? "#000000" : "currentColor" }} />
-                      NP Control
+                       {t.dashboard.modules.npControl}
                     </Link>
                   );
                 })()}

@@ -106,6 +106,15 @@ export async function PATCH(
     if (typeof isActive !== "boolean") {
       return NextResponse.json({ error: "El estado de la cuenta no es válido." }, { status: 400 });
     }
+    if (
+      session.role !== "SUPER_ADMIN" &&
+      (existing.role === "SUPER_ADMIN" || role === "SUPER_ADMIN")
+    ) {
+      return NextResponse.json(
+        { error: "Solo un SUPER_ADMIN puede modificar cuentas con ese rol." },
+        { status: 403 },
+      );
+    }
 
     const duplicate = await query<{ id: string }>(
       `SELECT id FROM users

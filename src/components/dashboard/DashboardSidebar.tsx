@@ -21,7 +21,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const isSuperAdmin = role === "SUPER_ADMIN";
-  const navGroups = getNavigationGroups(t);
+  const navGroups = getNavigationGroups(t, role);
 
   return (
     <aside
@@ -57,7 +57,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
               {group}
             </p>
             <div className="space-y-0.5">
-              {items.filter(({ roles }) => !roles || roles.includes(role)).map(({ href, label, icon: Icon, children }) => {
+              {items.map(({ href, label, icon: Icon, children }) => {
                 const active = isNavigationItemActive(pathname, href);
                 return (
                   <div key={href}>
@@ -125,7 +125,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
               className="px-3 mb-1 text-[0.6875rem] font-semibold uppercase tracking-wider"
               style={{ color: "#333333" }}
             >
-              Admin
+              {t.dashboard.sidebar.system}
             </p>
             <div className="space-y-0.5">
               {(() => {
@@ -146,7 +146,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
                       strokeWidth={1.75}
                       style={{ color: active ? "#000000" : "currentColor" }}
                     />
-                    <span className="flex-1 truncate">NP Control</span>
+                     <span className="flex-1 truncate">{t.dashboard.modules.npControl}</span>
                   </Link>
                 );
               })()}
