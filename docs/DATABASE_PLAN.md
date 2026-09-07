@@ -374,18 +374,33 @@ resuelve siempre a través del artista asociado.
 
 `releases` contiene:
 
-- `artist_id` con FK a `artists(id)` y eliminación restringida;
+- `id` UUID generado por PostgreSQL y `artist_id` con FK a `artists(id)` y
+  eliminación restringida;
 - `title`, `type` (`SINGLE`, `EP`, `ALBUM`) y `status`
   (`DRAFT`, `READY`, `RELEASED`, `ARCHIVED`);
-- `release_date`, `cover_url`, `created_at` y `updated_at`.
+- metadatos de distribución opcionales: `release_date`, `cover_url`, `upc`,
+  `catalog_number`, `genre`, `subgenre`, `language`, `version`, `label`,
+  `copyright_text`, `phonographic_copyright_text` y `explicit`;
+- `created_at` y `updated_at` con timestamps de PostgreSQL.
 
 `tracks` contiene:
 
-- `release_id` con FK a `releases(id)` y eliminación en cascada;
-- `title`, `track_number`, `duration_seconds`, `audio_url`,
-  `created_at` y `updated_at`.
+- `id` UUID generado por PostgreSQL y `release_id` con FK a `releases(id)` y
+  eliminación en cascada;
+- `title`, `track_number`, `duration_seconds`, `audio_url`, `isrc`, `version`,
+  `language` y `explicit`;
+- `created_at` y `updated_at` con timestamps de PostgreSQL.
 
 Existe una restricción única por `(release_id, track_number)`, índices por
 artista, estado y release, y checks para tipos, estados, números y duración.
-Esta fase no incorpora almacenamiento definitivo, procesamiento de audio ni
-distribución.
+
+Los créditos de los tracks se almacenan en `track_credits`, con FK en cascada a
+`tracks`, rol restringido a `COMPOSER`, `LYRICIST`, `PRODUCER` o `PERFORMER` y
+unicidad por `(track_id, name, role)`. Esta tabla es necesaria para que el
+detalle administrativo de un release pueda devolver sus tracks completos sin
+fallar cuando no existan créditos.
+
+El permiso inicial `releases.view` se asigna a `ADMIN` y no a `ARTIST`. La
+prueba automatizada del módulo valida además que el guard server-side responda
+`403` en todas sus rutas para una sesión ARTIST. Esta fase no incorpora
+almacenamiento definitivo, procesamiento de audio ni distribución.

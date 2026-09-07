@@ -7,4 +7,4 @@ Run production build validation only while the dev workflow is stopped, because 
 
 **Why:** The development server and `next build` share the same generated output directory.
 
-**How to apply:** Stop the workflow for the build, then restart it after validation.
+**How to apply:** Stop the workflow for the build, then restart it after validation. If a concurrent attempt timed out or reports a Webpack hash error, clear only `.next` before retrying.
