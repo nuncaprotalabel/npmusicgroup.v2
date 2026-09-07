@@ -6,3 +6,4 @@
 - [Preview workflow stability](preview-workflow-stability.md) — Imported Next.js projects can retain stale build output or duplicate launch layers; keep one app workflow and rebuild `.next` cleanly when preview manifests break.
 - [Workspace restore verification](workspace-restore.md) — Verify newly added routes survive reconciliation before trusting the final build manifest.
 - [Concurrent invitation writes](concurrent-invitations.md) — Associate new invitations with their INSERT result; never recover them through MAX(created_at).
+- [Releases RBAC readiness](releases-rbac.md) — Admin release routes are guarded, but the development database needs the releases schema before that module can be enabled.
