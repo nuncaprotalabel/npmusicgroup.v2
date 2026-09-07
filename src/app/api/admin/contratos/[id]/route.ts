@@ -57,10 +57,16 @@ export async function PATCH(
           `UPDATE contracts SET status = 'PENDIENTE_FIRMA', updated_at = NOW()
            WHERE id = $1 AND status = 'BORRADOR'
            RETURNING id, solicitud_id, invitation_id, $2::text AS nombre_artistico,
-                     email, type, title, version, content, sections, status,
-                     artist_percentage, company_percentage, $3::text AS created_by_username,
-                     created_at, updated_at, $4::timestamptz AS invitation_expires_at`,
-          [id, current.nombre_artistico, current.created_by_username, current.invitation_expires_at],
+                     $3::text AS email, type, title, version, content, sections, status,
+                     artist_percentage, company_percentage, $4::text AS created_by_username,
+                     created_at, updated_at, $5::timestamptz AS invitation_expires_at`,
+           [
+             id,
+             current.nombre_artistico,
+             current.email,
+             current.created_by_username,
+             current.invitation_expires_at,
+           ],
         )
       )[0];
       if (!submitted) return NextResponse.json({ error: "El contrato ya no está en borrador." }, { status: 409 });
@@ -100,10 +106,10 @@ export async function PATCH(
          SET title = $1, version = $2, content = $3, sections = $4::jsonb,
              updated_at = NOW()
          WHERE id = $5 AND status = 'BORRADOR'
-         RETURNING id, solicitud_id, invitation_id, $6::text AS nombre_artistico,
-                   email, type, title, version, content, sections, status,
-                   artist_percentage, company_percentage, $7::text AS created_by_username,
-                   created_at, updated_at, $8::timestamptz AS invitation_expires_at`,
+           RETURNING id, solicitud_id, invitation_id, $6::text AS nombre_artistico,
+                     $7::text AS email, type, title, version, content, sections, status,
+                     artist_percentage, company_percentage, $8::text AS created_by_username,
+                     created_at, updated_at, $9::timestamptz AS invitation_expires_at`,
         [
           title,
           version,
@@ -111,6 +117,7 @@ export async function PATCH(
           JSON.stringify(sections),
           id,
           current.nombre_artistico,
+           current.email,
           current.created_by_username,
           current.invitation_expires_at,
         ],

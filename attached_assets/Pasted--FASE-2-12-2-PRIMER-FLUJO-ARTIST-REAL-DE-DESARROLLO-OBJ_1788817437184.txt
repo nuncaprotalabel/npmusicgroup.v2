@@ -1,0 +1,433 @@
+# FASE 2.12.2 — PRIMER FLUJO ARTIST REAL DE DESARROLLO
+
+## OBJETIVO
+
+Completar UNA SOLA VEZ el flujo real de onboarding de un ARTIST en el entorno de desarrollo y utilizar esa cuenta para validar la persistencia real de:
+
+ARTIST → RELEASE → TRACK → METADATA → TRACK_CREDITS → AUDIT_LOG
+
+Esta fase existe porque Fase 2.12.1 quedó bloqueada al no existir ninguna cuenta ARTIST activa.
+
+NO crear cuentas ARTIST directamente mediante INSERT manual saltándose el flujo existente.
+
+NO iniciar Fase 2.13.
+
+NO agregar funcionalidades nuevas que no sean estrictamente necesarias para completar este flujo.
+
+NO refactorizar arquitectura.
+
+NO instalar dependencias.
+
+NO modificar el modelo de negocio.
+
+---
+
+# 1. INSPECCIÓN PREVIA
+
+Antes de modificar código:
+
+Inspeccionar únicamente los componentes existentes relacionados con:
+
+* `/aplicar`
+* solicitudes
+* aprobación administrativa
+* invitaciones
+* contratos
+* firma/aceptación
+* onboarding
+* activación de cuenta
+* login
+* artists
+
+Determinar cuál es actualmente el camino correcto para transformar una solicitud en una cuenta ARTIST activa.
+
+REUTILIZAR las APIs, páginas, tablas y servicios existentes.
+
+No crear un segundo flujo paralelo.
+
+---
+
+# 2. CREAR SOLICITUD DE DESARROLLO
+
+Crear una solicitud temporal mediante el flujo público existente `/aplicar`.
+
+Usar datos claramente identificables como desarrollo, por ejemplo:
+
+* Artistic name: `NP Test Artist`
+* Email: usar un correo de desarrollo controlado por el entorno, nunca un correo real de un tercero.
+* Country: `DO`
+* Genre: `Urban`
+* Main link: un enlace válido permitido por la aplicación.
+
+No modificar las validaciones de `/aplicar`.
+
+---
+
+# 3. APROBACIÓN
+
+Completar la aprobación utilizando el mecanismo administrativo existente.
+
+No modificar estados directamente en PostgreSQL salvo que el código existente requiera una acción administrativa específica.
+
+Si actualmente no existe una interfaz administrativa para aprobar solicitudes:
+
+* inspeccionar el código existente;
+* utilizar el mecanismo backend ya previsto si existe;
+* si realmente falta la operación necesaria, reportarlo como bloqueo.
+
+NO construir un sistema completo de gestión de solicitudes en esta fase.
+
+---
+
+# 4. INVITACIÓN
+
+Generar la invitación utilizando el flujo existente.
+
+Verificar:
+
+* token válido;
+* expiración;
+* estado pendiente;
+* relación con la solicitud.
+
+No reutilizar manualmente tokens de otras invitaciones.
+
+---
+
+# 5. CONTRATO Y FIRMA
+
+Utilizar el contrato existente asociado a la solicitud.
+
+Completar el flujo existente:
+
+INVITACIÓN → CONTRATO PENDIENTE_FIRMA → ACEPTACIÓN → CONTRATO FIRMADO → INVITACIÓN UTILIZADA
+
+No modificar el contenido legal del contrato.
+
+No crear contratos paralelos.
+
+Verificar que la firma se registre mediante `contract_signatures`.
+
+---
+
+# 6. ONBOARDING Y CUENTA ARTIST
+
+Utilizar el mecanismo existente de onboarding.
+
+Completar:
+
+CONTRATO FIRMADO
+→ ONBOARDING
+→ CUENTA CREADA
+→ CONTRASEÑA ESTABLECIDA
+→ CUENTA ACTIVA
+→ LOGIN
+
+La cuenta debe tener:
+
+* rol ARTIST;
+* sesión válida después del login;
+* relación correcta con `artists`;
+* perfil derivado de la solicitud/flujo existente.
+
+NO insertar directamente un usuario ARTIST en PostgreSQL para saltar pasos.
+
+NO almacenar contraseñas en texto plano.
+
+NO exponer tokens innecesariamente.
+
+---
+
+# 7. VALIDAR ARTIST
+
+Una vez activa la cuenta:
+
+Entrar mediante `/login`.
+
+Comprobar:
+
+* login correcto;
+* acceso a `/dashboard/releases`;
+* resolución server-side del artist;
+* ausencia de errores 500;
+* que el ARTIST no pueda acceder como administrador.
+
+---
+
+# 8. CREAR RELEASE REAL DE DESARROLLO
+
+Desde `/dashboard/releases`, crear:
+
+Title:
+`TEST METADATA RELEASE`
+
+Type:
+`SINGLE`
+
+Status:
+`DRAFT`
+
+No crear el release directamente mediante SQL.
+
+Comprobar que se persiste mediante el flujo normal de la aplicación.
+
+---
+
+# 9. CREAR TRACK
+
+Crear:
+
+Title:
+`TEST METADATA TRACK`
+
+Track number:
+`1`
+
+Comprobar persistencia.
+
+---
+
+# 10. VALIDAR METADATA DEL RELEASE
+
+Editar el release DRAFT y guardar:
+
+* version
+* genre
+* subgenre
+* language
+* catalog_number
+* label
+* copyright_text
+* phonographic_copyright_text
+* explicit
+
+UPC/EAN:
+
+No inventar un código oficial.
+
+Si el formulario permite dejarlo NULL, mantenerlo NULL.
+
+Comprobar:
+
+1. guardar;
+2. recargar;
+3. volver a abrir el release;
+4. comprobar que los valores persisten.
+
+---
+
+# 11. VALIDAR METADATA DEL TRACK
+
+Guardar:
+
+* version
+* language
+* explicit
+
+ISRC:
+
+No inventar un ISRC oficial.
+
+Si no existe un valor de desarrollo válido, mantenerlo NULL.
+
+Comprobar persistencia después de recargar.
+
+---
+
+# 12. VALIDAR CRÉDITOS
+
+Crear tres créditos:
+
+* COMPOSER
+* PRODUCER
+* PERFORMER
+
+Comprobar:
+
+* creación;
+* lectura;
+* edición de uno;
+* eliminación de uno;
+* persistencia;
+* relación correcta con el track.
+
+Después de recargar, los créditos restantes deben seguir presentes.
+
+---
+
+# 13. VALIDAR ADMIN
+
+Con la cuenta SUPER_ADMIN existente:
+
+Entrar al panel administrativo.
+
+Abrir `/admin/lanzamientos`.
+
+Localizar `TEST METADATA RELEASE`.
+
+Comprobar:
+
+* metadata visible;
+* track visible;
+* créditos consultables;
+* edición administrativa;
+* cambios persistentes.
+
+Comprobar que el release pertenece al ARTIST correcto.
+
+---
+
+# 14. VALIDAR AUDITORÍA
+
+Comprobar `audit_log` después de las operaciones.
+
+Verificar que se hayan registrado los eventos existentes correspondientes a:
+
+* RELEASE_CREATED
+* RELEASE_UPDATED
+* TRACK_CREATED
+* TRACK_UPDATED
+* TRACK_CREDIT_CREATED
+* TRACK_CREDIT_UPDATED
+* TRACK_CREDIT_DELETED
+
+No crear nuevos eventos.
+
+No modificar la política actual de auditoría.
+
+---
+
+# 15. VALIDAR OWNERSHIP
+
+Si el entorno permite disponer de un segundo ARTIST sin ampliar demasiado el flujo, NO es obligatorio crearlo.
+
+Como mínimo comprobar mediante inspección del código y/o endpoint que:
+
+`ARTIST A → RELEASE A → TRACK A → CREDIT A`
+
+y que las consultas server-side resuelven ownership mediante sesión + artista.
+
+No confiar únicamente en IDs enviados por frontend.
+
+No crear un segundo artista solamente para esta prueba si eso requiere repetir todo el onboarding.
+
+---
+
+# 16. LIMPIEZA
+
+Al terminar las pruebas:
+
+Eliminar los datos temporales creados mediante mecanismos seguros de desarrollo.
+
+Eliminar:
+
+* `TEST METADATA RELEASE`
+* tracks de prueba;
+* créditos de prueba;
+* solicitud temporal;
+* invitación temporal;
+* contrato temporal;
+* firma temporal;
+* onboarding temporal;
+* cuenta ARTIST temporal;
+* artista temporal.
+
+IMPORTANTE:
+
+No eliminar manualmente registros históricos de `audit_log` si el sistema los considera inmutables.
+
+Si alguna relación impide limpiar correctamente los datos, NO utilizar DELETE destructivos en cascada sin comprender las FK.
+
+Reportar exactamente qué datos quedaron.
+
+---
+
+# 17. NO MODIFICAR PRODUCCIÓN
+
+Esta fase debe ejecutarse únicamente sobre el entorno de desarrollo.
+
+No utilizar producción.
+
+No tocar datos reales.
+
+---
+
+# 18. VERIFICACIÓN FINAL
+
+Ejecutar:
+
+npx tsc --noEmit
+
+git diff --check
+
+npm run build
+
+Comprobar también:
+
+* `/login`
+* `/dashboard/releases`
+* `/admin/lanzamientos`
+* APIs de releases
+* APIs de tracks
+* APIs de credits
+* onboarding
+* activación
+
+---
+
+# 19. REGLA DE CORRECCIÓN
+
+Si aparece un error:
+
+Corregir únicamente el bug concreto.
+
+Después repetir la prueba afectada.
+
+NO aprovechar la fase para:
+
+* rediseñar;
+* refactorizar;
+* cambiar arquitectura;
+* agregar almacenamiento;
+* agregar distribución;
+* agregar analytics;
+* agregar royalties;
+* agregar pagos;
+* agregar messaging.
+
+---
+
+# 20. REPORTE FINAL
+
+Entregar:
+
+1. Flujo solicitud → ARTIST
+2. Invitación
+3. Contrato
+4. Firma
+5. Onboarding
+6. Activación
+7. Login ARTIST
+8. Creación release
+9. Creación track
+10. Metadata release
+11. Metadata track
+12. Créditos CRUD
+13. ADMIN E2E
+14. Auditoría
+15. Ownership/security
+16. Limpieza
+17. TypeScript
+18. Build
+19. Diff check
+20. Bugs encontrados/corregidos
+21. Datos que quedaron, si alguno
+22. Estado final
+
+Estados permitidos:
+
+VALIDADA
+VALIDADA CON OBSERVACIONES
+BLOQUEADA
+
+NO iniciar Fase 2.13.

@@ -25,7 +25,7 @@ export interface ContractRow {
 }
 
 export const CONTRACT_SELECT = `
-  SELECT c.id, c.solicitud_id, c.invitation_id, s.nombre_artistico, c.email,
+   SELECT c.id, c.solicitud_id, c.invitation_id, s.nombre_artistico, s.email,
          c.type, c.title, c.version, c.content, c.sections, c.status,
          c.artist_percentage, c.company_percentage,
          s.estado AS solicitud_status, i.status AS invitation_status,

@@ -100,18 +100,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
          VALUES ($1, $2, 'CONTRATO_ARTISTA', $3, '1.0', '', $4::jsonb,
                  'BORRADOR', 85.00, 15.00, $5)
          RETURNING id, solicitud_id, invitation_id, $6::text AS nombre_artistico,
-                   email, type, title, version, content, sections, status,
-                   artist_percentage, company_percentage, $7::text AS created_by_username,
-                   created_at, updated_at, $8::timestamptz AS invitation_expires_at`,
+                   $7::text AS email, type, title, version, content, sections, status,
+                   artist_percentage, company_percentage, $8::text AS created_by_username,
+                   created_at, updated_at, $9::timestamptz AS invitation_expires_at`,
         [
           invitation.solicitud_id,
           invitationId,
           `Borrador de contrato — ${invitation.nombre_artistico}`,
           JSON.stringify(EMPTY_CONTRACT_SECTIONS),
           session.userId,
-          invitation.nombre_artistico,
-          session.username,
-          invitation.invitation_expires_at,
+           invitation.nombre_artistico,
+           invitation.email,
+           session.username,
+           invitation.invitation_expires_at,
         ],
       )
     ).rows[0];
