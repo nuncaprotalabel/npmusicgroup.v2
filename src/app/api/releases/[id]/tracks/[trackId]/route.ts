@@ -7,7 +7,7 @@ type RouteContext = { params: Promise<{ id: string; trackId: string }> };
 
 async function ownedTrack(artistId: string, releaseId: string, trackId: string) {
   return queryOne<TrackRow>(
-    `SELECT t.id, t.release_id, t.title, t.track_number, t.duration_seconds, t.audio_url, t.created_at, t.updated_at
+    `SELECT t.id, t.release_id, t.title, t.track_number, t.duration_seconds, t.audio_url, t.isrc, t.version, t.language, t.explicit, t.created_at, t.updated_at
      FROM tracks t
      INNER JOIN releases r ON r.id = t.release_id
      WHERE t.id = $1 AND t.release_id = $2 AND r.artist_id = $3`,
@@ -32,19 +32,23 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = await request.json().catch(() => null);
     const input = body && typeof body === "object" ? body as Record<string, unknown> : {};
     const parsed = parseTrackInput({
-      ...input,
+       ...input,
       title: input.title ?? existing.title,
       trackNumber: input.trackNumber ?? existing.track_number,
       durationSeconds: input.durationSeconds ?? existing.duration_seconds,
-      audioUrl: input.audioUrl ?? existing.audio_url,
+       audioUrl: input.audioUrl ?? existing.audio_url,
+       isrc: input.isrc ?? existing.isrc,
+       version: input.version ?? existing.version,
+       language: input.language ?? existing.language,
+       explicit: input.explicit ?? existing.explicit,
     });
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const updated = await queryOne<TrackRow>(
       `UPDATE tracks
-       SET title = $1, track_number = $2, duration_seconds = $3, audio_url = $4, updated_at = NOW()
-       WHERE id = $5 AND release_id = $6
-       RETURNING id, release_id, title, track_number, duration_seconds, audio_url, created_at, updated_at`,
-      [parsed.title, parsed.trackNumber, parsed.durationSeconds, parsed.audioUrl, trackId, id],
+        SET title = $1, track_number = $2, duration_seconds = $3, audio_url = $4, isrc = $5, version = $6, language = $7, explicit = $8, updated_at = NOW()
+        WHERE id = $9 AND release_id = $10
+        RETURNING id, release_id, title, track_number, duration_seconds, audio_url, isrc, version, language, explicit, created_at, updated_at`,
+      [parsed.title, parsed.trackNumber, parsed.durationSeconds, parsed.audioUrl, parsed.isrc ?? null, parsed.version ?? null, parsed.language ?? null, parsed.explicit ?? false, trackId, id],
     );
     if (!updated) return NextResponse.json({ error: "El track no pudo actualizarse." }, { status: 409 });
 

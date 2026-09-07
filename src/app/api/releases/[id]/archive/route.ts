@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if ("error" in auth) return auth.error;
     const { id } = await params;
     const current = await queryOne<ReleaseRow>(
-      `SELECT id, artist_id, title, type, status, release_date, cover_url, created_at, updated_at
+      `SELECT id, artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit, created_at, updated_at
        FROM releases WHERE id = $1 AND artist_id = $2`,
       [id, auth.artistId],
     );
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const archived = await queryOne<ReleaseRow>(
       `UPDATE releases SET status = 'ARCHIVED', updated_at = NOW()
        WHERE id = $1 AND artist_id = $2
-       RETURNING id, artist_id, title, type, status, release_date, cover_url, created_at, updated_at`,
+       RETURNING id, artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit, created_at, updated_at`,
       [id, auth.artistId],
     );
     if (!archived) return NextResponse.json({ error: "El release no pudo archivarse." }, { status: 409 });

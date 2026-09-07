@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { queryOne } from "@/lib/db";
 import { getActiveSession } from "@/lib/session";
-import type { Release, ReleaseStatus, ReleaseType, Track } from "@/types/releases";
+import type { CreditRole, Release, ReleaseStatus, ReleaseType, Track, TrackCredit } from "@/types/releases";
 
 export const RELEASE_TYPES = ["SINGLE", "EP", "ALBUM"] as const;
 export const RELEASE_STATUSES = ["DRAFT", "READY", "RELEASED", "ARCHIVED"] as const;
+export const CREDIT_ROLES = ["COMPOSER", "LYRICIST", "PRODUCER", "PERFORMER"] as const;
 
 export interface ReleaseRow {
   id: string;
@@ -14,6 +15,16 @@ export interface ReleaseRow {
   status: ReleaseStatus;
   release_date: string | null;
   cover_url: string | null;
+  upc: string | null;
+  catalog_number: string | null;
+  genre: string | null;
+  subgenre: string | null;
+  language: string | null;
+  version: string | null;
+  label: string | null;
+  copyright_text: string | null;
+  phonographic_copyright_text: string | null;
+  explicit: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -25,8 +36,25 @@ export interface TrackRow {
   track_number: number;
   duration_seconds: number | null;
   audio_url: string | null;
+  isrc: string | null;
+  version: string | null;
+  language: string | null;
+  explicit: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface CreditRow {
+  id: string;
+  track_id: string;
+  name: string;
+  role: CreditRole;
+  created_at: string;
+  updated_at: string;
+}
+
+export function toCredit(row: CreditRow): TrackCredit {
+  return { id: row.id, trackId: row.track_id, name: row.name, role: row.role, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 
 export function toTrack(row: TrackRow): Track {
@@ -37,6 +65,11 @@ export function toTrack(row: TrackRow): Track {
     trackNumber: row.track_number,
     durationSeconds: row.duration_seconds,
     audioUrl: row.audio_url,
+    isrc: row.isrc,
+    version: row.version,
+    language: row.language,
+    explicit: row.explicit,
+    credits: [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -51,6 +84,16 @@ export function toRelease(row: ReleaseRow, tracks: Track[] = []): Release {
     status: row.status,
     releaseDate: row.release_date,
     coverUrl: row.cover_url,
+    upc: row.upc,
+    catalogNumber: row.catalog_number,
+    genre: row.genre,
+    subgenre: row.subgenre,
+    language: row.language,
+    version: row.version,
+    label: row.label,
+    copyrightText: row.copyright_text,
+    phonographicCopyrightText: row.phonographic_copyright_text,
+    explicit: row.explicit,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     tracks,
@@ -102,6 +145,21 @@ function optionalUrl(value: unknown, field: string): string | null | undefined {
   return value;
 }
 
+function optionalText(value: unknown, field: string, max: number): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value !== "string" || value.trim().length > max || /[\u0000-\u001F\u007F]/.test(value)) {
+    throw new Error(`${field} no es válido.`);
+  }
+  return value.trim();
+}
+
+function optionalCode(value: unknown, field: string, pattern: RegExp, max: number): string | null | undefined {
+  const text = optionalText(value, field, max);
+  if (text !== undefined && text !== null && !pattern.test(text)) throw new Error(`${field} no tiene un formato válido.`);
+  return text;
+}
+
 export function parseReleaseInput(body: unknown, partial = false):
   | { error: string }
   | {
@@ -110,10 +168,13 @@ export function parseReleaseInput(body: unknown, partial = false):
       status?: ReleaseStatus;
       releaseDate?: string | null;
       coverUrl?: string | null;
+      upc?: string | null; catalogNumber?: string | null; genre?: string | null; subgenre?: string | null;
+      language?: string | null; version?: string | null; label?: string | null; copyrightText?: string | null;
+      phonographicCopyrightText?: string | null; explicit?: boolean;
     } {
   const values = asObject(body);
   if (!values) return { error: "El release debe enviarse como un objeto." };
-  const allowed = new Set(["title", "type", "status", "releaseDate", "coverUrl"]);
+  const allowed = new Set(["title", "type", "status", "releaseDate", "coverUrl", "upc", "catalogNumber", "genre", "subgenre", "language", "version", "label", "copyrightText", "phonographicCopyrightText", "explicit"]);
   const unknown = Object.keys(values).find((key) => !allowed.has(key));
   if (unknown) return { error: `El campo ${unknown} no pertenece a un release.` };
 
@@ -122,7 +183,9 @@ export function parseReleaseInput(body: unknown, partial = false):
     type?: ReleaseType;
     status?: ReleaseStatus;
     releaseDate?: string | null;
-    coverUrl?: string | null;
+    coverUrl?: string | null; upc?: string | null; catalogNumber?: string | null; genre?: string | null; subgenre?: string | null;
+    language?: string | null; version?: string | null; label?: string | null; copyrightText?: string | null;
+    phonographicCopyrightText?: string | null; explicit?: boolean;
   } = {};
 
   if (!partial || "title" in values) {
@@ -158,6 +221,14 @@ export function parseReleaseInput(body: unknown, partial = false):
   }
   try {
     if ("coverUrl" in values) parsed.coverUrl = optionalUrl(values.coverUrl, "La portada");
+    if ("upc" in values) parsed.upc = optionalCode(values.upc, "El UPC/EAN", /^\d{8,14}$/, 20);
+    for (const [key, label, max] of [["catalogNumber","El número de catálogo",100],["genre","El género",100],["subgenre","El subgénero",100],["language","El idioma",20],["version","La versión",100],["label","El sello",150],["copyrightText","El copyright",1000],["phonographicCopyrightText","El copyright fonográfico",1000]] as const) {
+      if (key in values) parsed[key] = optionalText(values[key], label, max) as never;
+    }
+    if ("explicit" in values) {
+      if (typeof values.explicit !== "boolean") return { error: "El campo explícito debe ser booleano." };
+      parsed.explicit = values.explicit;
+    }
   } catch (error) {
     return { error: error instanceof Error ? error.message : "La portada no es válida." };
   }
@@ -167,10 +238,10 @@ export function parseReleaseInput(body: unknown, partial = false):
 
 export function parseTrackInput(body: unknown):
   | { error: string }
-  | { title: string; trackNumber: number; durationSeconds: number | null; audioUrl: string | null } {
+  | { title: string; trackNumber: number; durationSeconds: number | null; audioUrl: string | null; isrc?: string | null; version?: string | null; language?: string | null; explicit?: boolean } {
   const values = asObject(body);
   if (!values) return { error: "El track debe enviarse como un objeto." };
-  const allowed = new Set(["title", "trackNumber", "durationSeconds", "audioUrl"]);
+  const allowed = new Set(["title", "trackNumber", "durationSeconds", "audioUrl", "isrc", "version", "language", "explicit"]);
   const unknown = Object.keys(values).find((key) => !allowed.has(key));
   if (unknown) return { error: `El campo ${unknown} no pertenece a un track.` };
 
@@ -190,18 +261,43 @@ export function parseTrackInput(body: unknown):
   }
   try {
     const audioUrl = optionalUrl(values.audioUrl, "El audio");
-    return { title: values.title.trim(), trackNumber, durationSeconds, audioUrl: audioUrl ?? null };
+    const isrc = optionalCode(values.isrc, "El ISRC", /^[A-Za-z]{2}[A-Za-z0-9]{3}\d{7}$/, 30);
+    const version = optionalText(values.version, "La versión", 100);
+    const language = optionalText(values.language, "El idioma", 20);
+    if (values.explicit !== undefined && typeof values.explicit !== "boolean") return { error: "El campo explícito debe ser booleano." };
+    return { title: values.title.trim(), trackNumber, durationSeconds, audioUrl: audioUrl ?? null, isrc, version, language, explicit: values.explicit };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "El audio no es válido." };
   }
 }
 
+export function parseCreditInput(body: unknown):
+  | { error: string }
+  | { name: string; role: CreditRole } {
+  const values = asObject(body);
+  if (!values) return { error: "El crédito debe enviarse como un objeto." };
+  const unknown = Object.keys(values).find((key) => !["name", "role"].includes(key));
+  if (unknown) return { error: `El campo ${unknown} no pertenece a un crédito.` };
+  if (typeof values.name !== "string" || !values.name.trim() || values.name.trim().length > 200 || /[\u0000-\u001F\u007F]/.test(values.name)) {
+    return { error: "El nombre del crédito es obligatorio y no puede superar 200 caracteres." };
+  }
+  if (typeof values.role !== "string" || !CREDIT_ROLES.includes(values.role as CreditRole)) {
+    return { error: "El rol del crédito no es válido." };
+  }
+  return { name: values.name.trim(), role: values.role as CreditRole };
+}
+
 export const RELEASE_SELECT = `
-  SELECT id, artist_id, title, type, status, release_date, cover_url, created_at, updated_at
+  SELECT id, artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit, created_at, updated_at
   FROM releases
 `;
 
 export const TRACK_SELECT = `
-  SELECT id, release_id, title, track_number, duration_seconds, audio_url, created_at, updated_at
+  SELECT id, release_id, title, track_number, duration_seconds, audio_url, isrc, version, language, explicit, created_at, updated_at
   FROM tracks
+`;
+
+export const CREDIT_SELECT = `
+  SELECT id, track_id, name, role, created_at, updated_at
+  FROM track_credits
 `;

@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
     }
 
     const inserted = await queryOne<ReleaseRow>(
-      `INSERT INTO releases (artist_id, title, type, status, release_date, cover_url)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, artist_id, title, type, status, release_date, cover_url, created_at, updated_at`,
+      `INSERT INTO releases (artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       RETURNING id, artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit, created_at, updated_at`,
       [
         auth.artistId,
         parsed.title,
@@ -62,6 +62,16 @@ export async function POST(request: NextRequest) {
         parsed.status ?? "DRAFT",
         parsed.releaseDate ?? null,
         parsed.coverUrl ?? null,
+        parsed.upc ?? null,
+        parsed.catalogNumber ?? null,
+        parsed.genre ?? null,
+        parsed.subgenre ?? null,
+        parsed.language ?? null,
+        parsed.version ?? null,
+        parsed.label ?? null,
+        parsed.copyrightText ?? null,
+        parsed.phonographicCopyrightText ?? null,
+        parsed.explicit ?? false,
       ],
     );
     if (!inserted) return NextResponse.json({ error: "No se pudo crear el release." }, { status: 500 });

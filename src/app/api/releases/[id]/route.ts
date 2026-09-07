@@ -11,6 +11,7 @@ import {
   type ReleaseRow,
   type TrackRow,
 } from "@/lib/releases";
+import { CREDIT_SELECT, toCredit, type CreditRow } from "@/lib/releases";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -22,7 +23,11 @@ async function releaseWithTracks(artistId: string, id: string) {
   const release = await ownedRelease(artistId, id);
   if (!release) return null;
   const tracks = await query<TrackRow>(`${TRACK_SELECT} WHERE release_id = $1 ORDER BY track_number`, [id]);
-  return toRelease(release, tracks.map(toTrack));
+  const credits = await query<CreditRow>(`${CREDIT_SELECT} WHERE track_id = ANY($1::uuid[]) ORDER BY created_at`, [tracks.map((track) => track.id)]);
+  const creditsByTrack = new Map<string, CreditRow[]>();
+  for (const credit of credits) creditsByTrack.set(credit.track_id, [...(creditsByTrack.get(credit.track_id) ?? []), credit]);
+  const mappedTracks = tracks.map((track) => ({ ...toTrack(track), credits: (creditsByTrack.get(track.id) ?? []).map(toCredit) }));
+  return toRelease(release, mappedTracks);
 }
 
 export async function GET(_request: NextRequest, context: RouteContext) {
@@ -78,13 +83,16 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (parsed.status !== undefined) add("status", parsed.status);
     if (parsed.releaseDate !== undefined) add("release_date", parsed.releaseDate);
     if (parsed.coverUrl !== undefined) add("cover_url", parsed.coverUrl);
+    for (const [key, column] of [["upc","upc"],["catalogNumber","catalog_number"],["genre","genre"],["subgenre","subgenre"],["language","language"],["version","version"],["label","label"],["copyrightText","copyright_text"],["phonographicCopyrightText","phonographic_copyright_text"],["explicit","explicit"]] as const) {
+      if (parsed[key] !== undefined) add(column, parsed[key]);
+    }
     if (!fields.length) return NextResponse.json({ error: "No hay cambios para guardar." }, { status: 400 });
 
     const saved = await queryOne<ReleaseRow>(
       `UPDATE releases
        SET ${fields.join(", ")}, updated_at = NOW()
        WHERE id = $1 AND artist_id = $${values.length + 2} AND status = 'DRAFT'
-       RETURNING id, artist_id, title, type, status, release_date, cover_url, created_at, updated_at`,
+       RETURNING id, artist_id, title, type, status, release_date, cover_url, upc, catalog_number, genre, subgenre, language, version, label, copyright_text, phonographic_copyright_text, explicit, created_at, updated_at`,
       [id, ...values, auth.artistId],
     );
     if (!saved) return NextResponse.json({ error: "El release no pudo actualizarse." }, { status: 409 });

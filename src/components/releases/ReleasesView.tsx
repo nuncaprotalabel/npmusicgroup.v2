@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Archive, Check, Disc3, Loader2, Music2, Plus, Save, Trash2, X } from "lucide-react";
-import type { Release, ReleaseType, Track } from "@/types/releases";
+import type { CreditRole, Release, ReleaseType, Track, TrackCredit } from "@/types/releases";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { Translations } from "@/i18n/translations";
 
@@ -12,11 +12,14 @@ type ReleaseForm = {
   releaseDate: string;
   coverUrl: string;
   status: "DRAFT" | "READY";
+  version: string; genre: string; subgenre: string; language: string; upc: string; catalogNumber: string;
+  label: string; copyrightText: string; phonographicCopyrightText: string; explicit: boolean;
 };
 
 type TrackForm = {
   title: string;
   trackNumber: string;
+  isrc: string; version: string; language: string; explicit: boolean;
 };
 
 const EMPTY_RELEASE: ReleaseForm = {
@@ -25,9 +28,11 @@ const EMPTY_RELEASE: ReleaseForm = {
   releaseDate: "",
   coverUrl: "",
   status: "DRAFT",
+  version: "", genre: "", subgenre: "", language: "", upc: "", catalogNumber: "",
+  label: "", copyrightText: "", phonographicCopyrightText: "", explicit: false,
 };
 
-const EMPTY_TRACK: TrackForm = { title: "", trackNumber: "1" };
+const EMPTY_TRACK: TrackForm = { title: "", trackNumber: "1", isrc: "", version: "", language: "", explicit: false };
 
 async function readResponse<T>(response: Response): Promise<T> {
   const body = await response.json().catch(() => ({}));
@@ -107,9 +112,15 @@ export function ReleasesView() {
       releaseDate: release.releaseDate ?? "",
       coverUrl: release.coverUrl ?? "",
       status: release.status === "READY" ? "READY" : "DRAFT",
+      version: release.version ?? "", genre: release.genre ?? "", subgenre: release.subgenre ?? "", language: release.language ?? "",
+      upc: release.upc ?? "", catalogNumber: release.catalogNumber ?? "", label: release.label ?? "",
+      copyrightText: release.copyrightText ?? "", phonographicCopyrightText: release.phonographicCopyrightText ?? "", explicit: release.explicit,
     });
     setEditingTrackId(null);
     setError("");
+    void fetch(`/api/releases/${release.id}`, { cache: "no-store" }).then((response) => readResponse<{ release: Release }>(response))
+      .then(({ release: detailed }) => setReleases((current) => current.map((item) => item.id === detailed.id ? detailed : item)))
+      .catch(() => undefined);
   }
 
   async function saveRelease(event: FormEvent) {
@@ -132,6 +143,9 @@ export function ReleasesView() {
         releaseDate: body.release.releaseDate ?? "",
         coverUrl: body.release.coverUrl ?? "",
         status: body.release.status === "READY" ? "READY" : "DRAFT",
+        version: body.release.version ?? "", genre: body.release.genre ?? "", subgenre: body.release.subgenre ?? "", language: body.release.language ?? "",
+        upc: body.release.upc ?? "", catalogNumber: body.release.catalogNumber ?? "", label: body.release.label ?? "",
+        copyrightText: body.release.copyrightText ?? "", phonographicCopyrightText: body.release.phonographicCopyrightText ?? "", explicit: body.release.explicit,
       });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : copy.saveError);
@@ -164,7 +178,7 @@ export function ReleasesView() {
       await readResponse(await fetch(`/api/releases/${selected.id}/tracks`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title: trackForm.title, trackNumber: Number(trackForm.trackNumber) }),
+        body: JSON.stringify({ title: trackForm.title, trackNumber: Number(trackForm.trackNumber), isrc: trackForm.isrc, version: trackForm.version, language: trackForm.language, explicit: trackForm.explicit }),
       }));
       setTrackForm({ ...EMPTY_TRACK, trackNumber: String(selected.tracks.length + 2) });
       await refresh(selected.id);
@@ -177,7 +191,7 @@ export function ReleasesView() {
 
   function beginTrackEdit(track: Track) {
     setEditingTrackId(track.id);
-    setEditingTrack({ title: track.title, trackNumber: String(track.trackNumber) });
+    setEditingTrack({ title: track.title, trackNumber: String(track.trackNumber), isrc: track.isrc ?? "", version: track.version ?? "", language: track.language ?? "", explicit: track.explicit });
   }
 
   async function saveTrack(trackId: string) {
@@ -188,7 +202,7 @@ export function ReleasesView() {
       await readResponse(await fetch(`/api/releases/${selected.id}/tracks/${trackId}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title: editingTrack.title, trackNumber: Number(editingTrack.trackNumber) }),
+        body: JSON.stringify({ title: editingTrack.title, trackNumber: Number(editingTrack.trackNumber), isrc: editingTrack.isrc, version: editingTrack.version, language: editingTrack.language, explicit: editingTrack.explicit }),
       }));
       setEditingTrackId(null);
       await refresh(selected.id);
@@ -284,13 +298,28 @@ export function ReleasesView() {
                  <Field label={copy.statusLabel}><select value={releaseForm.status} onChange={(event) => setReleaseForm({ ...releaseForm, status: event.target.value as "DRAFT" | "READY" })} disabled={isEditingExisting && !canEdit}><option value="DRAFT">{copy.draft}</option><option value="READY">{copy.ready}</option></select></Field>
                  <Field label={copy.releaseDate}><input type="date" value={releaseForm.releaseDate} onChange={(event) => setReleaseForm({ ...releaseForm, releaseDate: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
                  <Field label={copy.coverUrl} className="sm:col-span-2"><input type="url" maxLength={2048} value={releaseForm.coverUrl} onChange={(event) => setReleaseForm({ ...releaseForm, coverUrl: event.target.value })} placeholder="https://…" disabled={isEditingExisting && !canEdit} /></Field>
+                  <div className="border-t pt-4 sm:col-span-2" style={{ borderColor: "#1E1E1E" }}>
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "#F5C518" }}>{copy.metadata}</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label={copy.version}><input maxLength={100} value={releaseForm.version} onChange={(event) => setReleaseForm({ ...releaseForm, version: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.language}><input maxLength={20} value={releaseForm.language} onChange={(event) => setReleaseForm({ ...releaseForm, language: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.genre}><input maxLength={100} value={releaseForm.genre} onChange={(event) => setReleaseForm({ ...releaseForm, genre: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.subgenre}><input maxLength={100} value={releaseForm.subgenre} onChange={(event) => setReleaseForm({ ...releaseForm, subgenre: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.upc}><input inputMode="numeric" maxLength={20} value={releaseForm.upc} onChange={(event) => setReleaseForm({ ...releaseForm, upc: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.catalogNumber}><input maxLength={100} value={releaseForm.catalogNumber} onChange={(event) => setReleaseForm({ ...releaseForm, catalogNumber: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.copyrightText}><input maxLength={1000} value={releaseForm.copyrightText} onChange={(event) => setReleaseForm({ ...releaseForm, copyrightText: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.phonographicCopyrightText}><input maxLength={1000} value={releaseForm.phonographicCopyrightText} onChange={(event) => setReleaseForm({ ...releaseForm, phonographicCopyrightText: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <Field label={copy.label}><input maxLength={150} value={releaseForm.label} onChange={(event) => setReleaseForm({ ...releaseForm, label: event.target.value })} disabled={isEditingExisting && !canEdit} /></Field>
+                      <label className="flex items-center gap-2 self-end text-xs" style={{ color: "#A3A3A3" }}><input type="checkbox" checked={releaseForm.explicit} onChange={(event) => setReleaseForm({ ...releaseForm, explicit: event.target.checked })} disabled={isEditingExisting && !canEdit} />{copy.explicit}</label>
+                    </div>
+                  </div>
                 <div className="flex items-center justify-between gap-3 border-t pt-4 sm:col-span-2" style={{ borderColor: "#1E1E1E" }}>
                    <p className="text-xs" style={{ color: "#525252" }}>{selected ? copy.typeAndDate(typeLabel(selected.type, copy), formatDate(selected.releaseDate, language, copy)) : copy.savedAsDraft}</p>
                    <button type="submit" disabled={saving || (isEditingExisting && !canEdit)} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "#F5C518" }}><Save size={15} /> {saving ? copy.saving : copy.save}</button>
                 </div>
               </form>
 
-               {selected && <TracksSection release={selected} canEdit={Boolean(canEdit)} trackForm={trackForm} setTrackForm={setTrackForm} onAdd={addTrack} editingTrackId={editingTrackId} editingTrack={editingTrack} setEditingTrack={setEditingTrack} onBeginEdit={beginTrackEdit} onSave={saveTrack} onDelete={deleteTrack} onCancelEdit={() => setEditingTrackId(null)} saving={saving} canAddSingleTrack={canAddSingleTrack} copy={copy} />}
+                {selected && <TracksSection release={selected} canEdit={Boolean(canEdit)} trackForm={trackForm} setTrackForm={setTrackForm} onAdd={addTrack} editingTrackId={editingTrackId} editingTrack={editingTrack} setEditingTrack={setEditingTrack} onBeginEdit={beginTrackEdit} onSave={saveTrack} onDelete={deleteTrack} onCancelEdit={() => setEditingTrackId(null)} saving={saving} canAddSingleTrack={canAddSingleTrack} copy={copy} onRefresh={() => refresh(selected.id)} />}
             </div>
           )}
         </section>
@@ -315,6 +344,7 @@ function TracksSection(props: {
   saving: boolean;
   canAddSingleTrack: boolean;
   copy: ReleaseCopy;
+  onRefresh: () => void;
 }) {
   return (
     <div className="mt-8 border-t pt-6" style={{ borderColor: "#1E1E1E" }}>
@@ -324,28 +354,72 @@ function TracksSection(props: {
       </div>
       <div className="space-y-2">
         {props.release.tracks.map((track) => props.editingTrackId === track.id ? (
-          <div key={track.id} className="grid gap-2 rounded-lg p-3 sm:grid-cols-[1fr_90px_auto]" style={{ background: "#141414" }}>
+           <div key={track.id} className="grid gap-2 rounded-lg p-3 sm:grid-cols-[1fr_90px_auto]" style={{ background: "#141414" }}>
              <input value={props.editingTrack.title} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, title: event.target.value })} aria-label={props.copy.trackTitle} />
              <input type="number" min="1" value={props.editingTrack.trackNumber} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, trackNumber: event.target.value })} aria-label={props.copy.trackNumber} />
             <div className="flex gap-2"><button type="button" onClick={() => props.onSave(track.id)} disabled={props.saving} className="rounded-md p-2 text-black" style={{ background: "#F5C518" }}><Check size={15} /></button><button type="button" onClick={props.onCancelEdit} className="rounded-md p-2 text-white" style={{ background: "#252525" }}><X size={15} /></button></div>
+              <div className="grid gap-2 sm:col-span-3 sm:grid-cols-3">
+                <input value={props.editingTrack.isrc} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, isrc: event.target.value })} placeholder="ISRC" aria-label="ISRC" />
+                <input value={props.editingTrack.version} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, version: event.target.value })} placeholder={props.copy.version} aria-label={props.copy.version} />
+                <input value={props.editingTrack.language} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, language: event.target.value })} placeholder={props.copy.language} aria-label={props.copy.language} />
+                <label className="flex items-center gap-2 text-xs" style={{ color: "#A3A3A3" }}><input type="checkbox" checked={props.editingTrack.explicit} onChange={(event) => props.setEditingTrack({ ...props.editingTrack, explicit: event.target.checked })} />{props.copy.explicit}</label>
+              </div>
           </div>
         ) : (
-          <div key={track.id} className="flex items-center gap-3 rounded-lg px-3 py-2.5" style={{ background: "#141414" }}>
+           <div key={track.id} className="rounded-lg px-3 py-2.5" style={{ background: "#141414" }}>
+             <div className="flex items-center gap-3">
             <span className="w-6 text-xs tabular-nums" style={{ color: "#525252" }}>{String(track.trackNumber).padStart(2, "0")}</span><span className="flex-1 truncate text-sm text-white">{track.title}</span>
              {props.canEdit && <><button type="button" onClick={() => props.onBeginEdit(track)} className="text-xs" style={{ color: "#737373" }}>{props.copy.edit}</button><button type="button" onClick={() => props.onDelete(track.id)} className="p-1" style={{ color: "#737373" }} aria-label={`${props.copy.delete} ${track.title}`}><Trash2 size={14} /></button></>}
+             </div>
+             <div className="mt-1 pl-9 text-xs" style={{ color: "#737373" }}>{track.isrc || "ISRC —"} · {track.version || props.copy.version} · {track.language || props.copy.language}{track.explicit ? ` · ${props.copy.explicit}` : ""}</div>
+             <CreditsSection releaseId={props.release.id} track={track} canEdit={props.canEdit} copy={props.copy} onRefresh={props.onRefresh} />
           </div>
         ))}
       </div>
       {props.canEdit && props.canAddSingleTrack && (
         <form onSubmit={props.onAdd} className="mt-4 grid gap-2 sm:grid-cols-[1fr_90px_auto]">
-           <input required maxLength={200} value={props.trackForm.title} onChange={(event) => props.setTrackForm({ ...props.trackForm, title: event.target.value })} placeholder={props.copy.newTrackTitle} aria-label={props.copy.newTrackTitle} />
+            <input required maxLength={200} value={props.trackForm.title} onChange={(event) => props.setTrackForm({ ...props.trackForm, title: event.target.value })} placeholder={props.copy.newTrackTitle} aria-label={props.copy.newTrackTitle} />
            <input required type="number" min="1" value={props.trackForm.trackNumber} onChange={(event) => props.setTrackForm({ ...props.trackForm, trackNumber: event.target.value })} aria-label={props.copy.newTrackNumber} />
            <button type="submit" disabled={props.saving} className="inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold text-black disabled:opacity-40" style={{ background: "#F5C518" }}><Plus size={14} /> {props.copy.add}</button>
+            <div className="grid gap-2 sm:col-span-3 sm:grid-cols-3"><input value={props.trackForm.isrc} onChange={(event) => props.setTrackForm({ ...props.trackForm, isrc: event.target.value })} placeholder="ISRC" aria-label="ISRC" /><input value={props.trackForm.version} onChange={(event) => props.setTrackForm({ ...props.trackForm, version: event.target.value })} placeholder={props.copy.version} aria-label={props.copy.version} /><input value={props.trackForm.language} onChange={(event) => props.setTrackForm({ ...props.trackForm, language: event.target.value })} placeholder={props.copy.language} aria-label={props.copy.language} /><label className="flex items-center gap-2 text-xs" style={{ color: "#A3A3A3" }}><input type="checkbox" checked={props.trackForm.explicit} onChange={(event) => props.setTrackForm({ ...props.trackForm, explicit: event.target.checked })} />{props.copy.explicit}</label></div>
         </form>
       )}
        {props.canEdit && !props.canAddSingleTrack && <p className="mt-3 text-xs" style={{ color: "#525252" }}>{props.copy.singleLimit}</p>}
     </div>
   );
+}
+
+function CreditsSection({ releaseId, track, canEdit, copy, onRefresh }: {
+  releaseId: string; track: Track; canEdit: boolean; copy: ReleaseCopy; onRefresh: () => void;
+}) {
+  const [name, setName] = useState(""); const [role, setRole] = useState<CreditRole>("PERFORMER");
+  const [editing, setEditing] = useState<string | null>(null); const [busy, setBusy] = useState(false);
+  const roleLabel = (value: CreditRole) => ({ COMPOSER: copy.composer, LYRICIST: copy.lyricist, PRODUCER: copy.producer, PERFORMER: copy.performer })[value];
+  async function save(creditId?: string) {
+    if (!name.trim()) return; setBusy(true);
+    try {
+      await readResponse(await fetch(`/api/releases/${releaseId}/tracks/${track.id}/credits${creditId ? `/${creditId}` : ""}`, { method: creditId ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, role }) }));
+      setName(""); setEditing(null); onRefresh();
+    } catch { /* parent release state shows the last confirmed value */ } finally { setBusy(false); }
+  }
+  async function remove(id: string) {
+    if (!window.confirm(copy.deleteConfirmation)) return; setBusy(true);
+    try { await readResponse(await fetch(`/api/releases/${releaseId}/tracks/${track.id}/credits/${id}`, { method: "DELETE" })); onRefresh(); } finally { setBusy(false); }
+  }
+  return <div className="mt-2 border-t pt-2" style={{ borderColor: "#242424" }}>
+    <p className="mb-1 text-[0.65rem] font-semibold uppercase tracking-wider" style={{ color: "#A3A3A3" }}>{copy.credits}</p>
+    {(track.credits ?? []).length === 0 && <p className="text-xs" style={{ color: "#525252" }}>{copy.noCredits}</p>}
+    {(track.credits ?? []).map((credit) => editing === credit.id ? <div key={credit.id} className="flex flex-wrap gap-2">
+      <input className="min-w-0 flex-1" value={name} onChange={(event) => setName(event.target.value)} aria-label={copy.creditName} />
+      <select value={role} onChange={(event) => setRole(event.target.value as CreditRole)}>{(["COMPOSER","LYRICIST","PRODUCER","PERFORMER"] as CreditRole[]).map((item) => <option key={item} value={item}>{roleLabel(item)}</option>)}</select>
+      <button type="button" disabled={busy} onClick={() => void save(credit.id)} className="text-xs" style={{ color: "#F5C518" }}>{copy.saveCredit}</button>
+      <button type="button" onClick={() => setEditing(null)} className="text-xs" style={{ color: "#737373" }}>×</button>
+    </div> : <div key={credit.id} className="flex items-center gap-2 text-xs" style={{ color: "#D4D4D4" }}>
+      <span className="flex-1">{credit.name} · {roleLabel(credit.role)}</span>
+      {canEdit && <><button type="button" onClick={() => { setEditing(credit.id); setName(credit.name); setRole(credit.role); }} style={{ color: "#737373" }}>{copy.edit}</button><button type="button" disabled={busy} onClick={() => void remove(credit.id)} style={{ color: "#737373" }}>{copy.delete}</button></>}
+    </div>)}
+    {canEdit && !editing && <div className="mt-2 flex flex-wrap gap-2"><input className="min-w-0 flex-1" maxLength={200} value={name} onChange={(event) => setName(event.target.value)} placeholder={copy.creditName} aria-label={copy.creditName} /><select value={role} onChange={(event) => setRole(event.target.value as CreditRole)}>{(["COMPOSER","LYRICIST","PRODUCER","PERFORMER"] as CreditRole[]).map((item) => <option key={item} value={item}>{roleLabel(item)}</option>)}</select><button type="button" disabled={busy || !name.trim()} onClick={() => void save()} className="text-xs font-semibold" style={{ color: "#F5C518" }}>{copy.addCredit}</button></div>}
+  </div>;
 }
 
 function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {

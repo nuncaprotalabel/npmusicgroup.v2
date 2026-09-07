@@ -1,0 +1,479 @@
+## FASE 2.12 — METADATA MUSICAL PROFESIONAL
+
+Implementa únicamente la primera capa de metadata profesional para releases y tracks.
+
+### OBJETIVO
+
+Preparar el catálogo de NP Music Group para futuras fases de validación y distribución digital.
+
+La estructura actual es:
+
+USER → ARTIST → RELEASE → TRACK
+
+Actualmente los releases tienen información básica:
+
+* título
+* tipo
+* estado
+* fecha de lanzamiento
+* cover_url
+
+Los tracks tienen:
+
+* título
+* número
+* duración
+* audio_url
+
+Ahora necesitamos ampliar el modelo para soportar metadata musical profesional.
+
+---
+
+# 1. REGLA PRINCIPAL
+
+Antes de modificar la base de datos, inspecciona el esquema real existente.
+
+NO duplicar columnas existentes.
+
+NO crear tablas paralelas si una estructura existente puede ampliarse correctamente.
+
+NO modificar relaciones existentes innecesariamente.
+
+NO romper el dashboard ARTIST ni la administración existente.
+
+---
+
+# 2. METADATA DEL RELEASE
+
+Agregar únicamente los campos que no existan actualmente y sean necesarios para:
+
+### Identificación
+
+* `upc`
+* `catalog_number`
+
+### Información musical
+
+* `genre`
+* `subgenre`
+* `language`
+* `version`
+
+### Información de lanzamiento
+
+* `label`
+* `release_date`
+
+Si alguno de estos campos ya existe con otro nombre, reutilizarlo.
+
+---
+
+# 3. COPYRIGHT
+
+El release debe poder almacenar:
+
+* `copyright_text`
+* `phonographic_copyright_text`
+
+Esto permitirá representar posteriormente:
+
+© copyright
+
+℗ phonographic copyright
+
+NO generar automáticamente información legal que no haya sido proporcionada.
+
+---
+
+# 4. CONTENIDO EXPLÍCITO
+
+Agregar soporte para indicar si el release contiene contenido explícito.
+
+Utilizar una representación consistente con el modelo existente.
+
+No crear múltiples campos equivalentes.
+
+---
+
+# 5. METADATA DEL TRACK
+
+Agregar únicamente los campos necesarios que todavía no existan:
+
+* `isrc`
+* `version`
+* `language`
+* `explicit`
+
+Si `version`, `language` o `explicit` deben compartirse con el modelo del release, mantenerlos independientes a nivel de track cuando el valor pueda diferir.
+
+---
+
+# 6. CRÉDITOS MUSICALES
+
+Crear una estructura profesional para créditos.
+
+Debe permitir asociar personas a un track con al menos:
+
+* nombre
+* rol
+
+Roles iniciales:
+
+* COMPOSER
+* LYRICIST
+* PRODUCER
+* PERFORMER
+
+No crear todavía un sistema completo de colaboradores, publishing o splits.
+
+La estructura debe permitir que un track tenga múltiples créditos.
+
+Evitar almacenar créditos como un único string separado por comas.
+
+---
+
+# 7. IDENTIFICADORES
+
+### ISRC
+
+El campo `isrc` debe ser opcional.
+
+NO generar ISRC ficticios.
+
+NO asignar automáticamente un código que parezca oficial.
+
+### UPC/EAN
+
+El campo `upc` debe ser opcional.
+
+NO generar códigos ficticios.
+
+### Catalog Number
+
+El `catalog_number` será un identificador interno de NP Music Group.
+
+No confundirlo con UPC/EAN o ISRC.
+
+---
+
+# 8. VALIDACIÓN
+
+Implementar validación server-side y frontend.
+
+Validar:
+
+* longitud
+* formato
+* caracteres inválidos
+* campos opcionales vacíos
+* fechas
+* valores permitidos
+* relaciones de créditos
+
+No inventar reglas externas que no sean necesarias.
+
+Los códigos oficiales, cuando se proporcionen, deben conservarse exactamente como fueron introducidos, salvo normalización segura de espacios si corresponde.
+
+---
+
+# 9. RELEASE READY
+
+Actualizar la validación existente de `READY` para considerar únicamente metadata que realmente sea obligatoria para el modelo actual.
+
+IMPORTANTE:
+
+NO hacer obligatorio ISRC.
+
+NO hacer obligatorio UPC/EAN.
+
+NO hacer obligatorio catalog number.
+
+NO impedir que un artista guarde un DRAFT por falta de identificadores oficiales.
+
+No convertir esta fase en una validación completa de distribución.
+
+---
+
+# 10. INTERFAZ ARTIST
+
+Actualizar el formulario existente de `/dashboard/releases`.
+
+El artista debe poder consultar/editar la metadata correspondiente cuando el release esté en `DRAFT`.
+
+Organizar la interfaz de forma clara:
+
+### Información básica
+
+* título
+* tipo
+* versión
+* género
+* subgénero
+* idioma
+
+### Identificación
+
+* UPC/EAN
+* número de catálogo
+
+### Copyright
+
+* ©
+* ℗
+
+### Contenido
+
+* explícito
+
+No convertir el formulario en una pantalla enorme.
+
+Usar secciones limpias y colapsables si el diseño actual lo permite.
+
+---
+
+# 11. TRACKS Y CRÉDITOS
+
+En el editor de tracks de un release `DRAFT`, permitir:
+
+* ISRC
+* versión
+* idioma
+* explícito
+* créditos
+
+Los créditos deben poder:
+
+* agregar
+* editar
+* eliminar
+
+Mostrar claramente el rol de cada persona.
+
+---
+
+# 12. ADMIN
+
+Actualizar la vista administrativa de releases para poder consultar esta metadata.
+
+El administrador debe poder visualizar:
+
+* UPC/EAN
+* catalog number
+* género
+* subgénero
+* idioma
+* versión
+* ©
+* ℗
+* explicit
+
+Y en cada track:
+
+* ISRC
+* versión
+* idioma
+* explicit
+* créditos
+
+No crear una nueva sección administrativa separada.
+
+Integrarlo en el detalle del release existente.
+
+---
+
+# 13. RBAC
+
+Reutilizar:
+
+* `releases.view`
+* `releases.manage`
+
+No crear un sistema nuevo de permisos.
+
+El servidor debe validar autorización como actualmente.
+
+---
+
+# 14. AUDITORÍA
+
+Reutilizar `audit_log`.
+
+Las modificaciones administrativas de metadata deben quedar registradas utilizando el sistema existente.
+
+No crear otro sistema de auditoría.
+
+---
+
+# 15. ES / EN
+
+Todo texto nuevo debe estar traducido mediante el sistema i18n existente.
+
+Idiomas:
+
+* español
+* inglés
+
+No crear otro sistema de traducción.
+
+---
+
+# 16. SEGURIDAD
+
+Mantener las reglas existentes:
+
+ARTIST:
+
+session → user → artist → release → track
+
+ADMIN:
+
+session → RBAC → release/track
+
+Nunca confiar en IDs del frontend como autorización.
+
+Validar relaciones en PostgreSQL.
+
+---
+
+# 17. NO IMPLEMENTAR TODAVÍA
+
+NO implementar:
+
+* distribución digital
+* MakeWaves
+* Spotify
+* Apple Music
+* ISRC automático
+* UPC automático
+* generación automática de códigos
+* audio storage
+* procesamiento de audio
+* splits
+* regalías
+* publishing
+* pagos
+* analytics
+* colaboradores avanzados
+* contratos de colaboradores
+* delivery a DSPs
+
+Esas funciones pertenecen a fases posteriores.
+
+---
+
+# 18. MIGRACIÓN
+
+Si se necesitan cambios de esquema:
+
+* crear migración segura;
+* conservar datos existentes;
+* utilizar valores `NULL` para metadata todavía desconocida;
+* no crear datos ficticios.
+
+Después comprobar que los releases/tracks actuales continúan funcionando.
+
+---
+
+# 19. RENDIMIENTO
+
+Evitar:
+
+* consultas N+1;
+* requests duplicados;
+* cargar créditos innecesariamente en listados;
+* modificar toda la arquitectura de servicios.
+
+Los créditos pueden cargarse en el detalle del release.
+
+---
+
+# 20. VERIFICACIÓN
+
+Ejecutar:
+
+`npx tsc --noEmit`
+
+`git diff --check`
+
+`npm run build`
+
+Probar:
+
+### ARTIST
+
+* crear DRAFT
+* editar metadata
+* editar track
+* agregar crédito
+* modificar crédito
+* eliminar crédito
+* guardar
+* recargar
+* comprobar persistencia
+
+### ADMIN
+
+* consultar release
+* consultar metadata
+* consultar tracks
+* consultar créditos
+* editar metadata
+* comprobar auditoría
+
+### Seguridad
+
+* sin sesión
+* usuario sin permiso
+* artista intentando acceder a release ajeno
+* datos inválidos
+* código inválido
+
+### Regresión
+
+Comprobar:
+
+* `/dashboard/releases`
+* `/admin/lanzamientos`
+* `/dashboard/artistas`
+
+No crear datos permanentes de prueba.
+
+---
+
+# 21. CRÉDITOS DE REPLIT
+
+Trabajar de forma quirúrgica.
+
+NO:
+
+* refactor general
+* migración de framework
+* nuevas dependencias innecesarias
+* nuevo sistema de autenticación
+* nuevo sistema RBAC
+* nuevo sistema i18n
+* modificar módulos no relacionados
+
+Modificar solamente lo necesario para esta fase.
+
+---
+
+# 22. REPORTE FINAL
+
+Entregar:
+
+1. Esquema de metadata implementado.
+2. Tablas/columnas nuevas o modificadas.
+3. Estructura de créditos.
+4. APIs modificadas/creadas.
+5. Formularios modificados.
+6. Validaciones implementadas.
+7. Reglas de `READY`.
+8. Auditoría.
+9. Rutas verificadas.
+10. Resultado de TypeScript.
+11. Resultado de build.
+12. Resultado de `git diff --check`.
+13. Problemas pendientes.
+
+NO comenzar automáticamente la Fase 2.13.

@@ -53,10 +53,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const parsed = parseTrackInput(await request.json().catch(() => null));
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const track = await queryOne<TrackRow>(
-      `INSERT INTO tracks (release_id, title, track_number, duration_seconds, audio_url)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, release_id, title, track_number, duration_seconds, audio_url, created_at, updated_at`,
-      [id, parsed.title, parsed.trackNumber, parsed.durationSeconds, parsed.audioUrl],
+       `INSERT INTO tracks (release_id, title, track_number, duration_seconds, audio_url, isrc, version, language, explicit)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, release_id, title, track_number, duration_seconds, audio_url, isrc, version, language, explicit, created_at, updated_at`,
+      [id, parsed.title, parsed.trackNumber, parsed.durationSeconds, parsed.audioUrl, parsed.isrc ?? null, parsed.version ?? null, parsed.language ?? null, parsed.explicit ?? false],
     );
     if (!track) return NextResponse.json({ error: "No se pudo crear el track." }, { status: 500 });
 

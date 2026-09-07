@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { getClientIp, logAudit } from "@/lib/audit";
 import { requirePermission, AuthorizationError } from "@/lib/authorization";
-import { parseReleaseInput, toRelease, toTrack, RELEASE_SELECT, TRACK_SELECT, type ReleaseRow, type TrackRow } from "@/lib/releases";
+import { parseReleaseInput, toRelease, toTrack, toCredit, RELEASE_SELECT, TRACK_SELECT, CREDIT_SELECT, type CreditRow, type ReleaseRow, type TrackRow } from "@/lib/releases";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -10,11 +10,14 @@ async function getRelease(id: string) {
   const release = await queryOne<ReleaseRow>(`${RELEASE_SELECT} WHERE id = $1`, [id]);
   if (!release) return null;
   const tracks = await query<TrackRow>(`${TRACK_SELECT} WHERE release_id = $1 ORDER BY track_number ASC`, [id]);
+  const credits = await query<CreditRow>(`${CREDIT_SELECT} WHERE track_id = ANY($1::uuid[]) ORDER BY created_at`, [tracks.map((track) => track.id)]);
+  const creditsByTrack = new Map<string, CreditRow[]>();
+  for (const credit of credits) creditsByTrack.set(credit.track_id, [...(creditsByTrack.get(credit.track_id) ?? []), credit]);
   const artist = await queryOne<{ name: string }>(
     `SELECT COALESCE(a.nombre_artistico, u.username) AS name FROM artists a JOIN users u ON u.id = a.user_id WHERE a.id = $1`,
     [release.artist_id],
   );
-  return { ...toRelease(release, tracks.map(toTrack)), artistName: artist?.name ?? "—" };
+  return { ...toRelease(release, tracks.map((track) => ({ ...toTrack(track), credits: (creditsByTrack.get(track.id) ?? []).map(toCredit) }))), artistName: artist?.name ?? "—" };
 }
 
 export async function GET(_request: NextRequest, { params }: Context) {
