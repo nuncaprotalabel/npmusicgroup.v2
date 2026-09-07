@@ -1,0 +1,258 @@
+# FASE 2.12.1 — VALIDACIÓN E2E DE METADATA MUSICAL
+
+## OBJETIVO
+
+Validar en condiciones reales los flujos implementados en Fase 2.12:
+
+ARTIST → RELEASE → TRACK → TRACK_CREDIT
+
+y
+
+ADMIN → RELEASE → TRACK → TRACK_CREDIT
+
+Esta fase NO agrega funcionalidades nuevas.
+
+NO rediseñar.
+NO refactorizar arquitectura.
+NO crear nuevos módulos.
+NO instalar dependencias.
+NO modificar reglas de negocio.
+NO iniciar Fase 2.13.
+
+El objetivo es únicamente detectar errores de persistencia, relaciones, permisos o auditoría que no hayan aparecido con las verificaciones estáticas.
+
+---
+
+## 1. PREPARACIÓN
+
+Inspecciona primero el esquema y código existente.
+
+Reutiliza exclusivamente:
+
+* users
+* sessions
+* artists
+* releases
+* tracks
+* track_credits
+* audit_log
+* RBAC existente
+* APIs existentes
+* componentes existentes
+
+No crear tablas nuevas.
+
+No modificar el esquema salvo que exista un error estrictamente necesario para completar la prueba.
+
+---
+
+# 2. PRUEBA ARTIST
+
+Utiliza una cuenta ARTIST existente si ya existe.
+
+Si no existe una cuenta ARTIST válida para pruebas:
+
+* crea temporalmente una cuenta de prueba siguiendo el flujo existente;
+* no expongas ni hardcodees credenciales reales;
+* registra claramente que es dato temporal.
+
+Crear temporalmente un release:
+
+* title: `TEST METADATA RELEASE`
+* type: `SINGLE`
+* status: `DRAFT`
+
+Comprobar que el release se persiste correctamente.
+
+Agregar metadata:
+
+* version
+* genre
+* subgenre
+* language
+* catalog_number
+* label
+* copyright_text
+* phonographic_copyright_text
+* explicit
+
+No introducir UPC/EAN falso con apariencia de código oficial.
+
+Crear un track temporal:
+
+* title: `TEST METADATA TRACK`
+* track_number: `1`
+
+Agregar:
+
+* isrc con valor explícitamente marcado como TEST solamente si la validación existente lo permite; si no lo permite, dejarlo NULL.
+* version
+* language
+* explicit
+
+Crear al menos tres créditos:
+
+1. Composer
+2. Producer
+3. Performer
+
+Verificar:
+
+* creación
+* lectura
+* edición
+* eliminación de al menos un crédito
+* persistencia después de recargar
+* relación correcta con track
+* relación correcta con release
+* ownership correcto del ARTIST
+
+---
+
+# 3. PRUEBA ADMIN
+
+Utiliza una cuenta ADMIN/SUPER_ADMIN existente.
+
+Consultar el release creado durante la prueba.
+
+Verificar que ADMIN puede:
+
+* consultar metadata del release;
+* consultar metadata del track;
+* consultar créditos;
+* editar metadata permitida;
+* editar track;
+* eliminar un crédito;
+* ver los cambios después de recargar.
+
+Verificar que las reglas existentes de:
+
+* releases.view
+* releases.manage
+
+continúan funcionando.
+
+No crear una nueva sección administrativa.
+
+---
+
+# 4. AUDITORÍA
+
+Comprobar en `audit_log` que las acciones realizadas durante la prueba generan los eventos esperados.
+
+Verificar específicamente:
+
+* RELEASE_CREATED / RELEASE_UPDATED
+* TRACK_CREATED / TRACK_UPDATED / TRACK_DELETED
+* TRACK_CREDIT_CREATED
+* TRACK_CREDIT_UPDATED
+* TRACK_CREDIT_DELETED
+
+No crear nuevos tipos de eventos.
+
+Comprobar que los registros contienen el contexto suficiente para identificar la operación.
+
+---
+
+# 5. SEGURIDAD
+
+Comprobar nuevamente:
+
+* API sin sesión → 401
+* ARTIST no puede modificar release de otro artista
+* ARTIST no puede modificar track de otro release
+* ARTIST no puede modificar créditos de otro track
+* ADMIN requiere la permission correspondiente
+* IDs enviados por frontend nunca sustituyen la resolución server-side del ownership
+
+No modificar las reglas de seguridad salvo que se encuentre un bug real.
+
+---
+
+# 6. LIMPIEZA OBLIGATORIA
+
+Al terminar las pruebas:
+
+Eliminar TODOS los datos temporales creados.
+
+Esto incluye:
+
+* release de prueba
+* tracks de prueba
+* créditos de prueba
+* usuario ARTIST temporal, solamente si fue creado
+* cualquier otro dato temporal asociado
+
+No dejar datos TEST en producción ni en la base de desarrollo.
+
+Después de la limpieza comprobar:
+
+* no quedan releases TEST;
+* no quedan tracks TEST;
+* no quedan créditos TEST;
+* no quedan cuentas TEST.
+
+Los registros de `audit_log` pueden permanecer si el sistema los considera históricos; no eliminarlos manualmente si la política actual del sistema indica que son inmutables.
+
+---
+
+# 7. VERIFICACIÓN FINAL
+
+Ejecutar:
+
+npx tsc --noEmit
+
+git diff --check
+
+npm run build
+
+Además verificar:
+
+* `/dashboard/releases`
+* `/admin/lanzamientos`
+* endpoints de metadata
+* endpoints de créditos
+* redirecciones de sesión
+* que no aparezcan errores 500
+* que no existan errores JS críticos
+
+No hacer una auditoría general del proyecto.
+
+---
+
+# 8. REGLA IMPORTANTE
+
+Si todo funciona:
+
+NO modificar código innecesariamente.
+
+Reportar Fase 2.12.1 como VALIDADA.
+
+Si aparece un error:
+
+corregir únicamente el error concreto y volver a ejecutar las pruebas afectadas.
+
+No convertir esta fase en refactor.
+
+---
+
+# 9. REPORTE FINAL
+
+Devuelve únicamente un reporte técnico con:
+
+1. ARTIST E2E
+2. ADMIN E2E
+3. Persistencia
+4. Créditos
+5. Auditoría
+6. Seguridad
+7. Limpieza de datos
+8. TypeScript
+9. Build
+10. Diff check
+11. Errores encontrados y correcciones realizadas
+12. Estado final:
+
+VALIDADA / VALIDADA CON OBSERVACIONES / BLOQUEADA
+
+No iniciar Fase 2.13.
