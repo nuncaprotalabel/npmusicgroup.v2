@@ -1,0 +1,807 @@
+# FASE 2.13 — ACTIVACIÓN FUNCIONAL DE NP MUSIC GROUP
+
+## CONTEXTO
+
+La fase anterior de recuperación crítica ya fue completada y verificada.
+
+Actualmente:
+
+* `dashboard/central` valida correctamente la sesión activa contra PostgreSQL.
+* `/admin` está unificado con `/dashboard/central`.
+* El middleware ya no depende de permisos obsoletos dentro del JWT.
+* Las páginas administrativas validan permisos server-side.
+* `/403` funciona correctamente.
+* El sidebar utiliza la ruta central correcta.
+* La navegación móvil de NP Control funciona.
+* Las solicitudes tienen transición real:
+  `PENDIENTE → REVISANDO → APROBADA/RECHAZADA`.
+* El onboarding verifica correctamente la creación del onboarding y del artista.
+* El esquema PostgreSQL incluye:
+
+  * `releases`
+  * `tracks`
+  * `track_credits`
+* El catálogo administrativo responde correctamente:
+
+  * SUPER_ADMIN autorizado → `200`
+  * sin sesión → `401`
+* `npx tsc --noEmit` pasa.
+* `git diff --check` pasa.
+* `npm run build` pasa.
+* Preview responde correctamente.
+* No existen sesiones de prueba ni datos artificiales pendientes.
+
+## OBJETIVO DE ESTA FASE
+
+Ahora NO queremos otra auditoría general.
+
+La infraestructura crítica ya fue recuperada.
+
+El objetivo es:
+
+> **Conectar funcionalmente los módulos que todavía permanecen como UI/estado honesto y convertirlos progresivamente en sistemas reales de NP Music Group.**
+
+NO rediseñar.
+
+NO rehacer autenticación.
+
+NO rehacer RBAC.
+
+NO crear mocks.
+
+NO crear datos falsos.
+
+---
+
+# 1. REGLA FUNDAMENTAL
+
+Un módulo solamente puede considerarse funcional cuando existe este flujo:
+
+```text
+INTERFAZ
+   ↓
+VALIDACIÓN
+   ↓
+API / SERVER ACTION
+   ↓
+AUTORIZACIÓN SERVER-SIDE
+   ↓
+POSTGRESQL / SERVICIO REAL
+   ↓
+RESPUESTA
+   ↓
+ACTUALIZACIÓN DE UI
+```
+
+Si falta cualquiera de estas capas, el módulo sigue siendo parcial.
+
+---
+
+# 2. NO ROMPER LO YA REPARADO
+
+Antes de tocar cualquier código:
+
+Preserva explícitamente:
+
+* autenticación;
+* sesiones;
+* RBAC;
+* permisos;
+* `/403`;
+* middleware;
+* `dashboard/central`;
+* navegación;
+* flujo de solicitudes;
+* onboarding;
+* schema existente;
+* estructura actual de PostgreSQL.
+
+No reemplaces sistemas funcionales por implementaciones nuevas solamente porque sean diferentes.
+
+No hagas una refactorización masiva.
+
+No cambies arquitectura sin una razón técnica concreta.
+
+---
+
+# 3. PRIORIDAD DE IMPLEMENTACIÓN
+
+Trabaja en este orden exacto:
+
+### BLOQUE A
+
+Solicitudes → Invitaciones → Onboarding → Artista
+
+### BLOQUE B
+
+Artistas administrativos
+
+### BLOQUE C
+
+Lanzamientos
+
+### BLOQUE D
+
+Contratos
+
+### BLOQUE E
+
+Cuentas
+
+### BLOQUE F
+
+Configuraciones
+
+### BLOQUE G
+
+Dashboard administrativo
+
+### BLOQUE H
+
+Dashboard de artista
+
+### BLOQUE I
+
+Analíticas e ingresos
+
+### BLOQUE J
+
+Homepage y rutas públicas
+
+---
+
+# 4. BLOQUE A — SOLICITUDES → INVITACIÓN → ONBOARDING → ARTISTA
+
+El sistema de solicitudes ya tiene estados reales.
+
+Ahora hay que completar el flujo posterior.
+
+## SUPER_ADMIN
+
+Desde una solicitud aprobada debe poder iniciar el proceso correspondiente.
+
+La invitación debe:
+
+* crearse realmente;
+* utilizar token seguro;
+* persistirse en DB;
+* tener estado;
+* tener expiración;
+* poder ser consultada;
+* poder abrir su ruta pública.
+
+## Invitación
+
+La ruta pública debe permitir continuar correctamente al siguiente paso del proceso.
+
+## Onboarding
+
+Debe completar correctamente el proceso existente.
+
+Al finalizar:
+
+* debe existir el registro de onboarding;
+* debe existir el artista;
+* deben existir las relaciones correspondientes;
+* el estado debe reflejar correctamente el resultado.
+
+NO crear artistas artificiales para probar.
+
+Utilizar el flujo real.
+
+---
+
+# 5. BLOQUE B — GESTIÓN ADMINISTRATIVA DE ARTISTAS
+
+Implementar el módulo administrativo utilizando los artistas reales existentes en PostgreSQL.
+
+SUPER_ADMIN debe poder:
+
+* listar artistas;
+* buscar;
+* abrir detalle;
+* consultar información;
+* consultar estado;
+* consultar lanzamientos asociados;
+* editar los campos que la arquitectura actual permita editar.
+
+Todas las modificaciones deben persistir.
+
+Después de guardar:
+
+1. DB actualizada.
+2. UI actualizada.
+3. Recarga mantiene los cambios.
+
+No usar estado local como fuente definitiva.
+
+---
+
+# 6. BLOQUE C — LANZAMIENTOS
+
+El schema de:
+
+* `releases`
+* `tracks`
+* `track_credits`
+
+ya existe.
+
+Ahora hay que convertirlo en un sistema funcional.
+
+## ARTIST
+
+Debe poder:
+
+### Crear lanzamiento
+
+El formulario debe validar:
+
+* información obligatoria;
+* artista propietario;
+* título;
+* datos del lanzamiento;
+* tracks;
+* créditos cuando correspondan.
+
+La creación debe producir registros reales en PostgreSQL.
+
+### Después de crear
+
+El artista debe poder:
+
+* visualizar el lanzamiento;
+* editarlo cuando su estado lo permita;
+* consultar su estado;
+* volver a la lista;
+* abrir el detalle.
+
+## SUPER_ADMIN
+
+Debe poder:
+
+* listar lanzamientos;
+* buscar;
+* filtrar;
+* abrir detalle;
+* revisar;
+* editar cuando corresponda;
+* modificar estados;
+* consultar artista;
+* consultar tracks;
+* consultar créditos.
+
+No crear una segunda tabla de releases.
+
+Utilizar el schema existente.
+
+---
+
+# 7. ESTADOS DE LANZAMIENTO
+
+Implementar estados reales y coherentes.
+
+No inventar estados innecesarios.
+
+Si el proyecto ya tiene estados definidos, conservarlos.
+
+Las transiciones deben validarse server-side.
+
+Un ARTIST no debe poder cambiar arbitrariamente un lanzamiento a un estado administrativo.
+
+SUPER_ADMIN debe tener las capacidades administrativas correspondientes.
+
+---
+
+# 8. ARCHIVOS Y PORTADAS
+
+Antes de implementar almacenamiento de archivos:
+
+Inspecciona qué infraestructura de storage existe actualmente.
+
+NO inventar un proveedor.
+
+NO guardar archivos grandes directamente en PostgreSQL si la arquitectura no está diseñada para ello.
+
+Si el proyecto ya tiene storage configurado:
+
+integrarlo.
+
+Si todavía no existe:
+
+dejar claramente separada la capa de metadata del archivo y documentar la dependencia.
+
+NO simular uploads exitosos.
+
+---
+
+# 9. BLOQUE D — CONTRATOS
+
+El módulo de contratos debe dejar de mostrar simplemente un estado vacío/error.
+
+Investigar primero la implementación existente.
+
+Revisar:
+
+* schema;
+* relaciones;
+* tipos;
+* API;
+* server actions;
+* componentes;
+* permisos;
+* estados;
+* flujo de invitación.
+
+SUPER_ADMIN debe poder acceder a contratos reales.
+
+Debe poder:
+
+* listar;
+* abrir;
+* consultar estado;
+* consultar artista;
+* consultar información relacionada;
+* realizar las acciones administrativas que el flujo existente contempla.
+
+Si existe flujo público de revisión/aceptación:
+
+conectarlo al contrato real.
+
+No duplicar el sistema existente.
+
+---
+
+# 10. BLOQUE E — CUENTAS
+
+Activar el módulo de cuentas.
+
+SUPER_ADMIN debe poder consultar:
+
+* usuarios;
+* rol;
+* estado;
+* información básica;
+* artista relacionado cuando exista.
+
+Las acciones administrativas deben respetar RBAC.
+
+No permitir cambios que puedan romper la autenticación.
+
+No permitir que un ARTIST gestione cuentas administrativas.
+
+---
+
+# 11. BLOQUE F — CONFIGURACIONES
+
+Activar configuración real.
+
+Separar claramente:
+
+## SUPER_ADMIN
+
+Configuraciones administrativas permitidas.
+
+## ARTIST
+
+Configuraciones de su propia cuenta/perfil.
+
+Nunca confiar exclusivamente en el frontend.
+
+Toda modificación sensible debe validarse server-side.
+
+---
+
+# 12. BLOQUE G — DASHBOARD ADMINISTRATIVO
+
+El dashboard debe dejar de depender de elementos visuales sin datos.
+
+Utilizar datos reales disponibles.
+
+Crear solamente métricas que tengan fuente real.
+
+Ejemplos:
+
+* solicitudes pendientes;
+* solicitudes en revisión;
+* artistas;
+* lanzamientos;
+* contratos;
+* usuarios.
+
+Si una métrica no tiene datos:
+
+mostrar estado vacío.
+
+NO inventar números.
+
+---
+
+# 13. BLOQUE H — DASHBOARD DE ARTISTA
+
+El dashboard del artista debe evolucionar de sus tres módulos actuales hacia una estructura de plataforma real.
+
+La navegación debe contemplar como mínimo:
+
+* Inicio
+* Lanzamientos
+* Analíticas
+* Ingresos
+* Perfil
+* Contratos
+* Mensajes/Notificaciones
+* Configuración
+
+IMPORTANTE:
+
+No es necesario implementar absolutamente todos los módulos nuevos en esta fase si todavía dependen de servicios externos.
+
+Pero los módulos que ya tengan backend deben funcionar realmente.
+
+Los módulos futuros deben quedar claramente identificados como pendientes.
+
+NO crear pantallas llenas de widgets vacíos.
+
+---
+
+# 14. LANZAMIENTOS DEL ARTISTA
+
+Esta es una de las prioridades principales.
+
+El artista debe poder:
+
+```text
+Dashboard
+→ Lanzamientos
+→ Nuevo lanzamiento
+→ Completar información
+→ Añadir tracks
+→ Añadir créditos
+→ Guardar
+→ Ver lanzamiento
+→ Editar
+→ Consultar estado
+```
+
+Cada operación debe persistir.
+
+Después de refrescar la página, los datos deben continuar ahí.
+
+---
+
+# 15. ANALÍTICAS
+
+NO inventar streams, ingresos o métricas.
+
+Primero determinar qué fuente real de datos existe actualmente.
+
+Si todavía no existe integración externa:
+
+crear correctamente:
+
+* estructura;
+* consultas internas;
+* estados vacíos;
+* filtros preparados;
+* arquitectura extensible.
+
+El sistema debe poder crecer posteriormente sin rehacer el módulo.
+
+---
+
+# 16. INGRESOS
+
+No mostrar dinero ficticio.
+
+Preparar la arquitectura para:
+
+* ingresos por lanzamiento;
+* períodos;
+* porcentaje del artista;
+* porcentaje de NP Music Group;
+* colaboradores cuando correspondan.
+
+Los valores solamente deben aparecer cuando exista información real.
+
+---
+
+# 17. MENSAJERÍA / NOTIFICACIONES
+
+Antes de crear un sistema nuevo:
+
+buscar si ya existe una implementación parcial.
+
+Si existe:
+
+repararla.
+
+Si no existe:
+
+no crear un sistema complejo innecesariamente dentro de esta fase.
+
+Dejar preparada la navegación y arquitectura para la siguiente fase.
+
+---
+
+# 18. HOMEPAGE
+
+La homepage debe representar el producto real.
+
+Eliminar o corregir rutas que actualmente:
+
+* redirigen incorrectamente al inicio;
+* no tienen contenido;
+* existen solamente como relleno.
+
+No añadir más secciones simplemente para que la página parezca más completa.
+
+Cada sección pública debe tener propósito real.
+
+---
+
+# 19. NAVEGACIÓN
+
+Mantener el sistema de navegación que ya fue reparado.
+
+Verificar que todas las nuevas páginas:
+
+* tengan acceso desde el sidebar correspondiente;
+* tengan breadcrumb/back navigation cuando sea necesario;
+* puedan volver al dashboard;
+* no requieran cerrar sesión;
+* no provoquen redirects incorrectos.
+
+---
+
+# 20. API Y SEGURIDAD
+
+Cada endpoint nuevo debe:
+
+1. validar sesión;
+2. validar rol/permisos;
+3. validar input;
+4. validar propiedad del recurso;
+5. ejecutar operación;
+6. devolver respuesta consistente.
+
+No confiar en:
+
+* botones ocultos;
+* rutas ocultas;
+* datos enviados por frontend.
+
+Ejemplo:
+
+Un ARTIST no debe poder modificar un `release` perteneciente a otro artista simplemente cambiando un ID en la petición.
+
+---
+
+# 21. VALIDACIÓN DE PROPIEDAD
+
+Para recursos pertenecientes a artistas:
+
+```text
+ARTIST
+    ↓
+resourceId
+    ↓
+¿resource.owner === authenticatedArtist?
+    ↓
+YES → permitir
+NO → 403
+```
+
+SUPER_ADMIN puede acceder según sus permisos.
+
+Esto debe aplicarse como mínimo a:
+
+* releases;
+* tracks;
+* perfil;
+* contratos cuando corresponda;
+* ingresos;
+* analíticas.
+
+---
+
+# 22. TESTING
+
+No marques un módulo como terminado porque compile.
+
+Cada módulo terminado debe probarse con flujo real.
+
+## Lanzamientos
+
+```text
+ARTIST login
+→ abrir releases
+→ crear release
+→ guardar
+→ recargar
+→ verificar existencia
+→ editar
+→ recargar
+→ verificar cambios
+
+SUPER_ADMIN login
+→ releases
+→ buscar release
+→ abrir
+→ verificar artista
+→ verificar tracks
+```
+
+## Seguridad
+
+```text
+ARTIST
+→ intentar acceder a recurso de otro artista
+→ 403
+
+ARTIST
+→ intentar endpoint administrativo
+→ 403
+
+SUPER_ADMIN
+→ endpoint administrativo
+→ 200
+```
+
+## Navegación
+
+Entrar en cada módulo y volver al dashboard sin cerrar sesión.
+
+---
+
+# 23. NO FABRICAR RESULTADOS DE TESTING
+
+Si una prueba no pudo realizarse:
+
+escribir:
+
+`NOT TESTED`
+
+No escribir:
+
+`PASS`
+
+No crear datos falsos solamente para conseguir un PASS.
+
+Si una prueba necesita una cuenta ARTIST y actualmente no existe una cuenta válida para completar el flujo:
+
+dejarlo explícito y explicar la dependencia.
+
+No fabricar una cuenta simplemente para ocultar el problema.
+
+---
+
+# 24. DEFINICIÓN DE TERMINADO
+
+Un módulo puede marcarse:
+
+### ✅ FUNCIONAL
+
+Cuando:
+
+* UI funciona;
+* API funciona;
+* autorización funciona;
+* DB funciona;
+* persistencia funciona;
+* navegación funciona;
+* errores están manejados;
+* flujo E2E probado.
+
+### ⚠️ PARCIAL
+
+Cuando existe infraestructura pero falta una dependencia o parte funcional.
+
+### ❌ BLOQUEADO
+
+Cuando existe una dependencia externa real que impide completar el módulo.
+
+---
+
+# 25. INFORME FINAL OBLIGATORIO
+
+Al terminar esta fase entrega:
+
+## 1. Resumen
+
+Qué se activó.
+
+## 2. Archivos modificados
+
+Lista exacta.
+
+## 3. DB
+
+Indicar:
+
+* tablas utilizadas;
+* migraciones creadas;
+* migraciones modificadas.
+
+## 4. APIs
+
+Lista de endpoints creados/modificados.
+
+## 5. Seguridad
+
+Explicar qué validaciones server-side se implementaron.
+
+## 6. Testing
+
+Usar exactamente:
+
+```text
+[PASS]
+[FAIL]
+[NOT TESTED]
+[BLOCKED]
+```
+
+## 7. Estado por módulo
+
+```text
+Solicitudes       ✅
+Invitaciones      ✅/⚠️/❌
+Onboarding        ✅
+Artistas          ✅/⚠️/❌
+Lanzamientos      ✅/⚠️/❌
+Contratos         ✅/⚠️/❌
+Cuentas           ✅/⚠️/❌
+Configuración     ✅/⚠️/❌
+Dashboard Admin   ✅/⚠️/❌
+Dashboard Artist  ✅/⚠️/❌
+Analíticas        ✅/⚠️/❌
+Ingresos          ✅/⚠️/❌
+Homepage          ✅/⚠️/❌
+```
+
+## 8. BLOQUEADORES
+
+Si queda algo pendiente, explicar:
+
+* qué falta;
+* por qué;
+* qué dependencia necesita;
+* qué NO debe hacerse para intentar ocultarlo.
+
+---
+
+# 26. CONDICIÓN FINAL
+
+NO avances a diseño avanzado ni a nuevas features después de completar parcialmente esta fase.
+
+Primero consigue que los módulos prioritarios funcionen realmente.
+
+La prioridad absoluta es:
+
+**Solicitudes → Invitaciones → Onboarding → Artistas → Lanzamientos → Contratos**
+
+Después:
+
+**Cuentas → Configuración → Dashboards → Analíticas → Ingresos**
+
+Y finalmente:
+
+**Homepage / contenido público.**
+
+El objetivo no es hacer que NP Music Group parezca más completo.
+
+El objetivo es que cada pieza que ya existe empiece a funcionar como parte de un sistema real.
+
+NO MOCKS.
+
+NO DATOS FALSOS.
+
+NO BOTONES DECORATIVOS.
+
+NO REDIRECCIONES ARBITRARIAS.
+
+NO ELIMINAR SEGURIDAD.
+
+NO REHACER LO QUE YA FUNCIONA.
+
+**Construir sobre la recuperación crítica ya completada.**

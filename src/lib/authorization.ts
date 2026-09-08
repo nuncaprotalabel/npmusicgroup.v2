@@ -18,6 +18,9 @@ export class AuthorizationError extends Error {
 export async function requirePermission(permission: Permission) {
   const session = await getActiveSession();
   if (!session) throw new AuthorizationError(401, "No autenticado.");
+  if (session.role === "ARTIST") {
+    throw new AuthorizationError(403, "Los artistas no pueden acceder a módulos administrativos.");
+  }
 
   const allowed = await hasPermission(session.role, permission);
   if (!allowed) throw new AuthorizationError(403, "Permisos insuficientes.");
