@@ -7,6 +7,7 @@
 
 import { Wrench } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
 import type { DashboardModuleKey } from "./navigation";
 
@@ -21,7 +22,9 @@ interface InDevelopmentProps {
 
 export function InDevelopment({ moduleName, moduleKey, description }: InDevelopmentProps) {
   const { t } = useTranslation();
+  const pathname = usePathname();
   const title = moduleKey ? t.dashboard.modules[moduleKey] : moduleName ?? t.dashboard.inDevelopment.title;
+  const backHref = pathname.startsWith("/dashboard") ? "/dashboard/central" : "/admin";
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 text-center">
@@ -53,7 +56,7 @@ export function InDevelopment({ moduleName, moduleKey, description }: InDevelopm
       </p>
 
       <Link
-        href="/admin"
+        href={backHref}
         className="mt-6 inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors hover:bg-[#F5C518] hover:text-black"
         style={{ border: "1px solid #2A2A2A", color: "#A3A3A3" }}
       >

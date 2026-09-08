@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/np-control",          label: "Central",    icon: LayoutDashboard },
   { href: "/np-control/usuarios", label: "Usuarios",   icon: Users },
   { href: "/np-control/permisos", label: "Permisos",   icon: ShieldCheck },

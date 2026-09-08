@@ -4,8 +4,12 @@ import { requirePermission, AuthorizationError } from "@/lib/authorization";
 import { getClientIp, logAudit } from "@/lib/audit";
 import type { Solicitud, SolicitudEstado } from "@/types/solicitud";
 
-const ALLOWED_TRANSITIONS = ["APROBADA", "RECHAZADA"] as const;
-type AdministrativeStatus = (typeof ALLOWED_TRANSITIONS)[number];
+const ALLOWED_TRANSITIONS: Record<SolicitudEstado, readonly SolicitudEstado[]> = {
+  PENDIENTE: ["REVISANDO", "APROBADA", "RECHAZADA"],
+  REVISANDO: ["APROBADA", "RECHAZADA"],
+  APROBADA: [],
+  RECHAZADA: [],
+};
 
 interface SolicitudRow {
   id: string;
@@ -47,7 +51,7 @@ export async function PATCH(
     const body = await request.json().catch(() => null);
     const nextStatus = body?.estado;
 
-    if (!ALLOWED_TRANSITIONS.includes(nextStatus as AdministrativeStatus)) {
+    if (typeof nextStatus !== "string") {
       return NextResponse.json(
         { error: "La transición de estado no es válida." },
         { status: 400 },
@@ -66,9 +70,9 @@ export async function PATCH(
     if (!current) {
       return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
     }
-    if (current.estado !== "PENDIENTE") {
+    if (!ALLOWED_TRANSITIONS[current.estado].includes(nextStatus as SolicitudEstado)) {
       return NextResponse.json(
-        { error: "Solo se pueden procesar solicitudes pendientes." },
+        { error: "La solicitud ya no admite esa transición de estado." },
         { status: 409 },
       );
     }
@@ -92,10 +96,15 @@ export async function PATCH(
     }
 
     const approved = nextStatus === "APROBADA";
+    const reviewing = nextStatus === "REVISANDO";
     await logAudit({
       userId: session.userId,
       username: session.username,
-      action: approved ? "SOLICITUD_APROBADA" : "SOLICITUD_RECHAZADA",
+      action: approved
+        ? "SOLICITUD_APROBADA"
+        : reviewing
+          ? "SOLICITUD_EN_REVISION"
+          : "SOLICITUD_RECHAZADA",
       entityType: "solicitud",
       entityId: id,
       metadata: {
@@ -105,7 +114,7 @@ export async function PATCH(
         email: current.email,
       },
       ipAddress: getClientIp(request.headers),
-      severity: approved ? "INFO" : "WARN",
+      severity: approved ? "INFO" : reviewing ? "INFO" : "WARN",
     });
 
     return NextResponse.json({ solicitud: mapRow(updated) });

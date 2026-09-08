@@ -57,9 +57,13 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
 
   async function processSolicitud(
     solicitud: Solicitud,
-    estado: Extract<SolicitudEstado, "APROBADA" | "RECHAZADA">,
+    estado: Extract<SolicitudEstado, "REVISANDO" | "APROBADA" | "RECHAZADA">,
   ) {
-    const action = estado === "APROBADA" ? "aprobar" : "rechazar";
+    const action = estado === "APROBADA"
+      ? "aprobar"
+      : estado === "RECHAZADA"
+        ? "rechazar"
+        : "marcar en revisión";
     if (!window.confirm(`¿Confirmas ${action} la solicitud de ${solicitud.nombreArtistico}?`)) return;
 
     setBusyId(solicitud.id);
@@ -246,11 +250,11 @@ function SolicitudDetail({
   invitationLink: InvitationLinkResult | null;
   copied: boolean;
   onClose: () => void;
-  onProcess: (estado: Extract<SolicitudEstado, "APROBADA" | "RECHAZADA">) => void;
+  onProcess: (estado: Extract<SolicitudEstado, "REVISANDO" | "APROBADA" | "RECHAZADA">) => void;
   onCreateInvitation: () => void;
   onCopyInvitationLink: () => void;
 }) {
-  const isPending = solicitud.estado === "PENDIENTE";
+  const canProcess = solicitud.estado === "PENDIENTE" || solicitud.estado === "REVISANDO";
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <button type="button" className="absolute inset-0 cursor-default" onClick={onClose} aria-label="Cerrar detalle" />
@@ -344,8 +348,20 @@ function SolicitudDetail({
             </div>
           </div>
 
-          {canManage && isPending && (
+          {canManage && canProcess && (
             <div className="flex flex-col gap-2 border-t border-[#141414] pt-5 sm:flex-row">
+              {solicitud.estado === "PENDIENTE" && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  fullWidth
+                  disabled={busy}
+                  icon={<Clock3 size={15} />}
+                  onClick={() => onProcess("REVISANDO")}
+                >
+                  En revisión
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -369,7 +385,7 @@ function SolicitudDetail({
             </div>
           )}
 
-          {canManage && !isPending && (
+          {canManage && !canProcess && (
             <p className="border-t border-[#141414] pt-5 text-xs text-[#525252]">
               Esta solicitud ya fue procesada y no admite nuevas transiciones.
             </p>

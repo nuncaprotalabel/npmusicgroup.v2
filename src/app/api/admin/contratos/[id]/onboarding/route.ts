@@ -211,6 +211,10 @@ export async function POST(
       )
     ).rows[0];
 
+    if (!onboarding || !artist) {
+      throw new Error("No se pudo crear de forma completa el onboarding del artista.");
+    }
+
     await client.query("COMMIT");
 
     const auditContext = {

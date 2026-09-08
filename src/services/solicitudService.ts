@@ -48,7 +48,7 @@ export async function getSolicitudes(): Promise<GetSolicitudesResult> {
 
 export async function updateSolicitudStatus(
   id: string,
-  estado: Extract<Solicitud['estado'], 'APROBADA' | 'RECHAZADA'>,
+  estado: Extract<Solicitud['estado'], 'REVISANDO' | 'APROBADA' | 'RECHAZADA'>,
 ): Promise<UpdateSolicitudResult> {
   try {
     const response = await fetch(`/api/admin/solicitudes/${id}`, {

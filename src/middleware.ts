@@ -62,12 +62,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return clearAndRedirect(request, pathname);
   }
 
-  // Sin restricción de rol → permitir
+  // Las decisiones de permiso se validan server-side contra PostgreSQL.
+  // El JWT solo se usa aquí para autenticación temprana y roles de alto nivel;
+  // así un cambio de RBAC no queda bloqueado por permisos obsoletos del token.
   if (!routeRule.roles || routeRule.roles.length === 0) {
-    if (!routeRule.permission || session.role === 'SUPER_ADMIN' || session.permissions?.includes(routeRule.permission)) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL(routeRule.forbidden ?? '/403', request.url));
+    return NextResponse.next();
   }
 
   // Verificar rol

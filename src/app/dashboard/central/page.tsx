@@ -3,8 +3,9 @@
  * Muestra el estado real de la plataforma sin datos ficticios.
  * Si no hay datos, muestra estados vacíos profesionales.
  */
-import { getSession } from "@/lib/auth";
+import { getActiveSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import {
   Users,
   Music,
@@ -50,7 +51,7 @@ async function getStats(role: string) {
 }
 
 export default async function CentralPage() {
-  const session = await getSession();
+  const session = await getActiveSession();
   if (!session) redirect("/login?from=/dashboard/central");
 
   const stats = await getStats(session.role);
@@ -125,8 +126,8 @@ export default async function CentralPage() {
           Módulos disponibles
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {MODULES.map(({ label, description, href }) => (
-            <a
+          {getModulesForRole(session.role).map(({ label, description, href }) => (
+            <Link
               key={href}
               href={href}
               className="flex flex-col gap-1 p-4 rounded-lg border border-transparent transition-all duration-150 hover:border-[#2A2A2A]"
@@ -134,7 +135,7 @@ export default async function CentralPage() {
             >
               <span className="text-sm font-medium text-white">{label}</span>
               <span className="text-xs" style={{ color: "#525252" }}>{description}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -159,14 +160,25 @@ export default async function CentralPage() {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const MODULES = [
-  { label: "Artistas",              description: "Gestión de artistas y perfiles",     href: "/admin/artistas" },
-  { label: "Lanzamientos",          description: "Publicaciones y releases",           href: "/admin/lanzamientos" },
-  { label: "Contratos",             description: "Contratos y acuerdos digitales",     href: "/admin/contratos" },
-  { label: "Ingresos",              description: "Ingresos y distribución de royalties",href: "/admin/ingresos" },
-  { label: "Analíticas",            description: "Estadísticas y métricas",            href: "/admin/analiticas" },
-  { label: "Mensajes",              description: "Comunicación interna",               href: "/admin/mensajes" },
+const ADMIN_MODULES = [
+  { label: "Artistas",       description: "Gestión de artistas y perfiles",     href: "/admin/artistas" },
+  { label: "Lanzamientos",   description: "Publicaciones y releases",           href: "/admin/lanzamientos" },
+  { label: "Contratos",      description: "Contratos y acuerdos digitales",     href: "/admin/contratos" },
+  { label: "Cuentas",        description: "Usuarios y estados de cuenta",       href: "/admin/cuentas" },
+  { label: "Ingresos",       description: "Ingresos y distribución de royalties",href: "/admin/ingresos" },
+  { label: "Analíticas",     description: "Estadísticas y métricas",             href: "/admin/analiticas" },
 ];
+
+const ARTIST_MODULES = [
+  { label: "Mi perfil",      description: "Información pública y contacto",      href: "/dashboard/perfil" },
+  { label: "Lanzamientos",  description: "Gestiona tu catálogo musical",        href: "/dashboard/releases" },
+  { label: "Analíticas",    description: "Métricas disponibles de tu catálogo",  href: "/dashboard/analiticas" },
+  { label: "Ingresos",      description: "Información económica disponible",    href: "/dashboard/ingresos" },
+];
+
+function getModulesForRole(role: string) {
+  return role === "ARTIST" ? ARTIST_MODULES : ADMIN_MODULES;
+}
 
 function StatCard({
   icon: Icon,

@@ -27,13 +27,22 @@ export default function ForbiddenPage() {
         <p className="text-sm leading-relaxed mb-8" style={{ color: "#737373" }}>
           No tienes permisos para acceder a esta sección de la plataforma.
         </p>
-        <Link
-          href="/login"
-          className="px-6 py-2.5 rounded-lg text-sm font-semibold text-black transition-all duration-150"
-          style={{ background: "#F5C518" }}
-        >
-          Volver al inicio de sesión
-        </Link>
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          <Link
+            href="/dashboard/central"
+            className="px-6 py-2.5 rounded-lg text-sm font-semibold text-black transition-all duration-150"
+            style={{ background: "#F5C518" }}
+          >
+            Volver al dashboard
+          </Link>
+          <Link
+            href="/login"
+            className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150"
+            style={{ border: "1px solid #2A2A2A", color: "#A3A3A3" }}
+          >
+            Cambiar de cuenta
+          </Link>
+        </div>
       </div>
     </div>
   );

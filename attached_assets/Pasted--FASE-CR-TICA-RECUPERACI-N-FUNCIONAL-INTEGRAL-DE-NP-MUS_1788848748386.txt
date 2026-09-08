@@ -1,0 +1,1201 @@
+# FASE CRÍTICA — RECUPERACIÓN FUNCIONAL INTEGRAL DE NP MUSIC GROUP
+
+## 0. CONTEXTO
+
+Estamos desarrollando **NP Music Group**, una plataforma privada de gestión y operación musical.
+
+El proyecto actualmente tiene una interfaz bastante desarrollada visualmente, pero presenta un problema crítico:
+
+> Muchas funciones existen solamente a nivel visual y no están conectadas correctamente con backend, base de datos, autenticación, autorización, navegación o lógica de negocio.
+
+Por lo tanto, **NO debemos continuar agregando nuevas funcionalidades ni hacer otra fase de diseño hasta conseguir que el sistema existente sea realmente funcional de extremo a extremo.**
+
+Esta fase tiene prioridad absoluta.
+
+---
+
+# 1. OBJETIVO PRINCIPAL
+
+Convertir el proyecto actual de NP Music Group de una interfaz principalmente visual en una **plataforma funcional de extremo a extremo**.
+
+Cada módulo existente debe:
+
+1. Tener una ruta real.
+2. Tener navegación real.
+3. Tener permisos correctos.
+4. Tener conexión real con la base de datos.
+5. Tener operaciones CRUD cuando correspondan.
+6. Tener estados reales.
+7. Tener validaciones.
+8. Tener manejo de errores.
+9. Tener persistencia.
+10. Actualizar correctamente la interfaz después de las acciones.
+11. Poder volver al dashboard/home correspondiente sin cerrar sesión.
+12. Respetar el sistema de roles existente.
+13. Funcionar tanto en desktop como en móvil.
+
+---
+
+# 2. REGLA MÁS IMPORTANTE
+
+## NO CREAR FALSAS FUNCIONALIDADES
+
+No quiero:
+
+* botones decorativos;
+* formularios que no guardan nada;
+* estadísticas falsas;
+* tablas con datos hardcodeados;
+* páginas que solamente muestran "próximamente";
+* acciones que parecen funcionar pero no modifican la base de datos;
+* rutas que redirigen al inicio sin razón;
+* permisos simulados;
+* componentes desconectados del backend;
+* datos mock utilizados como sustituto de datos reales;
+* estados falsos para hacer parecer que una operación terminó correctamente.
+
+Si una función existe en la interfaz, debe funcionar realmente.
+
+Si todavía no puede funcionar por una dependencia técnica, **detén esa parte, identifica exactamente la dependencia faltante y corrígela**, en lugar de simularla.
+
+---
+
+# 3. ANTES DE MODIFICAR CÓDIGO: AUDITORÍA OBLIGATORIA
+
+Antes de comenzar a cambiar archivos:
+
+### 3.1 Analiza toda la arquitectura existente
+
+Revisa:
+
+* estructura de carpetas;
+* rutas;
+* API routes;
+* server actions;
+* componentes;
+* hooks;
+* servicios;
+* autenticación;
+* autorización;
+* RBAC;
+* middleware;
+* base de datos;
+* schema;
+* migraciones;
+* seeds;
+* relaciones;
+* sesiones;
+* contratos;
+* invitaciones;
+* solicitudes;
+* lanzamientos;
+* artistas;
+* cuentas;
+* estadísticas;
+* configuraciones;
+* navegación;
+* layouts;
+* redirects.
+
+### 3.2 Identifica qué existe realmente
+
+Clasifica cada módulo como:
+
+* FUNCIONANDO
+* PARCIALMENTE FUNCIONAL
+* SOLO UI
+* ROTO
+* FALTANTE
+* BLOQUEADO POR DEPENDENCIA
+
+No asumas que porque existe un componente significa que existe la funcionalidad.
+
+### 3.3 Revisa especialmente los problemas de autorización
+
+Actualmente algunas acciones muestran errores equivalentes a:
+
+> "No tienes permisos para realizar esta acción."
+
+Esto debe investigarse desde la raíz.
+
+No quiero simplemente eliminar la comprobación de permisos.
+
+Determina:
+
+* qué usuario está autenticado;
+* qué rol tiene;
+* cómo se obtiene el rol;
+* cómo se valida el rol;
+* qué permisos debería tener;
+* qué middleware interviene;
+* qué API/action rechaza la operación;
+* si existe inconsistencia entre nombres de roles;
+* si existen roles en DB;
+* si existen permisos;
+* si las relaciones entre usuario/rol están correctas.
+
+La solución debe mantener seguridad real.
+
+---
+
+# 4. REVISAR EL SISTEMA RBAC COMPLETO
+
+El sistema debe funcionar correctamente con los roles existentes.
+
+Como mínimo debe existir correctamente:
+
+## SUPER_ADMIN
+
+Debe tener acceso completo a la plataforma administrativa.
+
+Debe poder:
+
+* gestionar solicitudes;
+* aceptar/rechazar solicitudes;
+* gestionar artistas;
+* crear y gestionar invitaciones;
+* gestionar contratos;
+* gestionar lanzamientos;
+* gestionar cuentas;
+* consultar estadísticas;
+* modificar configuraciones permitidas;
+* administrar el sistema.
+
+## ARTIST
+
+Debe tener acceso únicamente a las funciones correspondientes a un artista.
+
+Debe poder:
+
+* acceder a su dashboard;
+* administrar su perfil;
+* gestionar sus lanzamientos;
+* consultar sus analíticas;
+* consultar información relacionada con sus ingresos cuando corresponda;
+* consultar estados de sus procesos;
+* utilizar las demás herramientas que correspondan al ecosistema de artista.
+
+No debe poder acceder a funciones administrativas.
+
+---
+
+# 5. SOLICITUDES DE ARTISTAS
+
+Este flujo debe funcionar completamente.
+
+Actualmente:
+
+> Un artista puede enviar una solicitud, pero aparentemente la solicitud no llega a ningún lugar y SUPER_ADMIN no puede gestionarla.
+
+Esto debe solucionarse de extremo a extremo.
+
+## Flujo esperado
+
+ARTISTA/PÚBLICO:
+
+`/aplicar`
+
+↓
+
+Completa formulario.
+
+↓
+
+Frontend valida.
+
+↓
+
+Backend valida nuevamente.
+
+↓
+
+Solicitud se guarda en PostgreSQL/Neon.
+
+↓
+
+Estado inicial:
+
+`PENDIENTE`
+
+↓
+
+SUPER_ADMIN entra al panel.
+
+↓
+
+Accede a:
+
+`Solicitudes`
+
+↓
+
+Puede ver las solicitudes reales almacenadas en DB.
+
+↓
+
+Puede abrir el detalle.
+
+↓
+
+Puede:
+
+* aceptar;
+* rechazar;
+* revisar información;
+* cambiar estado cuando corresponda.
+
+Las acciones deben persistir realmente.
+
+Después de una acción:
+
+* DB actualizada;
+* UI actualizada;
+* estado visible correctamente;
+* historial/metadata conservado cuando corresponda.
+
+---
+
+# 6. INVITACIONES
+
+El sistema de invitaciones debe funcionar realmente.
+
+SUPER_ADMIN debe poder:
+
+1. Seleccionar una solicitud/artista cuando corresponda.
+2. Crear una invitación.
+3. Generar token seguro.
+4. Guardar la invitación en DB.
+5. Establecer expiración.
+6. Gestionar estado.
+7. Acceder al enlace público.
+8. Permitir al destinatario continuar el proceso.
+9. Evitar reutilización indebida del token.
+10. Registrar aceptación/rechazo.
+
+Revisar especialmente las rutas y archivos existentes relacionados con:
+
+* invitations;
+* invitacion/[token];
+* aceptar;
+* PublicContractReview;
+* contracts;
+* onboarding.
+
+No rehacer estos sistemas sin antes entender qué está implementado.
+
+---
+
+# 7. CONTRATOS
+
+Actualmente el apartado de contratos genera error.
+
+Esto tiene prioridad alta.
+
+Investiga el error real.
+
+Revisa:
+
+* schema;
+* tablas;
+* relaciones;
+* queries;
+* API;
+* tipos TypeScript;
+* server actions;
+* estados;
+* permisos;
+* componentes;
+* rutas;
+* datos existentes.
+
+No ocultes el error.
+
+Corrige la causa raíz.
+
+El SUPER_ADMIN debe poder:
+
+* ver contratos;
+* abrir un contrato;
+* crear cuando corresponda;
+* editar cuando corresponda;
+* revisar estado;
+* relacionarlo con artista/invitación;
+* gestionar el flujo correspondiente.
+
+Si existe ya lógica de revisión/aceptación pública, intégrala correctamente en lugar de duplicarla.
+
+---
+
+# 8. ARTISTAS
+
+El panel administrativo debe permitir gestionar artistas reales.
+
+SUPER_ADMIN debe poder:
+
+* listar artistas;
+* abrir perfil;
+* consultar información;
+* editar información administrativa permitida;
+* consultar estado;
+* consultar lanzamientos;
+* consultar información relevante del artista.
+
+No utilizar datos hardcodeados.
+
+Todos los datos deben venir de DB.
+
+---
+
+# 9. LANZAMIENTOS
+
+Actualmente los lanzamientos parecen existir visualmente pero no funcionan correctamente.
+
+Además, el panel ARTIST rechaza acciones de creación con errores de permisos.
+
+Esto debe solucionarse.
+
+## ARTIST debe poder
+
+Crear un lanzamiento cuando su estado/permisos lo permitan.
+
+El flujo debe incluir como mínimo:
+
+* título;
+* artista;
+* género;
+* información básica;
+* portada;
+* audio/archivos cuando la arquitectura actual lo contemple;
+* fecha;
+* colaboradores/créditos cuando corresponda;
+* estado.
+
+El lanzamiento debe guardarse realmente.
+
+Debe poder aparecer posteriormente en:
+
+* dashboard;
+* lista de lanzamientos;
+* panel administrativo;
+* perfil del artista;
+* analíticas cuando existan datos.
+
+## SUPER_ADMIN debe poder
+
+* ver lanzamientos;
+* abrir detalle;
+* revisar;
+* editar cuando corresponda;
+* cambiar estados;
+* gestionar información;
+* consultar artista asociado.
+
+No crear una segunda arquitectura de releases si ya existe una.
+
+Primero reparar la existente.
+
+---
+
+# 10. PANEL DE ARTISTA
+
+El panel de artista actual es demasiado limitado y además sus tres módulos actuales no funcionan.
+
+Actualmente existen:
+
+* Lanzamientos
+* Analíticas
+* Perfil
+
+Esto no es suficiente para el producto final.
+
+Pero en esta fase NO quiero llenar el dashboard de widgets decorativos.
+
+Primero hay que conseguir que la base funcional sea sólida.
+
+## El panel debe tener una arquitectura preparada para:
+
+* Inicio / Dashboard
+* Lanzamientos
+* Analíticas
+* Ingresos
+* Perfil
+* Solicitudes/procesos
+* Contratos
+* Mensajes/notificaciones
+* Configuración
+
+Los módulos que todavía dependan de otra fase pueden quedar preparados correctamente, pero:
+
+> NO crear datos falsos para aparentar que funcionan.
+
+---
+
+# 11. DASHBOARD DEL ARTISTA
+
+Debe mostrar información REAL.
+
+Como mínimo, cuando existan datos:
+
+* resumen de lanzamientos;
+* estados;
+* estadísticas disponibles;
+* información relevante;
+* actividad reciente.
+
+Si no existen datos todavía:
+
+Mostrar un estado vacío profesional.
+
+Ejemplo:
+
+"No hay lanzamientos todavía."
+
+No mostrar:
+
+* números inventados;
+* streams inventados;
+* ingresos inventados;
+* estadísticas ficticias.
+
+---
+
+# 12. ANALÍTICAS
+
+El módulo de analíticas debe estar conectado a una fuente de datos real.
+
+Si actualmente todavía no existe una fuente externa de streaming/distribución:
+
+No inventar estadísticas.
+
+Implementar correctamente:
+
+* estructura;
+* consultas;
+* estados vacíos;
+* filtros;
+* arquitectura preparada para datos reales.
+
+Cuando existan datos internos reales, mostrarlos.
+
+---
+
+# 13. INGRESOS
+
+Crear/terminar la estructura necesaria para que el artista pueda consultar información económica cuando existan datos reales.
+
+No inventar dinero.
+
+Debe quedar preparado para:
+
+* ingresos;
+* períodos;
+* lanzamientos;
+* distribución;
+* porcentaje del artista;
+* porcentaje de NP Music Group;
+* otros participantes cuando corresponda.
+
+Las cifras deben venir de DB o de una fuente real.
+
+---
+
+# 14. CUENTAS
+
+Actualmente no se puede acceder correctamente al apartado de cuentas.
+
+Debe revisarse completamente.
+
+SUPER_ADMIN debe poder:
+
+* acceder a cuentas;
+* ver usuarios;
+* ver roles;
+* consultar estado;
+* gestionar cuentas según permisos;
+* distinguir usuarios administrativos y artistas;
+* consultar información básica;
+* activar/desactivar cuando el modelo actual lo contemple.
+
+No romper el sistema de autenticación existente.
+
+---
+
+# 15. ESTADÍSTICAS ADMINISTRATIVAS
+
+El apartado de estadísticas debe ser funcional.
+
+Debe utilizar datos reales disponibles en DB.
+
+No inventar métricas.
+
+Como mínimo preparar la arquitectura para:
+
+* solicitudes;
+* artistas;
+* lanzamientos;
+* estados;
+* actividad;
+* ingresos;
+* otros KPIs disponibles.
+
+Si una métrica no tiene fuente de datos todavía:
+
+mostrar claramente estado vacío o "sin datos".
+
+---
+
+# 16. CONFIGURACIONES
+
+Actualmente el apartado de configuración no funciona.
+
+Debe investigarse la ruta y corregirse.
+
+Debe existir una página real de configuración.
+
+La configuración debe estar separada según el rol.
+
+SUPER_ADMIN:
+
+* configuración administrativa disponible;
+* preferencias;
+* opciones del sistema que ya estén contempladas.
+
+ARTIST:
+
+* configuración de cuenta;
+* perfil;
+* preferencias correspondientes.
+
+No permitir que un ARTIST modifique configuraciones administrativas.
+
+---
+
+# 17. NAVEGACIÓN — PROBLEMA CRÍTICO
+
+Actualmente cuando se entra a determinadas secciones:
+
+> No existe una forma correcta de volver al inicio del panel y el usuario termina obligado a cerrar sesión.
+
+Esto es inaceptable.
+
+Revisar completamente:
+
+* layouts;
+* sidebar;
+* navbar;
+* breadcrumbs;
+* rutas;
+* router;
+* redirects;
+* middleware;
+* páginas protegidas;
+* navegación móvil.
+
+Cada panel debe tener navegación persistente.
+
+## SUPER_ADMIN
+
+Debe poder navegar sin cerrar sesión entre:
+
+* Dashboard
+* Solicitudes
+* Invitaciones
+* Artistas
+* Lanzamientos
+* Contratos
+* Cuentas
+* Estadísticas
+* Configuración
+
+## ARTIST
+
+Debe poder navegar sin cerrar sesión entre sus módulos.
+
+No usar `logout` como mecanismo de navegación.
+
+No hacer redirects globales hacia `/` cuando una ruta interna falla.
+
+Si existe un error:
+
+mostrar el error correspondiente dentro del contexto de la aplicación.
+
+---
+
+# 18. REVISAR TODAS LAS REDIRECCIONES
+
+Buscar explícitamente:
+
+* redirects;
+* router.push;
+* router.replace;
+* middleware redirects;
+* auth redirects;
+* fallback redirects;
+* catch-all routes;
+* not-found behavior.
+
+Determinar por qué determinadas páginas vuelven al inicio.
+
+Una ruta protegida debe:
+
+1. comprobar sesión;
+2. comprobar rol;
+3. permitir acceso si corresponde;
+4. mostrar error 403 si no corresponde;
+5. NO enviar al usuario al home arbitrariamente.
+
+---
+
+# 19. HOMEPAGE PÚBLICA
+
+La página principal también presenta problemas.
+
+Actualmente contiene demasiadas secciones/información vacía o sin función real, como:
+
+* blog;
+* contacto;
+* otras secciones.
+
+Y algunas rutas aparentemente vuelven al inicio.
+
+En esta fase:
+
+## Auditar todas las secciones públicas.
+
+Cada sección debe ser una de estas:
+
+### A. Funcional
+
+Tiene contenido y ruta real.
+
+### B. Preparada
+
+Existe correctamente pero todavía depende de una funcionalidad futura.
+
+### C. Debe eliminarse temporalmente
+
+Si solo existe como relleno visual y no forma parte real del producto actual.
+
+No quiero más contenido ficticio para hacer que la homepage parezca más completa.
+
+La homepage debe representar lo que realmente existe.
+
+---
+
+# 20. ERRORES Y MANEJO DE EXCEPCIONES
+
+Revisar todos los errores actuales.
+
+Especialmente:
+
+* errores de DB;
+* errores de autorización;
+* errores de rutas;
+* errores de sesión;
+* errores de relaciones;
+* errores de queries;
+* errores de TypeScript;
+* errores de API;
+* errores de formularios;
+* errores de navegación.
+
+No ocultarlos con:
+
+```text
+try/catch
+```
+
+que simplemente devuelva una respuesta genérica.
+
+Los errores deben tener:
+
+* causa identificada;
+* manejo adecuado;
+* mensaje útil;
+* logging cuando corresponda;
+* respuesta correcta para frontend.
+
+---
+
+# 21. BASE DE DATOS
+
+Revisar que PostgreSQL/Neon tenga correctamente:
+
+* tablas;
+* relaciones;
+* foreign keys;
+* índices;
+* constraints;
+* estados;
+* roles;
+* permisos;
+* sesiones;
+* solicitudes;
+* invitaciones;
+* contratos;
+* artistas;
+* lanzamientos;
+* cuentas.
+
+No crear tablas duplicadas si ya existe una estructura equivalente.
+
+No modificar destructivamente la DB sin necesidad.
+
+Si hace falta una migración:
+
+crear una migración limpia y explicada.
+
+Si existe una tabla que el código espera pero no existe:
+
+identificar por qué y corregir la migración/schema correspondiente.
+
+---
+
+# 22. DATOS EXISTENTES
+
+NO eliminar los datos existentes simplemente para "hacer funcionar" el sistema.
+
+Primero determina:
+
+* qué datos existen;
+* qué relaciones tienen;
+* qué datos están incompletos;
+* qué datos son de prueba;
+* qué datos son necesarios para testing.
+
+No crear cuentas ARTIST falsas solamente para ocultar un problema de permisos.
+
+Si es necesario realizar pruebas, documentar claramente qué datos de prueba se utilizaron.
+
+---
+
+# 23. SEGURIDAD
+
+No solucionar los errores eliminando seguridad.
+
+Está PROHIBIDO:
+
+* quitar autorización;
+* permitir que cualquier usuario llame APIs administrativas;
+* ocultar botones como sustituto de permisos;
+* confiar solamente en permisos del frontend;
+* exponer información administrativa al ARTIST.
+
+La autorización debe validarse en backend.
+
+El frontend solamente debe reflejar esos permisos.
+
+---
+
+# 24. PRINCIPIO DE SOURCE OF TRUTH
+
+Para cada módulo debe existir una única fuente de verdad.
+
+Ejemplo:
+
+Solicitud:
+
+DB → API → UI
+
+No:
+
+UI → estado local → aparentemente funciona.
+
+Lo mismo para:
+
+* artistas;
+* contratos;
+* invitaciones;
+* lanzamientos;
+* usuarios;
+* estadísticas.
+
+---
+
+# 25. TESTING OBLIGATORIO
+
+Después de reparar cada módulo, probar el flujo completo.
+
+## TEST 1 — Solicitud
+
+Enviar solicitud.
+
+Verificar DB.
+
+Entrar como SUPER_ADMIN.
+
+Verificar que aparece.
+
+Abrir.
+
+Aceptar/rechazar.
+
+Verificar persistencia.
+
+---
+
+## TEST 2 — Invitación
+
+Crear invitación.
+
+Verificar token.
+
+Abrir enlace.
+
+Verificar estado.
+
+Aceptar.
+
+Verificar persistencia.
+
+---
+
+## TEST 3 — Contrato
+
+Crear/abrir contrato según flujo actual.
+
+Verificar relaciones.
+
+Abrir desde admin.
+
+Verificar que no existe error.
+
+Verificar estados.
+
+---
+
+## TEST 4 — Artista
+
+Entrar como ARTIST.
+
+Verificar dashboard.
+
+Verificar perfil.
+
+Modificar información permitida.
+
+Verificar DB.
+
+---
+
+## TEST 5 — Lanzamiento
+
+ARTIST:
+
+Crear lanzamiento.
+
+Guardar.
+
+Recargar.
+
+Verificar que sigue existiendo.
+
+SUPER_ADMIN:
+
+Abrir lanzamientos.
+
+Encontrar el lanzamiento.
+
+Abrir detalle.
+
+Verificar información.
+
+---
+
+## TEST 6 — Permisos
+
+ARTIST intenta acceder a una ruta administrativa.
+
+Debe recibir:
+
+`403 / Access Denied`
+
+o equivalente.
+
+NO debe:
+
+* ver información;
+* ejecutar acciones;
+* acceder a APIs administrativas.
+
+SUPER_ADMIN debe poder acceder a sus módulos.
+
+---
+
+## TEST 7 — Navegación
+
+Entrar en cada módulo.
+
+Volver al dashboard.
+
+Navegar a otro módulo.
+
+Volver atrás.
+
+Cerrar y abrir rutas.
+
+Verificar que nunca sea necesario cerrar sesión para continuar navegando.
+
+---
+
+# 26. MOBILE
+
+No romper la experiencia móvil existente.
+
+El panel debe funcionar correctamente en:
+
+* Android;
+* desktop.
+
+La navegación móvil debe permitir acceder a los módulos sin quedar atrapado en una página.
+
+---
+
+# 27. NO REDISEÑAR
+
+Esta fase NO es un rediseño visual.
+
+Conservar:
+
+* identidad de NP Music Group;
+* colores;
+* branding;
+* estructura visual;
+* estética;
+* componentes existentes que estén bien construidos.
+
+Solo modificar UI cuando sea necesario para:
+
+* corregir navegación;
+* mostrar estados;
+* mostrar errores;
+* permitir acciones;
+* mejorar usabilidad funcional.
+
+No introducir:
+
+* gradientes innecesarios;
+* widgets decorativos;
+* estadísticas falsas;
+* cards vacías;
+* elementos de relleno.
+
+---
+
+# 28. ORDEN DE EJECUCIÓN
+
+No intentes arreglar todo simultáneamente sin verificar dependencias.
+
+Trabaja en este orden:
+
+### BLOQUE 1
+
+Autenticación + sesiones + RBAC + permisos.
+
+### BLOQUE 2
+
+Layouts + navegación + rutas protegidas + redirects.
+
+### BLOQUE 3
+
+Base de datos + relaciones + migraciones necesarias.
+
+### BLOQUE 4
+
+Solicitudes.
+
+### BLOQUE 5
+
+Invitaciones.
+
+### BLOQUE 6
+
+Contratos.
+
+### BLOQUE 7
+
+Artistas.
+
+### BLOQUE 8
+
+Lanzamientos.
+
+### BLOQUE 9
+
+Cuentas.
+
+### BLOQUE 10
+
+Estadísticas.
+
+### BLOQUE 11
+
+Configuraciones.
+
+### BLOQUE 12
+
+Panel ARTIST.
+
+### BLOQUE 13
+
+Homepage y rutas públicas.
+
+### BLOQUE 14
+
+Testing E2E completo.
+
+---
+
+# 29. REGLA DE DEPENDENCIAS
+
+Si un bloque depende de otro, corrige primero la dependencia.
+
+Ejemplo:
+
+No intentes arreglar:
+
+`Crear lanzamiento`
+
+si antes:
+
+`ARTIST → autenticación → rol → autorización`
+
+está roto.
+
+No intentes arreglar:
+
+`Contratos`
+
+si las relaciones necesarias de DB están rotas.
+
+No intentes arreglar:
+
+`Dashboard`
+
+con datos falsos si las consultas reales están rotas.
+
+---
+
+# 30. CRITERIO DE "FUNCIONANDO"
+
+Un módulo NO se considera terminado porque:
+
+* carga;
+* tiene botones;
+* tiene una tabla;
+* no muestra errores visuales.
+
+Se considera terminado solamente cuando:
+
+**UI → API/SERVER → DB → respuesta → UI**
+
+funciona correctamente.
+
+Y además:
+
+**autenticación → autorización → operación → persistencia**
+
+funciona correctamente.
+
+---
+
+# 31. INFORME OBLIGATORIO AL FINAL
+
+Cuando termines, NO respondas simplemente:
+
+> "Done."
+
+Entrega un informe técnico con:
+
+## A. Problemas encontrados
+
+Lista de problemas reales detectados.
+
+## B. Archivos modificados
+
+Lista exacta.
+
+## C. Migraciones
+
+Indicar cuáles fueron creadas/modificadas.
+
+## D. Funcionalidades reparadas
+
+Lista por módulo.
+
+## E. Problemas que siguen bloqueados
+
+Solo si realmente existe una dependencia externa.
+
+## F. Testing realizado
+
+Indicar exactamente qué flujos fueron probados.
+
+Ejemplo:
+
+```text
+SOLICITUD
+[PASS] Crear solicitud
+[PASS] Persistencia DB
+[PASS] Visualización SUPER_ADMIN
+[PASS] Aceptación
+[PASS] Rechazo
+
+INVITACIÓN
+[PASS] Crear
+[PASS] Token
+[PASS] Acceso público
+...
+```
+
+## G. Estado final
+
+Clasificar cada módulo:
+
+* ✅ FUNCIONAL
+* ⚠️ PARCIAL
+* ❌ BLOQUEADO
+
+---
+
+# 32. CONDICIÓN FINAL
+
+NO continúes con nuevas fases del proyecto hasta que esta fase termine.
+
+El objetivo de esta fase no es agregar más cosas.
+
+El objetivo es:
+
+> **Hacer que todo lo que ya construimos realmente funcione.**
+
+NP Music Group no debe quedar como una colección de dashboards y páginas bonitas.
+
+Debe funcionar como una verdadera plataforma privada de gestión musical.
+
+Prioriza:
+
+**funcionalidad > arquitectura correcta > seguridad > persistencia > navegación > UI.**
+
+Y recuerda:
+
+**NO SIMULAR FUNCIONALIDAD.**
+
+Si algo parece funcionar pero no persiste, no funciona.
+
+Si un botón existe pero no ejecuta una operación real, no funciona.
+
+Si una página existe pero no se puede navegar correctamente hacia/desde ella, no funciona.
+
+Si una función solamente funciona eliminando los permisos, no está correctamente implementada.
+
+Si una estadística no tiene datos reales, debe mostrar estado vacío, no inventar información.
+
+Primero audita.
+
+Después corrige las dependencias fundamentales.
+
+Después implementa.
+
+Después prueba.
+
+Y solamente cuando el sistema completo supere las pruebas E2E, considera esta fase terminada.
