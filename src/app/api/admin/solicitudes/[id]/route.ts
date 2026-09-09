@@ -80,7 +80,7 @@ export async function PATCH(
     const updated = (
       await query<SolicitudRow>(
         `UPDATE solicitudes
-         SET estado = $1, updated_at = NOW()
+         SET estado = $1
          WHERE id = $2 AND estado = $3
          RETURNING id, nombre_artistico, email, pais, genero_principal,
                    enlace_principal, instagram, tiktok, mensaje, estado, created_at`,
@@ -108,7 +108,7 @@ export async function PATCH(
       entityType: "solicitud",
       entityId: id,
       metadata: {
-        previousStatus: "PENDIENTE",
+        previousStatus: current.estado,
         nextStatus,
         nombreArtistico: current.nombre_artistico,
         email: current.email,

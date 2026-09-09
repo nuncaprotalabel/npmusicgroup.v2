@@ -52,7 +52,7 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
   const load = useCallback(async () => {
     setError(null);
     const result = await getSolicitudes();
-    if (result.error) setError(copy.errors.load);
+    if (result.error) setError(result.error || copy.errors.load);
     else setSolicitudes(result.solicitudes ?? []);
   }, [copy.errors.load]);
 
@@ -75,7 +75,7 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
     const result = await updateSolicitudStatus(solicitud.id, estado);
     setBusyId(null);
     if (result.error) {
-      setError(copy.errors.update);
+      setError(result.error || copy.errors.update);
       return;
     }
     setSelected(null);
@@ -88,7 +88,7 @@ export function SolicitudesAdminView({ canManage }: { canManage: boolean }) {
     const result = await createInvitationForSolicitud(solicitud.id);
     setBusyId(null);
     if (result.error) {
-      setError(copy.errors.invitation);
+      setError(result.error || copy.errors.invitation);
       return;
     }
     setInvitationLink(result);

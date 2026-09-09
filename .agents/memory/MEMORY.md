@@ -9,3 +9,4 @@
 - [Releases RBAC readiness](releases-rbac.md) — Admin release routes are guarded, but the development database needs the releases schema before that module can be enabled.
 - [Contract schema source](contract-schema.md) — Contract email values derive from the related application; they are not stored on `contracts`.
 - [Private panel language boundary](private-panel-language.md) — Client-side language context cannot update Server Component page copy without a client-rendered shell.
+- [Solicitudes schema](solicitudes-schema.md) — The solicitudes table has no updated_at column; status updates must only write estado.
