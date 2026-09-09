@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, Loader2, Menu, ShieldCheck, X } from "lucide-react";
 import { logout } from "@/services/authService";
 import { NAV_ITEMS } from "./NpControlSidebar";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface NpControlHeaderProps {
   username: string;
@@ -18,6 +19,14 @@ export function NpControlHeader({ username }: NpControlHeaderProps) {
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const labels = {
+    "/np-control": t.dashboard.modules.central,
+    "/np-control/usuarios": t.dashboard.modules.users,
+    "/np-control/permisos": t.dashboard.modules.permissions,
+    "/np-control/auditoria": t.dashboard.modules.activity,
+    "/np-control/config": t.dashboard.modules.settings,
+  };
 
   async function handleLogout() {
     setBusy(true);
@@ -36,14 +45,14 @@ export function NpControlHeader({ username }: NpControlHeaderProps) {
           type="button"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-[#737373] transition-colors hover:bg-[#141414] hover:text-white lg:hidden"
           onClick={() => setMenuOpen((open) => !open)}
-          aria-label={menuOpen ? "Cerrar navegación" : "Abrir navegación"}
+          aria-label={menuOpen ? t.dashboard.header.closeNavigation : t.dashboard.header.openNavigation}
           aria-expanded={menuOpen}
         >
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
         <ShieldCheck size={14} strokeWidth={1.75} style={{ color: "#F5C518" }} />
         <span className="text-[0.8125rem] font-semibold text-white">
-          NP Control
+          {t.dashboard.modules.npControl}
         </span>
         <span style={{ color: "#333333" }} className="text-[0.8125rem]">
           /
@@ -83,14 +92,14 @@ export function NpControlHeader({ username }: NpControlHeaderProps) {
             ? <Loader2 size={12} className="animate-spin" />
             : <LogOut  size={12} strokeWidth={1.75} />
           }
-          {busy ? "Saliendo…" : "Cerrar sesión"}
+          {busy ? t.dashboard.header.loggingOut : t.dashboard.header.logout}
         </button>
       </div>
 
       {menuOpen && (
         <nav
           className="absolute left-0 right-0 top-full z-50 border-b border-[#1E1E1E] bg-[#080808] p-2 shadow-2xl lg:hidden"
-          aria-label="Navegación NP Control"
+           aria-label={t.dashboard.header.openNavigation}
         >
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = href === "/np-control"
@@ -108,7 +117,7 @@ export function NpControlHeader({ username }: NpControlHeaderProps) {
                 }}
               >
                 <Icon size={15} strokeWidth={1.75} />
-                {label}
+                {labels[href]}
               </Link>
             );
           })}

@@ -7,6 +7,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { X, ChevronRight } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -24,6 +25,19 @@ export function DashboardMobileSidebar({ role, open, onClose }: Props) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const navGroups = getNavigationGroups(t, role);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) onClose();
+  }, [pathname, open, onClose]);
 
   if (!open) return null;
 

@@ -81,10 +81,10 @@ export async function PATCH(
       await query<SolicitudRow>(
         `UPDATE solicitudes
          SET estado = $1, updated_at = NOW()
-         WHERE id = $2 AND estado = 'PENDIENTE'
+         WHERE id = $2 AND estado = $3
          RETURNING id, nombre_artistico, email, pais, genero_principal,
                    enlace_principal, instagram, tiktok, mensaje, estado, created_at`,
-        [nextStatus, id],
+        [nextStatus, id, current.estado],
       )
     )[0];
 

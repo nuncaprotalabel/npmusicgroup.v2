@@ -77,7 +77,7 @@ export function DashboardHeader({ username, role, onMenuToggle }: DashboardHeade
 
   const moduleName = getCurrentModule(pathname, t.dashboard.modules);
   const initials   = getInitials(username);
-  const roleLabel  = ROLE_LABELS[role] ?? role;
+  const roleLabel  = t.adminArtists.roles[role] ?? ROLE_LABELS[role] ?? role;
 
   async function handleLogout() {
     setBusy(true);
@@ -99,7 +99,7 @@ export function DashboardHeader({ username, role, onMenuToggle }: DashboardHeade
           onMouseEnter={e => (e.currentTarget.style.color = "#FFFFFF")}
           onMouseLeave={e => (e.currentTarget.style.color = "#737373")}
           onClick={onMenuToggle}
-          aria-label="Abrir navegación"
+          aria-label={t.dashboard.header.openNavigation}
         >
           <Menu size={18} />
         </button>

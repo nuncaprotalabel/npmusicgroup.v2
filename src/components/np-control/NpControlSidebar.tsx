@@ -15,6 +15,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export const NAV_ITEMS = [
   { href: "/np-control",          label: "Central",    icon: LayoutDashboard },
@@ -26,6 +27,14 @@ export const NAV_ITEMS = [
 
 export function NpControlSidebar() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const labels = {
+    "/np-control": t.dashboard.modules.central,
+    "/np-control/usuarios": t.dashboard.modules.users,
+    "/np-control/permisos": t.dashboard.modules.permissions,
+    "/np-control/auditoria": t.dashboard.modules.activity,
+    "/np-control/config": t.dashboard.modules.settings,
+  };
 
   return (
     <aside
@@ -49,8 +58,8 @@ export function NpControlSidebar() {
           <p className="text-[0.75rem] font-bold text-white leading-none">
             NP Control
           </p>
-          <p className="text-[0.65rem] mt-0.5" style={{ color: "#525252" }}>
-            Panel administrativo
+        <p className="text-[0.65rem] mt-0.5" style={{ color: "#525252" }}>
+            {t.dashboard.modules.npControl}
           </p>
         </div>
       </div>
@@ -87,7 +96,7 @@ export function NpControlSidebar() {
                 strokeWidth={1.75}
                 style={{ color: isActive ? "#000000" : "currentColor" }}
               />
-              {label}
+              {labels[href]}
             </Link>
           );
         })}

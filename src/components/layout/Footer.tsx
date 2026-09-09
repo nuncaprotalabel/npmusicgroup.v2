@@ -90,19 +90,6 @@ export function Footer() {
             <p className="text-sm text-[#666] leading-[1.7] max-w-xs">
               {t.footer.description}
             </p>
-            <div className="flex items-center gap-2.5 mt-6">
-              {socialLinks.map(({ label, href, icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#1A1A1A] text-[#555] hover:text-[#F5C518] hover:border-[#F5C518]/25 hover:bg-[#F5C518]/6 transition-all duration-200"
-                  style={{ '--tw-shadow': 'none' } as React.CSSProperties}
-                >
-                  {icon}
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Links Columns */}

@@ -1,0 +1,806 @@
+# FASE 2.12.2 — ESTABILIZACIÓN INTEGRAL DEL PANEL PRIVADO
+
+## OBJETIVO
+
+Corregir de forma definitiva la navegación, el funcionamiento de Solicitudes, la navegación BACK/FORWARD y la traducción completa del panel privado.
+
+El panel privado debe funcionar como una aplicación moderna:
+
+CLICK → NAVEGACIÓN → CONTENIDO CORRECTO
+
+sin necesidad de actualizar manualmente la página.
+
+Esta fase tiene prioridad sobre cualquier nueva funcionalidad.
+
+NO iniciar Fase 2.13.
+
+NO continuar todavía con la validación E2E de ARTIST.
+
+NO reconstruir el proyecto.
+
+NO cambiar la arquitectura general.
+
+NO instalar dependencias nuevas salvo que sea absolutamente imprescindible.
+
+NO utilizar `window.location.reload()` como solución a problemas de navegación.
+
+NO crear datos ficticios permanentes.
+
+---
+
+# PARTE A — NAVEGACIÓN DEL PANEL PRIVADO
+
+## PROBLEMA ACTUAL
+
+Actualmente algunos apartados del panel privado solo muestran correctamente su contenido después de actualizar manualmente la página.
+
+Ejemplo:
+
+1. Entrar al panel.
+2. Hacer click en "Artistas".
+3. La navegación no carga correctamente.
+4. Al actualizar la página, "Artistas" aparece correctamente.
+
+Esto ocurre también en otros apartados.
+
+DEBE CORREGIRSE LA CAUSA REAL.
+
+---
+
+## 1. AUDITORÍA ESPECÍFICA DE NAVEGACIÓN
+
+Inspeccionar únicamente:
+
+* layouts privados;
+* sidebar desktop;
+* sidebar/mobile;
+* header;
+* navegación del dashboard;
+* navegación de `/admin`;
+* navegación de `/np-control`;
+* componentes de navegación;
+* rutas privadas;
+* providers;
+* contexto de idioma;
+* cualquier lógica que controle pathname/active route;
+* handlers de click;
+* `Link`;
+* `router.push`;
+* `router.replace`;
+* `router.back`;
+* estados de loading;
+* efectos que dependan de `pathname`.
+
+Determinar por qué una navegación mediante click no provoca correctamente el render del destino.
+
+Buscar específicamente:
+
+* navegación manual incorrecta;
+* `router.push()` mal utilizado;
+* `preventDefault()` bloqueando enlaces;
+* overlays invisibles capturando clicks;
+* elementos con `pointer-events`;
+* botones dentro de enlaces;
+* estados locales que no se actualizan después del cambio de ruta;
+* componentes que dependen incorrectamente de `window.location`;
+* providers que mantienen estado obsoleto;
+* problemas de layout anidado;
+* problemas con Server Components / Client Components;
+* rutas que necesitan refresh para ejecutar correctamente;
+* redirects incorrectos;
+* links apuntando a rutas antiguas;
+* componentes reutilizados con estado stale;
+* condiciones basadas en pathname que no reaccionan a navegación client-side.
+
+NO modificar archivos que no estén relacionados con este problema.
+
+---
+
+# 2. REGLA DE NAVEGACIÓN
+
+Todos los apartados existentes del panel privado deben poder abrirse con UN SOLO CLICK.
+
+Como mínimo verificar:
+
+* Dashboard / Central
+* Solicitudes
+* Invitaciones
+* Contratos
+* Artistas
+* Lanzamientos
+* Cuentas
+* Analíticas
+* Ingresos
+* Recursos
+* NP Control
+* Usuarios
+* Permisos
+* Auditoría
+* Configuración
+
+Usar la navegación nativa correcta del framework existente.
+
+Cuando corresponda:
+
+* `<Link>`
+* router existente
+* navegación server/client apropiada
+
+No utilizar refresh completo como mecanismo normal de navegación.
+
+---
+
+# 3. ACTIVE STATE
+
+Al navegar:
+
+* el elemento seleccionado debe marcarse inmediatamente;
+* el sidebar debe reflejar la ruta actual;
+* no debe ser necesario actualizar la página;
+* el estado no debe quedarse en la sección anterior.
+
+Verificar rutas anidadas.
+
+Ejemplo:
+
+`/admin/lanzamientos/123`
+
+debe seguir identificándose como parte de Lanzamientos.
+
+---
+
+# PARTE B — BOTÓN VOLVER ATRÁS
+
+## PROBLEMA ACTUAL
+
+El botón de volver atrás frecuentemente no funciona correctamente y requiere actualizar la página.
+
+Debe comportarse como navegación real.
+
+---
+
+## 4. REVISAR TODAS LAS IMPLEMENTACIONES DE BACK
+
+Buscar botones:
+
+* Volver
+* Atrás
+* Back
+* ←
+* iconos equivalentes
+
+Determinar cuáles usan:
+
+* `router.back()`
+* `router.push()`
+* `window.history.back()`
+* links manuales
+
+Corregirlos según el contexto.
+
+---
+
+## 5. COMPORTAMIENTO ESPERADO
+
+Si existe historial válido dentro del panel:
+
+BACK → página anterior real.
+
+Si no existe historial válido:
+
+BACK → ruta padre lógica.
+
+Ejemplos:
+
+`/admin/lanzamientos/123`
+→ `/admin/lanzamientos`
+
+`/admin/solicitudes/123`
+→ `/admin/solicitudes`
+
+`/admin/artistas/123`
+→ `/admin/artistas`
+
+No depender de un refresh.
+
+No crear loops de navegación.
+
+No enviar al usuario accidentalmente al sitio público.
+
+---
+
+# PARTE C — SOLICITUDES: FUNCIONAMIENTO REAL
+
+## PROBLEMA ACTUAL
+
+Las solicitudes provenientes de `/aplicar` ahora sí llegan correctamente.
+
+Pero el panel administrativo no permite completar el flujo:
+
+SOLICITUD → APROBACIÓN/RECHAZO → INVITACIÓN
+
+Esto debe quedar funcional.
+
+---
+
+# 6. INSPECCIONAR EL MODELO EXISTENTE
+
+Reutilizar:
+
+* `solicitudes`
+* `invitations`
+* `contracts`
+* `audit_log`
+* RBAC existente
+* servicios existentes
+* autorización existente
+
+NO crear una segunda tabla de solicitudes.
+
+NO crear otro sistema paralelo de invitaciones.
+
+NO duplicar lógica existente.
+
+---
+
+# 7. MEJORAR `/admin/solicitudes`
+
+Convertir la sección en un workspace administrativo real y limpio.
+
+Debe mostrar información real proveniente de PostgreSQL.
+
+Como mínimo:
+
+* nombre artístico;
+* email;
+* país;
+* género;
+* enlace principal;
+* Instagram;
+* TikTok;
+* mensaje/presentación;
+* estado;
+* fecha de solicitud.
+
+Estados existentes deben respetarse.
+
+NO inventar nuevos estados sin necesidad.
+
+---
+
+# 8. DETALLE DE SOLICITUD
+
+Al seleccionar una solicitud debe poder abrirse su detalle con un solo click.
+
+El detalle debe presentar la información de forma clara y profesional.
+
+Evitar llenar la interfaz de tarjetas decorativas.
+
+Priorizar:
+
+* jerarquía;
+* legibilidad;
+* acciones claras;
+* estado;
+* información relevante.
+
+---
+
+# 9. APROBAR SOLICITUD
+
+Implementar o reparar la acción administrativa existente para:
+
+`PENDIENTE → APROBADA`
+
+Debe:
+
+* validar sesión;
+* validar permiso/RBAC;
+* validar estado actual;
+* actualizar PostgreSQL;
+* impedir doble aprobación;
+* registrar auditoría;
+* devolver resultado real al frontend;
+* actualizar la interfaz inmediatamente sin refresh.
+
+No confiar en el estado enviado desde frontend.
+
+La transición debe validarse server-side.
+
+---
+
+# 10. RECHAZAR SOLICITUD
+
+Implementar o reparar:
+
+`PENDIENTE → RECHAZADA`
+
+Debe:
+
+* validar sesión;
+* validar permiso;
+* validar estado;
+* actualizar PostgreSQL;
+* impedir operaciones inválidas;
+* registrar auditoría;
+* actualizar UI inmediatamente.
+
+Si el modelo existente contempla motivo de rechazo, reutilizarlo.
+
+NO crear campos nuevos innecesarios.
+
+---
+
+# 11. INVITACIÓN DESDE SOLICITUD APROBADA
+
+Después de aprobar una solicitud, debe ser posible continuar con el flujo existente:
+
+SOLICITUD APROBADA
+→ CREAR INVITACIÓN
+→ INVITACIÓN PENDIENTE
+→ CONTRATO
+→ FIRMA
+→ ONBOARDING
+
+La acción de crear invitación debe utilizar el sistema existente de invitations.
+
+NO crear tokens manualmente desde frontend.
+
+NO mostrar tokens sensibles innecesariamente.
+
+La creación debe ser server-side.
+
+Debe impedirse crear invitaciones duplicadas cuando exista una invitación válida pendiente, según las reglas actuales.
+
+Registrar auditoría utilizando el sistema existente.
+
+---
+
+# 12. EXPERIENCIA DE SOLICITUDES
+
+Después de:
+
+* aprobar;
+* rechazar;
+* crear invitación;
+
+la UI debe actualizarse inmediatamente.
+
+NO:
+
+* refresh manual;
+* `window.location.reload()`;
+* pedir al usuario que vuelva a entrar;
+* mostrar información antigua.
+
+Utilizar actualización de estado/revalidación apropiada al framework existente.
+
+---
+
+# 13. ESTADOS VISUALES
+
+La sección debe tener estados claros:
+
+* loading;
+* vacío;
+* error;
+* éxito;
+* acción en progreso.
+
+Los botones deben:
+
+* deshabilitarse mientras se procesa;
+* evitar doble click;
+* mostrar feedback;
+* recuperar correctamente después de un error.
+
+---
+
+# PARTE D — DISEÑO DE SOLICITUDES
+
+## 14. REDISEÑO FUNCIONAL, NO DECORATIVO
+
+Mejorar la interfaz existente de Solicitudes manteniendo el lenguaje visual de NP Music Group:
+
+* negro;
+* blanco;
+* amarillo como identidad/acción;
+* rojo para estados de peligro/error;
+* premium;
+* limpio;
+* moderno;
+* editorial;
+* mucho espacio;
+* excelente experiencia Android.
+
+NO convertirlo en una interfaz gamer.
+
+NO agregar widgets innecesarios.
+
+NO agregar estadísticas falsas.
+
+NO agregar información que no exista en PostgreSQL.
+
+---
+
+# 15. LISTADO
+
+El listado debe permitir entender rápidamente:
+
+* quién solicitó;
+* cuándo;
+* género;
+* estado;
+* qué acción puede realizar el administrador.
+
+Las acciones deben ser evidentes.
+
+Evitar botones ambiguos.
+
+---
+
+# 16. RESPONSIVE
+
+Probar especialmente:
+
+Desktop:
+
+* sidebar;
+* listado;
+* detalle;
+* acciones.
+
+Mobile:
+
+* navegación;
+* listado;
+* detalle;
+* botones;
+* modales/diálogos;
+* aprobación/rechazo;
+* creación de invitación.
+
+No permitir overflow horizontal innecesario.
+
+---
+
+# PARTE E — TRADUCCIÓN COMPLETA DEL PANEL PRIVADO
+
+## PROBLEMA ACTUAL
+
+El selector ES/EN traduce solamente una parte del panel.
+
+Hay múltiples textos que permanecen en el idioma original.
+
+Esto debe corregirse.
+
+---
+
+# 17. REGLA PRINCIPAL
+
+Cuando el usuario cambia:
+
+ES ↔ EN
+
+TODO EL PANEL PRIVADO debe cambiar de idioma.
+
+No solamente el sidebar.
+
+No solamente headers.
+
+No solamente botones.
+
+TODO.
+
+---
+
+# 18. AUDITORÍA DE TEXTOS
+
+Buscar texto visible hardcodeado dentro de las áreas privadas.
+
+Revisar:
+
+* dashboard;
+* sidebar;
+* mobile sidebar;
+* header;
+* solicitudes;
+* invitaciones;
+* contratos;
+* artistas;
+* lanzamientos;
+* tracks;
+* cuentas;
+* analíticas;
+* ingresos;
+* recursos;
+* NP Control;
+* usuarios;
+* permisos;
+* auditoría;
+* configuración;
+* formularios;
+* botones;
+* tooltips;
+* modales;
+* dialogs;
+* mensajes de error;
+* mensajes de éxito;
+* estados;
+* tablas;
+* filtros;
+* placeholders;
+* empty states;
+* loading;
+* validaciones;
+* confirmaciones;
+* breadcrumbs;
+* navegación;
+* botones Back;
+* paginación si existe.
+
+---
+
+# 19. SISTEMA DE TRADUCCIÓN
+
+Reutilizar el sistema i18n existente.
+
+NO crear otro traductor.
+
+NO duplicar contextos.
+
+NO hacer traducción automática externa.
+
+NO utilizar Google Translate.
+
+Los textos deben venir del sistema ES/EN existente.
+
+Si faltan claves:
+
+* agregarlas a `src/i18n/translations.ts`;
+* mantener estructura consistente;
+* asegurar que ambos idiomas tengan las mismas claves.
+
+---
+
+# 20. PROHIBIDO
+
+No dejar:
+
+* `Solicitudes` en español mientras el resto está en inglés;
+* mensajes de error en español dentro del modo EN;
+* botones en español dentro del modo EN;
+* títulos en inglés dentro del modo ES;
+* textos hardcodeados que no reaccionan al cambio de idioma.
+
+La comprobación debe hacerse cambiando el idioma con la página ya abierta.
+
+No depender de refresh para traducir.
+
+---
+
+# 21. PERSISTENCIA
+
+Mantener el comportamiento existente:
+
+* localStorage;
+* cookie;
+* server-side initial language;
+
+según la implementación actual.
+
+No romper SSR/hydration.
+
+Al cambiar idioma:
+
+* UI actualizada inmediatamente;
+* navegación posterior conserva idioma;
+* refresh conserva idioma;
+* rutas privadas conservan idioma.
+
+---
+
+# PARTE F — VALIDACIÓN INTEGRAL
+
+Después de implementar los cambios probar SIN REFRESH MANUAL.
+
+## Navegación
+
+Desde el panel:
+
+1. Central
+2. Solicitudes
+3. Artistas
+4. Lanzamientos
+5. Contratos
+6. Invitaciones
+7. Cuentas
+8. NP Control
+9. Volver
+10. Adelante
+
+Cada navegación debe funcionar con un solo click.
+
+---
+
+## Solicitudes
+
+Probar:
+
+1. solicitud existente;
+2. abrir detalle;
+3. aprobar;
+4. comprobar actualización inmediata;
+5. crear invitación;
+6. comprobar actualización inmediata;
+7. volver;
+8. entrar nuevamente;
+9. comprobar persistencia.
+
+Si existen solicitudes aptas para rechazo:
+
+10. rechazar;
+11. comprobar actualización inmediata.
+
+---
+
+## Idioma
+
+Probar desde una misma página:
+
+ES → EN
+
+Comprobar que TODO el contenido visible cambia.
+
+Después:
+
+EN → ES
+
+Comprobar nuevamente.
+
+No actualizar la página.
+
+---
+
+# SEGURIDAD
+
+Mantener todas las protecciones actuales.
+
+Las acciones administrativas deben verificar server-side:
+
+* sesión;
+* usuario;
+* rol;
+* permission;
+* estado actual;
+* ownership/relación correspondiente.
+
+Frontend hiding NO es autorización.
+
+No aceptar simplemente:
+
+`approved=true`
+
+desde el frontend sin validación server-side.
+
+---
+
+# NO TOCAR
+
+No modificar en esta fase:
+
+* distribución;
+* DSP;
+* almacenamiento de audio;
+* procesamiento de audio;
+* royalties;
+* splits;
+* pagos;
+* analytics reales;
+* messaging;
+* nueva arquitectura de contratos;
+* sistema de autenticación salvo bugs directamente relacionados;
+* modelo legal.
+
+No iniciar Fase 2.13.
+
+---
+
+# VERIFICACIÓN TÉCNICA
+
+Ejecutar:
+
+npx tsc --noEmit
+
+git diff --check
+
+npm run build
+
+Además:
+
+* probar navegación client-side;
+* probar Back;
+* probar solicitudes;
+* probar aprobación;
+* probar rechazo;
+* probar invitación;
+* probar ES/EN;
+* comprobar ausencia de errores 500;
+* comprobar consola del navegador;
+* comprobar que no existan hydration errors;
+* comprobar que no existan errores JS al navegar entre rutas.
+
+IMPORTANTE:
+
+No considerar la prueba exitosa simplemente porque cada URL funciona después de un refresh.
+
+La prueba debe realizarse mediante navegación real con clicks.
+
+---
+
+# REPORTE FINAL
+
+Entregar:
+
+## 1. Navegación
+
+* causa raíz encontrada;
+* archivos modificados;
+* solución aplicada;
+* rutas verificadas.
+
+## 2. Back
+
+* implementación anterior;
+* corrección;
+* rutas verificadas.
+
+## 3. Solicitudes
+
+* estado anterior;
+* APIs existentes/reparadas/creadas;
+* aprobación;
+* rechazo;
+* invitaciones;
+* auditoría;
+* actualización inmediata de UI.
+
+## 4. Diseño
+
+* cambios realizados;
+* responsive.
+
+## 5. Traducción
+
+* áreas auditadas;
+* nuevas claves;
+* componentes corregidos;
+* ES/EN verificado sin refresh.
+
+## 6. Seguridad
+
+* permisos;
+* validaciones server-side.
+
+## 7. Verificación
+
+* TypeScript;
+* build;
+* diff check;
+* navegación sin refresh;
+* errores de consola;
+* errores 500.
+
+## 8. Datos
+
+Confirmar que NO se crearon datos ficticios permanentes.
+
+## 9. Estado final
+
+Debe ser uno de:
+
+* ESTABLE
+* ESTABLE CON OBSERVACIONES
+* BLOQUEADO
+
+NO iniciar Fase 2.13.

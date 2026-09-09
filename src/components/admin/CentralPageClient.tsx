@@ -10,45 +10,28 @@ interface CentralPageClientProps {
   role: UserRole;
 }
 
-const MODULES = [
-  { key: "artists" as const, href: "/admin/artistas", icon: Users },
-  { key: "releases" as const, href: "/admin/lanzamientos", icon: Send },
-  { key: "contracts" as const, href: "/admin/contratos", icon: FileText },
-  { key: "revenue" as const, href: "/admin/ingresos", icon: DollarSign },
-  { key: "analytics" as const, href: "/admin/analiticas", icon: BarChart2 },
-  { key: "messaging" as const, href: "/admin/mensajes", icon: MessageSquare },
+const ADMIN_MODULES = [
+  { key: "artists" as const, href: "/admin/artistas", icon: Users, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] as UserRole[] },
+  { key: "releases" as const, href: "/admin/lanzamientos", icon: Send, roles: ["SUPER_ADMIN", "ADMIN", "DISTRIBUTION_MANAGER", "MANAGER"] as UserRole[] },
+  { key: "contracts" as const, href: "/admin/contratos", icon: FileText, roles: ["SUPER_ADMIN", "ADMIN", "MANAGER"] as UserRole[] },
+  { key: "revenue" as const, href: "/admin/ingresos", icon: DollarSign, roles: ["SUPER_ADMIN", "ADMIN"] as UserRole[] },
+  { key: "analytics" as const, href: "/admin/analiticas", icon: BarChart2, roles: ["SUPER_ADMIN", "ADMIN"] as UserRole[] },
+  { key: "messaging" as const, href: "/admin/mensajes", icon: MessageSquare, roles: ["SUPER_ADMIN", "ADMIN"] as UserRole[] },
 ];
 
-const MODULE_DESCRIPTIONS = {
-  artists: {
-    es: "Gestión de artistas y perfiles",
-    en: "Artist and profile management",
-  },
-  releases: {
-    es: "Publicaciones y lanzamientos",
-    en: "Releases and publications",
-  },
-  contracts: {
-    es: "Contratos y acuerdos digitales",
-    en: "Contracts and digital agreements",
-  },
-  revenue: {
-    es: "Ingresos y distribución de royalties",
-    en: "Income and royalty distribution",
-  },
-  analytics: {
-    es: "Estadísticas y métricas",
-    en: "Statistics and metrics",
-  },
-  messaging: {
-    es: "Comunicación interna",
-    en: "Internal communication",
-  },
-} as const;
+const ARTIST_MODULES = [
+  { key: "profile" as const, href: "/dashboard/perfil", icon: Users },
+  { key: "releases" as const, href: "/dashboard/releases", icon: Send },
+  { key: "analytics" as const, href: "/dashboard/analiticas", icon: BarChart2 },
+  { key: "revenue" as const, href: "/dashboard/ingresos", icon: DollarSign },
+];
 
 export function CentralPageClient({ username, role }: CentralPageClientProps) {
   const { t, language } = useTranslation();
   const initials = username.slice(0, 2).toUpperCase();
+  const modules = role === "ARTIST"
+    ? ARTIST_MODULES
+    : ADMIN_MODULES.filter((module) => module.roles.includes(role));
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -92,7 +75,7 @@ export function CentralPageClient({ username, role }: CentralPageClientProps) {
           {language === "es" ? "Módulos disponibles" : "Available modules"}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {MODULES.map(({ key, href, icon: Icon }) => (
+          {modules.map(({ key, href, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -105,7 +88,7 @@ export function CentralPageClient({ username, role }: CentralPageClientProps) {
                   {t.dashboard.modules[key]}
                 </span>
                 <span className="block text-xs mt-0.5" style={{ color: "#525252" }}>
-                  {MODULE_DESCRIPTIONS[key][language]}
+                  {t.dashboard.modulePage.description}
                 </span>
               </span>
             </Link>
