@@ -24,7 +24,7 @@ export function PublicInfoPage({
   const { language } = useTranslation();
   const isEs = language === "es";
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-white sm:px-10 lg:px-16">
+    <main className="upsi-info-page min-h-screen bg-black px-6 py-10 text-white sm:px-10 lg:px-16">
       <div className="mx-auto max-w-4xl">
         <Link href="/" className="mb-16 inline-flex items-center gap-2 text-sm text-[#737373] transition-colors hover:text-[#9B5CFF]">
           <ArrowLeft size={15} /> {isEs ? "Volver al inicio" : "Back to home"}

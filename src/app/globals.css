@@ -422,8 +422,8 @@
 }
 
 html { scroll-behavior: smooth; }
-::selection { background: #a66aff; color: #09060f; }
-:focus-visible { outline: 2px solid #b382ff; outline-offset: 3px; }
+.upsi-site ::selection, .upsi-application ::selection, .upsi-info-page ::selection { background: #a66aff; color: #09060f; }
+.upsi-site :focus-visible, .upsi-application :focus-visible, .upsi-info-page :focus-visible { outline: 2px solid #b382ff; outline-offset: 3px; }
 .upsi-site { color: #f7f5fb; background: var(--upsi-bg); overflow: clip; }
 .upsi-site [id] { scroll-margin-top: 92px; }
 .upsi-container { width: min(100% - 2.5rem, 1200px); margin-inline: auto; }
@@ -711,5 +711,5 @@ html { scroll-behavior: smooth; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+  .upsi-site *, .upsi-site *::before, .upsi-site *::after, .upsi-application *, .upsi-application *::before, .upsi-application *::after, .upsi-info-page *, .upsi-info-page *::before, .upsi-info-page *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }

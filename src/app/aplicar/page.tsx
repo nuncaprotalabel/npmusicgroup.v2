@@ -121,7 +121,7 @@ export default function AplicarPage() {
 
   if (success) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "#000" }}>
+      <main className="upsi-application min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "#000" }}>
         <section className="w-full max-w-[460px] rounded-2xl p-8 sm:p-10 text-center" style={{ background: "#0A0A0A", border: "1px solid #1E1E1E", boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "rgba(155,92,255,0.10)", border: "1px solid rgba(155,92,255,0.20)" }}>
             <CheckCircle2 size={30} style={{ color: "#9B5CFF" }} />
@@ -137,7 +137,7 @@ export default function AplicarPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start px-4 py-12" style={{ background: "#000" }}>
+    <main className="upsi-application min-h-screen flex flex-col items-center justify-start px-4 py-12" style={{ background: "#000" }}>
       <section className="w-full max-w-[580px] rounded-2xl p-6 sm:p-8" style={{ background: "#0A0A0A", border: "1px solid #1E1E1E", boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
         <header className="flex flex-col items-center mb-8">
           <div className="relative w-11 h-11 mb-4"><Image src="/upsi-mark.webp" alt="UPSI" fill className="object-contain" priority /></div>
