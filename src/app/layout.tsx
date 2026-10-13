@@ -12,34 +12,34 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "NP Music Group — Plataforma para artistas independientes",
+  title: "UPSI — Distribución musical global",
   description:
-    "Organiza tu proyecto musical con una plataforma profesional diseñada para artistas independientes.",
+    "UPSI conecta proyectos musicales con plataformas de streaming mediante un proceso de acceso y revisión.",
   keywords: [
     "distribución musical",
     "artistas independientes",
     "música digital",
     "streaming",
     "royalties",
-    "NP Music Group",
+    "UPSI",
   ],
-  authors: [{ name: "NP Music Group" }],
+  authors: [{ name: "UPSI" }],
   openGraph: {
-    title: "NP Music Group — Tu música. Tu carrera. Tu negocio.",
+    title: "UPSI — Tu música, sin límites.",
     description:
-      "Un espacio profesional para organizar proyectos musicales independientes.",
+      "Distribución musical digital para artistas y proyectos independientes.",
     type: "website",
     locale: "es_ES",
-    siteName: "NP Music Group",
+    siteName: "UPSI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NP Music Group",
-    description: "Un espacio profesional para proyectos musicales independientes.",
+    title: "UPSI",
+    description: "Distribución musical digital para artistas y proyectos independientes.",
   },
   icons: {
-    icon: "/logo-transparent.png",
-    apple: "/logo-transparent.png",
+    icon: "/upsi-mark.webp",
+    apple: "/upsi-touch-icon.png",
   },
   robots: {
     index: true,
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000",
+  themeColor: "#07060A",
 };
 
 export default async function RootLayout({

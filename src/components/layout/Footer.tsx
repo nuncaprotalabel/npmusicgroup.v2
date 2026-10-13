@@ -1,150 +1,40 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useInView } from "@/hooks/useInView";
-
-const socialLinks: Array<{ label: string; href: string; icon: React.ReactNode }> = [];
-/*
-  {
-    label: "Instagram",
-    href: "#",
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-      </svg>
-    ),
-  },
-  {
-    label: "YouTube",
-    href: "#",
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
-        <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
-      </svg>
-    ),
-  },
-  {
-    label: "TikTok",
-    href: "#",
-    icon: (
-      <svg width="14" height="15" viewBox="0 0 24 27" fill="currentColor" aria-hidden="true">
-        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z" />
-      </svg>
-    ),
-  },
-  {
-    label: "X / Twitter",
-    href: "#",
-    icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
-      </svg>
-    ),
-  },
-];
-*/
 
 export function Footer() {
   const { t } = useTranslation();
-  const { ref, inView } = useInView({ threshold: 0.05 });
-
-  const footerLinks = {
-    [t.footer.sections.platform]: [
-      { label: t.footer.links.artists, href: "/artistas" },
-      { label: t.footer.links.releases, href: "/lanzamientos" },
-      { label: t.footer.links.distribution, href: "/#distribucion" },
-      { label: t.footer.links.revenue, href: "/ingresos" },
-      { label: t.footer.links.analytics, href: "/analiticas" },
-    ],
-    [t.footer.sections.resources]: [
-      { label: t.footer.links.blog, href: "/blog" },
-      { label: t.footer.links.support, href: "/soporte" },
-      { label: t.footer.links.faq, href: "/faq" },
-      { label: t.footer.links.status, href: "/estado" },
-    ],
-    [t.footer.sections.company]: [
-      { label: t.footer.links.about, href: "/sobre-nosotros" },
-      { label: t.footer.links.contact, href: "/contacto" },
-      { label: t.footer.links.terms, href: "/terminos" },
-      { label: t.footer.links.privacy, href: "/privacidad" },
-    ],
-  };
+  const copy = t.publicHome.footer;
+  const year = new Date().getFullYear();
+  const groups = [
+    { title: copy.platformTitle, links: [{ label: t.publicHome.nav.services, href: "/#servicios" }, { label: t.publicHome.nav.plans, href: "/#planes" }, { label: t.publicHome.nav.artists, href: "/#artistas" }, { label: t.publicHome.nav.process, href: "/#como-funciona" }] },
+    { title: copy.resourcesTitle, links: [{ label: copy.faq, href: "/faq" }, { label: copy.guides, href: "/recursos" }, { label: copy.support, href: "/soporte" }, { label: copy.contact, href: "/contacto" }] },
+    { title: copy.accountTitle, links: [{ label: copy.login, href: "/login" }, { label: copy.requestAccess, href: "/aplicar" }, { label: copy.terms, href: "/terminos" }, { label: copy.privacy, href: "/privacidad" }] },
+  ];
 
   return (
-    <footer className="border-t border-[#141414] bg-[#030303]">
-      <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 py-14 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
-
-          {/* Brand Column */}
-          <div className={`sm:col-span-2 reveal${inView ? " in-view" : ""}`}>
-            <a href="/" className="flex items-center gap-2.5 mb-5 group w-fit">
-              <div className="w-10 h-10 relative transition-transform duration-200 group-hover:scale-105">
-                <Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" />
-              </div>
-              <span className="font-bold text-white">NP Music Group</span>
-            </a>
-            <p className="text-sm text-[#666] leading-[1.7] max-w-xs">
-              {t.footer.description}
-            </p>
+    <footer className="upsi-footer">
+      <div className="upsi-container">
+        <div className="upsi-footer-main">
+          <div className="upsi-footer-brand">
+            <Link href="/" className="upsi-brand-lockup">
+              <Image src="/upsi-mark.webp" alt="UPSI" width={43} height={43} />
+              <span><strong>UPSI</strong><small>{t.publicHome.brandTagline}</small></span>
+            </Link>
+            <p>{copy.description}</p>
           </div>
-
-          {/* Links Columns */}
-          {Object.entries(footerLinks).map(([section, links], i) => (
-            <div
-              key={section}
-              className={`reveal${inView ? " in-view" : ""} reveal-delay-${i + 1}`}
-            >
-              <h4 className="text-[0.6875rem] font-semibold text-white tracking-[0.12em] uppercase mb-5">
-                {section}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="group relative text-sm text-[#555] hover:text-[#F5C518] transition-colors duration-200 inline-flex flex-col"
-                    >
-                      {link.label}
-                      <span className="absolute -bottom-0.5 left-0 h-px w-full bg-[#F5C518]/50 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-250" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          {groups.map((group) => (
+            <div className="upsi-footer-group" key={group.title}>
+              <h2>{group.title}</h2>
+              <ul>{group.links.map((link) => <li key={link.label}><Link href={link.href}>{link.label}</Link></li>)}</ul>
             </div>
           ))}
         </div>
-
-        {/* Newsletter */}
-        <div className="mt-12 pt-10 border-t border-[#141414]">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-1">
-                {t.footer.newsletter.title}
-              </h4>
-              <p className="text-sm text-[#555]">
-                {t.footer.newsletter.description}
-              </p>
-            </div>
-            <div className="rounded-lg border border-[#1A1A1A] bg-[#080808] px-4 py-3 text-sm text-[#555] sm:w-64">
-              {t.common.comingSoon}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-[#0E0E0E]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-[#333]">{t.footer.copyright}</p>
-          <p className="text-xs text-[#333]">
-            {t.footer.madeWith}{" "}
-            <span className="text-[#F5C518]">♥</span>{" "}
-            {t.footer.forCommunity}
-          </p>
+        <div className="upsi-footer-bottom">
+          <p>© {year} UPSI. {copy.rights}</p>
+          <p>{copy.note}</p>
         </div>
       </div>
     </footer>

@@ -290,3 +290,14 @@ Mientras no existan datos reales: mostrar **estados vacíos profesionales** (ver
 La plataforma debe generar inmediatamente la sensación de haber sido desarrollada por una empresa tecnológica especializada en software para la industria musical.
 
 Cada interfaz debe reflejar **calidad, orden, confianza y profesionalismo**.
+
+
+---
+
+## 20. Extensión de marca pública UPSI — Fase 2
+
+La web pública de distribución musical usa la marca UPSI y una paleta de negro profundo, blanco y violeta eléctrico (#9B5CFF / #B58BFF). El logotipo aprobado entregado para esta fase se conserva como recurso de marca optimizado en public/upsi-mark.webp; no se redibuja ni se sustituye por otro símbolo.
+
+Este ajuste está limitado a la experiencia pública (landing, navegación y presentación del formulario de solicitud) y a sus metadatos. No cambia por sí solo la identidad, los colores ni los flujos del panel privado NP Music Group, ni modifica la arquitectura, la autenticación o la base de datos.
+
+La landing puede mostrar nombres de plataformas solo como referencia y debe aclarar que no prueban acuerdos o entregas activas. Todo contenido demostrativo sobre artistas o lanzamientos debe identificarse como ficticio y no asociado a UPSI. No se publican cifras, regalías, precios, comisiones ni condiciones que no estén aprobados. El acceso sigue dependiendo de revisión, invitación y formalización; no se presenta como automático.

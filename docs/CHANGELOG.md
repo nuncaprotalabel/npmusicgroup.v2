@@ -18,6 +18,24 @@
 
 ## Historial
 
+## [v0.3.0] — 2026-10-12
+
+### Added
+- Landing pública UPSI con secciones de servicios, planes en revisión, galería de demostración marcada, proceso de incorporación, recursos y ayuda.
+- Vistas de acceso privado y portada compuestas sin métricas, catálogo o resultados inventados.
+- Logotipo de UPSI optimizado para la web pública.
+
+### Changed
+- Nueva identidad violeta limitada a la web pública y al formulario de solicitud; el panel privado mantiene su identidad previa.
+- Navegación pública con anclas reales, estado activo, menú móvil accesible y enlaces funcionales a acceso/solicitud.
+- Lista de plataformas convertida en texto referencial con descargo explícito de acuerdos o integraciones.
+- Metadatos y enlaces del pie de página alineados a UPSI; contenido de solicitud sin prometer tiempos de respuesta.
+
+### Verified
+- La solicitud existente continúa usando el servicio y la ruta de API actuales; no se altera autenticación, persistencia ni base de datos.
+
+---
+
 ## [v0.2.0] — 2026-08-03
 
 ### Added
