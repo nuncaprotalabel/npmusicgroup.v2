@@ -19,7 +19,7 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
       onClick={toggle}
       aria-label={language === "es" ? "Switch to English" : "Cambiar a Español"}
       className={cn(
-        "flex items-center gap-1.5 h-8 px-2.5 text-xs font-semibold rounded-lg",
+        "flex items-center gap-1.5 min-h-11 px-3 text-xs font-semibold rounded-lg",
         "border border-[#262626] text-[#737373]",
         "hover:text-white hover:border-[#404040] hover:bg-[#141414]",
         "transition-all duration-150",

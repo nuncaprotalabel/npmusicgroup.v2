@@ -40,7 +40,7 @@ function validate(data: FormData): FieldErrors {
 }
 
 const inputClass = "w-full rounded-lg px-3.5 py-2.5 text-[0.875rem] text-white outline-none transition-all duration-150 disabled:opacity-50 placeholder:text-[#3a3a3a]";
-const inputStyle = { background: "#141414", border: "1px solid #2A2A2A", caretColor: "#F5C518" } as const;
+const inputStyle = { background: "#141414", border: "1px solid #2A2A2A", caretColor: "#9B5CFF" } as const;
 
 function Field({ label, required, optional, error, children }: {
   label: string; required?: boolean; optional?: boolean; error?: string; children: React.ReactNode;
@@ -49,7 +49,7 @@ function Field({ label, required, optional, error, children }: {
     <div>
       <label className="flex items-center gap-1.5 text-[0.8125rem] font-medium mb-1.5" style={{ color: "#A3A3A3" }}>
         {label}
-        {required && <span style={{ color: "#F5C518" }}>*</span>}
+        {required && <span style={{ color: "#9B5CFF" }}>*</span>}
         {optional && <span className="text-[0.75rem] font-normal" style={{ color: "#555" }}>· opcional</span>}
       </label>
       {children}
@@ -61,8 +61,8 @@ function Field({ label, required, optional, error, children }: {
 function inputEvents(hasError: boolean) {
   return {
     onFocus: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      event.currentTarget.style.borderColor = hasError ? "rgba(239,68,68,0.7)" : "#F5C518";
-      event.currentTarget.style.boxShadow = hasError ? "0 0 0 3px rgba(239,68,68,0.07)" : "0 0 0 3px rgba(245,197,24,0.08)";
+      event.currentTarget.style.borderColor = hasError ? "rgba(239,68,68,0.7)" : "#9B5CFF";
+      event.currentTarget.style.boxShadow = hasError ? "0 0 0 3px rgba(239,68,68,0.07)" : "0 0 0 3px rgba(155,92,255,0.08)";
     },
     onBlur: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       event.currentTarget.style.borderColor = hasError ? "rgba(239,68,68,0.6)" : "#2A2A2A";
@@ -123,15 +123,15 @@ export default function AplicarPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "#000" }}>
         <section className="w-full max-w-[460px] rounded-2xl p-8 sm:p-10 text-center" style={{ background: "#0A0A0A", border: "1px solid #1E1E1E", boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "rgba(245,197,24,0.10)", border: "1px solid rgba(245,197,24,0.20)" }}>
-            <CheckCircle2 size={30} style={{ color: "#F5C518" }} />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "rgba(155,92,255,0.10)", border: "1px solid rgba(155,92,255,0.20)" }}>
+            <CheckCircle2 size={30} style={{ color: "#9B5CFF" }} />
           </div>
           <h1 className="text-[1.25rem] font-bold text-white mb-2">Solicitud recibida</h1>
           <p className="text-[0.875rem] leading-relaxed mb-2" style={{ color: "#737373" }}>Tu solicitud fue registrada con éxito.</p>
-          <p className="text-[0.875rem] leading-relaxed mb-8" style={{ color: "#555" }}>El equipo de NP Music Group la revisará y se pondrá en contacto contigo en los próximos días hábiles.</p>
-          <Link href="/" className="inline-flex items-center gap-2 text-[0.875rem] font-medium hover:opacity-80" style={{ color: "#F5C518" }}><ArrowLeft size={15} />Volver al inicio</Link>
+          <p className="text-[0.875rem] leading-relaxed mb-8" style={{ color: "#555" }}>La solicitud requiere evaluación. El envío no garantiza aprobación ni activación de una cuenta.</p>
+          <Link href="/" className="inline-flex items-center gap-2 text-[0.875rem] font-medium hover:opacity-80" style={{ color: "#9B5CFF" }}><ArrowLeft size={15} />Volver al inicio</Link>
         </section>
-        <p className="mt-6 text-[0.75rem]" style={{ color: "#333" }}>© {new Date().getFullYear()} NP Music Group · Proceso de admisión interno</p>
+        <p className="mt-6 text-[0.75rem]" style={{ color: "#333" }}>© {new Date().getFullYear()} UPSI · Proceso de admisión interno</p>
       </main>
     );
   }
@@ -140,12 +140,12 @@ export default function AplicarPage() {
     <main className="min-h-screen flex flex-col items-center justify-start px-4 py-12" style={{ background: "#000" }}>
       <section className="w-full max-w-[580px] rounded-2xl p-6 sm:p-8" style={{ background: "#0A0A0A", border: "1px solid #1E1E1E", boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
         <header className="flex flex-col items-center mb-8">
-          <div className="relative w-11 h-11 mb-4"><Image src="/logo-transparent.png" alt="NP Music Group" fill className="object-contain" priority /></div>
-          <h1 className="text-[1.125rem] font-bold text-white tracking-tight">Aplicar a NP Music Group</h1>
+          <div className="relative w-11 h-11 mb-4"><Image src="/upsi-mark.webp" alt="UPSI" fill className="object-contain" priority /></div>
+          <h1 className="text-[1.125rem] font-bold text-white tracking-tight">Aplicar a UPSI</h1>
           <p className="text-[0.8125rem] mt-1 text-center" style={{ color: "#737373" }}>Completa el formulario y nos pondremos en contacto contigo</p>
         </header>
 
-        {submitError && <div className="flex items-start gap-3 rounded-lg px-4 py-3 mb-5 text-[0.875rem]" style={{ background: duplicate ? "rgba(245,197,24,0.06)" : "rgba(239,68,68,0.07)", border: duplicate ? "1px solid rgba(245,197,24,0.20)" : "1px solid rgba(239,68,68,0.20)", color: duplicate ? "#F5C518" : "#EF4444" }} role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" /><span>{submitError}</span></div>}
+        {submitError && <div className="flex items-start gap-3 rounded-lg px-4 py-3 mb-5 text-[0.875rem]" style={{ background: duplicate ? "rgba(155,92,255,0.06)" : "rgba(239,68,68,0.07)", border: duplicate ? "1px solid rgba(155,92,255,0.20)" : "1px solid rgba(239,68,68,0.20)", color: duplicate ? "#9B5CFF" : "#EF4444" }} role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" /><span>{submitError}</span></div>}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <Field label="Nombre artístico" required error={errors.nombreArtistico}>
@@ -176,11 +176,11 @@ export default function AplicarPage() {
             <textarea id="mensaje" name="mensaje" rows={4} value={data.mensaje} onChange={handleChange} disabled={loading} placeholder="Cuéntanos sobre tu proyecto, trayectoria y objetivos…" className={`${inputClass} resize-none`} style={{ ...inputStyle, borderColor: errors.mensaje ? "rgba(239,68,68,0.6)" : "#2A2A2A" }} {...inputEvents(!!errors.mensaje)} />
             <p className="text-[0.75rem] mt-1 text-right tabular-nums" style={{ color: data.mensaje.length > MAX_MESSAGE_LENGTH ? "#EF4444" : "#404040" }}>{data.mensaje.length} / {MAX_MESSAGE_LENGTH}</p>
           </Field>
-          <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-lg py-3 text-[0.875rem] font-semibold text-black transition-all disabled:opacity-60 disabled:cursor-not-allowed" style={{ background: "linear-gradient(135deg, #F5C518 0%, #E6B300 100%)", boxShadow: loading ? "none" : "0 2px 12px rgba(245,197,24,0.25)" }}>{loading && <Loader2 size={15} className="animate-spin" />}{loading ? "Enviando solicitud…" : "Enviar solicitud"}</button>
+          <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-lg py-3 text-[0.875rem] font-semibold text-black transition-all disabled:opacity-60 disabled:cursor-not-allowed" style={{ background: "linear-gradient(135deg, #9B5CFF 0%, #7334D2 100%)", boxShadow: loading ? "none" : "0 2px 12px rgba(155,92,255,0.25)" }}>{loading && <Loader2 size={15} className="animate-spin" />}{loading ? "Enviando solicitud…" : "Enviar solicitud"}</button>
           <p className="text-center text-[0.8125rem] pt-1"><Link href="/" className="inline-flex items-center gap-1 hover:text-white" style={{ color: "#555" }}><ArrowLeft size={13} />Volver al inicio</Link></p>
         </form>
       </section>
-      <p className="mt-6 text-[0.75rem] text-center" style={{ color: "#333" }}>© {new Date().getFullYear()} NP Music Group · Proceso de admisión interno</p>
+      <p className="mt-6 text-[0.75rem] text-center" style={{ color: "#333" }}>© {new Date().getFullYear()} UPSI · Proceso de admisión interno</p>
     </main>
   );
 }
